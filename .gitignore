@@ -1,3 +1,28 @@
-.vscode/
-.lesgo_g6/.vscode/
+# Created by https://www.toptal.com/developers/gitignore/api/psoccreator
+# Edit at https://www.toptal.com/developers/gitignore?templates=psoccreator
 
+### PSoCCreator ###
+# Project Settings
+*.cywrk.*
+*.cyprj.*
+
+# Generated Assets and Resources
+Debug/
+Release/
+Export/
+CortexM3/
+*/codegentemp
+*/Generated_Source
+*_datasheet.pdf
+*_timing.html
+*.cycdx
+*.cyfit
+*.rpt
+*.svd
+*.log
+*.zip
+
+# End of https://www.toptal.com/developers/gitignore/api/psoccreator
+
+
+.vscode/
