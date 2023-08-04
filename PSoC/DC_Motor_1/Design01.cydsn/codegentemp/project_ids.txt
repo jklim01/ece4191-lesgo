@@ -1,0 +1,6 @@
+C:\Users\Ken\GitHub\ece4191-lesgo\PSoC\DC_Motor_1\Design01.cydsn\Design01.cyprj|cedda34d-0f05-4ad1-9d10-87a02ae2703b
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|509372ad-01f1-4c4a-bf40-45b8adcaa5af
+C:\Users\Ken\OneDrive - Monash University\Documents\PSoC Creator\4.4\Downloads ( 4.4).cylib\Downloads ( 4.4).cyprj|6904c588-91e2-4e6c-80f3-c4ac36430da0
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|62a9dc2f-ca23-4d8e-be16-8a154089186d
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|1dbb3e9c-2ca9-4b29-9b53-bcf575919770
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|11d2792c-b072-4c95-9aff-18161e7a43f6
