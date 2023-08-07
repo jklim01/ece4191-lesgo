@@ -33,6 +33,8 @@
 #include "Motor_1_IN_4.h"
 #include "Motor_1_ENB_aliases.h"
 #include "Motor_1_ENB.h"
+#include "PWM_2.h"
+#include "Clock_2.h"
 #include "core_cm3_psoc5.h"
 #include "CyDmac.h"
 #include "CyFlash.h"

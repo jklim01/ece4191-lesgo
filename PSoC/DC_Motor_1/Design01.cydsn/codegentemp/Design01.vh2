@@ -2,7 +2,7 @@
 --	Conversion of Design01.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Fri Aug 04 12:25:35 2023
+--	Sun Aug 06 17:10:46 2023
 --
 
 USE cypress.cypress.all;
@@ -51,10 +51,21 @@ SIGNAL tmpIO_0__Motor_1_IN_4_net_0 : bit;
 TERMINAL tmpSIOVREF__Motor_1_IN_4_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__Motor_1_IN_4_net_0 : bit;
 SIGNAL tmpOE__Motor_1_ENB_net_0 : bit;
+SIGNAL Net_248 : bit;
 SIGNAL tmpFB_0__Motor_1_ENB_net_0 : bit;
 SIGNAL tmpIO_0__Motor_1_ENB_net_0 : bit;
 TERMINAL tmpSIOVREF__Motor_1_ENB_net_0 : bit;
 SIGNAL tmpINTERRUPT_0__Motor_1_ENB_net_0 : bit;
+SIGNAL Net_222 : bit;
+SIGNAL \PWM_2:Net_107\ : bit;
+SIGNAL \PWM_2:Net_113\ : bit;
+SIGNAL Net_232 : bit;
+SIGNAL \PWM_2:Net_63\ : bit;
+SIGNAL \PWM_2:Net_57\ : bit;
+SIGNAL \PWM_2:Net_54\ : bit;
+SIGNAL Net_313 : bit;
+SIGNAL Net_318 : bit;
+SIGNAL \PWM_2:Net_114\ : bit;
 BEGIN
 
 zero <=  ('0') ;
@@ -488,7 +499,7 @@ Motor_1_ENB:cy_psoc3_pins_v1_10
 		ovt_hyst_trim=>"0",
 		input_buffer_sel=>"00")
 	PORT MAP(oe=>(tmpOE__Motor_1_IN_1_net_0),
-		y=>Net_157,
+		y=>Net_248,
 		fb=>(tmpFB_0__Motor_1_ENB_net_0),
 		analog=>(open),
 		io=>(tmpIO_0__Motor_1_ENB_net_0),
@@ -501,5 +512,25 @@ Motor_1_ENB:cy_psoc3_pins_v1_10
 		out_clock_en=>tmpOE__Motor_1_IN_1_net_0,
 		out_reset=>zero,
 		interrupt=>tmpINTERRUPT_0__Motor_1_ENB_net_0);
+\PWM_2:PWMHW\:cy_psoc3_timer_v1_0
+	GENERIC MAP(cy_registers=>"")
+	PORT MAP(clock=>Net_222,
+		kill=>zero,
+		enable=>tmpOE__Motor_1_IN_1_net_0,
+		capture=>zero,
+		timer_reset=>zero,
+		tc=>\PWM_2:Net_63\,
+		compare=>Net_248,
+		interrupt=>\PWM_2:Net_54\);
+Clock_2:cy_clock_v1_0
+	GENERIC MAP(cy_registers=>"",
+		id=>"71929acd-1207-45c9-958e-dca3e19b63a3",
+		source_clock_id=>"",
+		divisor=>0,
+		period=>"1000000000",
+		is_direct=>'0',
+		is_digital=>'1')
+	PORT MAP(clock_out=>Net_222,
+		dig_domain_out=>open);
 
 END R_T_L;

@@ -24,10 +24,15 @@ int main(void)
     PWM_1_Start();
     Motor_1_IN_1_Write(1);
     Motor_1_IN_2_Write(0);
+    PWM_1_WriteCompare(175);    // Left Wheel Speed
     // Right Wheel
+    PWM_2_Start();
     Motor_1_IN_3_Write(0);
     Motor_1_IN_4_Write(1);
-    PWM_1_WriteCompare(175);
+    PWM_2_WriteCompare(175);    // Right Wheel Speed
+    
+    // Shaft Encoder - 35:45
+    
     for(;;)
     {
         /* Place your application code here. */

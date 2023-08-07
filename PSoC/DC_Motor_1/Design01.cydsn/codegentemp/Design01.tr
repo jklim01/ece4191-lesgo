@@ -16,9 +16,11 @@
 ##################################################################### 
                     1::Clock Frequency Summary
 ===================================================================== 
-Number of clocks: 7
+Number of clocks: 9
 Clock: Clock_1                  | N/A  | Target: 1.00 MHz   | 
 Clock: Clock_1(fixed-function)  | N/A  | Target: 1.00 MHz   | 
+Clock: Clock_2                  | N/A  | Target: 1.00 MHz   | 
+Clock: Clock_2(fixed-function)  | N/A  | Target: 1.00 MHz   | 
 Clock: CyBUS_CLK                | N/A  | Target: 24.00 MHz  | 
 Clock: CyILO                    | N/A  | Target: 0.00 MHz   | 
 Clock: CyIMO                    | N/A  | Target: 3.00 MHz   | 
@@ -59,8 +61,8 @@ Port Name  Setup to Clk  Clock Name:Phase
 
 Port Name           Clock to Out  Clock Name:Phase           
 ------------------  ------------  -------------------------  
-Motor_1_ENA(0)_PAD  25520         Clock_1(fixed-function):R  
-Motor_1_ENB(0)_PAD  26451         Clock_1(fixed-function):R  
+Motor_1_ENA(0)_PAD  25035         Clock_1(fixed-function):R  
+Motor_1_ENB(0)_PAD  26158         Clock_2(fixed-function):R  
 
 
                          3.3::Pad to Pad

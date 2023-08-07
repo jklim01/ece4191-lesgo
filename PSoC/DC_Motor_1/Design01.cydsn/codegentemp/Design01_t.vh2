@@ -1,5 +1,5 @@
 -- Project:   C:\Users\Ken\GitHub\ece4191-lesgo\PSoC\DC_Motor_1\Design01.cydsn\Design01.cyprj
--- Generated: 08/04/2023 12:25:38
+-- Generated: 08/06/2023 17:10:49
 -- PSoC Creator  4.4
 
 ENTITY Design01 IS
@@ -40,11 +40,17 @@ ARCHITECTURE __DEFAULT__ OF Design01 IS
     SIGNAL Motor_1_IN_3(0)__PA : bit;
     SIGNAL Motor_1_IN_4(0)__PA : bit;
     SIGNAL Net_157 : bit;
+    SIGNAL Net_222 : bit;
+    ATTRIBUTE global_signal OF Net_222 : SIGNAL IS true;
+    SIGNAL Net_222_local : bit;
+    SIGNAL Net_248 : bit;
     SIGNAL Net_31 : bit;
     ATTRIBUTE global_signal OF Net_31 : SIGNAL IS true;
     SIGNAL Net_31_local : bit;
     SIGNAL \PWM_1:Net_54\ : bit;
     SIGNAL \PWM_1:Net_63\ : bit;
+    SIGNAL \PWM_2:Net_54\ : bit;
+    SIGNAL \PWM_2:Net_63\ : bit;
     SIGNAL __ONE__ : bit;
     ATTRIBUTE placement_force OF __ONE__ : SIGNAL IS "U(1,3,A)0";
     ATTRIBUTE POWER OF __ONE__ : SIGNAL IS true;
@@ -55,6 +61,7 @@ ARCHITECTURE __DEFAULT__ OF Design01 IS
     SIGNAL zero : bit;
     ATTRIBUTE GROUND OF zero : SIGNAL IS true;
     SIGNAL \ClockBlock.dclk_glb_ff_0__sig\ : bit;
+    SIGNAL \ClockBlock.dclk_glb_ff_1__sig\ : bit;
     ATTRIBUTE Location OF ClockBlock : LABEL IS "F(Clock,0)";
     ATTRIBUTE lib_model OF Motor_1_IN_1(0) : LABEL IS "iocell1";
     ATTRIBUTE Location OF Motor_1_IN_1(0) : LABEL IS "P1[5]";
@@ -71,6 +78,7 @@ ARCHITECTURE __DEFAULT__ OF Design01 IS
     ATTRIBUTE Location OF \PWM_1:PWMHW\ : LABEL IS "F(Timer,0)";
     ATTRIBUTE lib_model OF __ONE__ : LABEL IS "macrocell1";
     ATTRIBUTE Location OF __ONE__ : LABEL IS "U(1,3)";
+    ATTRIBUTE Location OF \PWM_2:PWMHW\ : LABEL IS "F(Timer,1)";
     COMPONENT clockblockcell
         PORT (
             dclk_0 : OUT std_ulogic;
@@ -256,7 +264,10 @@ BEGIN
             dsi_glb_div => open,
             dclk_glb_0 => Net_31,
             dclk_0 => Net_31_local,
-            dclk_glb_ff_0 => \ClockBlock.dclk_glb_ff_0__sig\);
+            dclk_glb_1 => Net_222,
+            dclk_1 => Net_222_local,
+            dclk_glb_ff_0 => \ClockBlock.dclk_glb_ff_0__sig\,
+            dclk_glb_ff_1 => \ClockBlock.dclk_glb_ff_1__sig\);
 
     Motor_1_IN_1:logicalport
         GENERIC MAP(
@@ -792,7 +803,7 @@ BEGIN
         PORT MAP(
             pa_out => Motor_1_ENB(0)__PA,
             oe => open,
-            pin_input => Net_157,
+            pin_input => Net_248,
             pad_out => Motor_1_ENB(0)_PAD,
             pad_in => Motor_1_ENB(0)_PAD,
             in_clock => open,
@@ -822,5 +833,18 @@ BEGIN
             clken_mode => 1)
         PORT MAP(
             q => __ONE__);
+
+    \PWM_2:PWMHW\:timercell
+        GENERIC MAP(
+            cy_registers => "")
+        PORT MAP(
+            clock => \ClockBlock.dclk_glb_ff_1__sig\,
+            kill => open,
+            enable => __ONE__,
+            capture => open,
+            timer_reset => open,
+            tc => \PWM_2:Net_63\,
+            cmp => Net_248,
+            irq => \PWM_2:Net_54\);
 
 END __DEFAULT__;
