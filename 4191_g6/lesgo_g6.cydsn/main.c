@@ -10,6 +10,7 @@
  * ========================================
 */
 #include "project.h"
+#include "locomotion.h"
 
 int main(void)
 {

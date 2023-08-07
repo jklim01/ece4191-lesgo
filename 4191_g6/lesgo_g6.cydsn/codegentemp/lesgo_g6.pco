@@ -1,0 +1,19 @@
+# lesgo_g6
+# 2023-08-05 12:06:24Z
+
+# IO_0@[IOP=(1)][IoId=(0)] is reserved: SWDDebugEnabled
+dont_use_io iocell 1 0
+# IO_1@[IOP=(1)][IoId=(1)] is reserved: SWDDebugEnabled
+dont_use_io iocell 1 1
+# IO_3@[IOP=(1)][IoId=(3)] is reserved: SWDDebugEnabled
+dont_use_io iocell 1 3
+set_location "ClockBlock" clockblockcell -1 -1 0
+set_io "motor_l_en(0)" iocell 0 5
+set_io "motor_r_en(0)" iocell 0 0
+set_io "motor_l_in1(0)" iocell 0 1
+set_io "motor_l_in2(0)" iocell 0 3
+set_io "motor_r_in1(0)" iocell 0 2
+set_io "motor_r_in2(0)" iocell 0 4
+set_location "\motor_l_pwm:PWMHW\" timercell -1 -1 0
+set_location "__ONE__" 3 0 0 0
+set_location "\motor_r_pwm:PWMHW\" timercell -1 -1 1
