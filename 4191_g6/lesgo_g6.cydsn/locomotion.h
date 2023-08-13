@@ -63,7 +63,7 @@
 //     REVERSE
 // } Movement;
 
-typedef enum {
+typedef enum __attribute__ ((__packed__)) {
     FORWARD,
     REVERSE
 } Direction;
