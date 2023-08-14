@@ -26,12 +26,6 @@
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_pwm_PM.c" value="SOURCE_C;CortexM3;;;;motor_r_pwm" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\Clock_1.c" value="SOURCE_C;CortexM3;;;;Clock_1" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\Clock_1.h" value="HEADER;;;;;Clock_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_en_aliases.h" value="HEADER;;;;;motor_l_en" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_en.c" value="SOURCE_C;CortexM3;;;;motor_l_en" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_en.h" value="HEADER;;;;;motor_l_en" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_en_aliases.h" value="HEADER;;;;;motor_r_en" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_en.c" value="SOURCE_C;CortexM3;;;;motor_r_en" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_en.h" value="HEADER;;;;;motor_r_en" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_in1_aliases.h" value="HEADER;;;;;motor_l_in1" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_in1.c" value="SOURCE_C;CortexM3;;;;motor_l_in1" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_in1.h" value="HEADER;;;;;motor_l_in1" />
@@ -44,6 +38,43 @@
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_in2_aliases.h" value="HEADER;;;;;motor_r_in2" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_in2.c" value="SOURCE_C;CortexM3;;;;motor_r_in2" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_in2.h" value="HEADER;;;;;motor_r_in2" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec.c" value="SOURCE_C;CortexM3;;;;motor_l_quaddec" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec.h" value="HEADER;;;;;motor_l_quaddec" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec_INT.c" value="SOURCE_C;CortexM3;;;;motor_l_quaddec" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec_PM.c" value="SOURCE_C;CortexM3;;;;motor_l_quaddec" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec_PVT.h" value="HEADER;;;;;motor_l_quaddec" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_phaseA_aliases.h" value="HEADER;;;;;motor_l_phaseA" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_phaseA.c" value="SOURCE_C;CortexM3;;;;motor_l_phaseA" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_phaseA.h" value="HEADER;;;;;motor_l_phaseA" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_phaseB_aliases.h" value="HEADER;;;;;motor_l_phaseB" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_phaseB.c" value="SOURCE_C;CortexM3;;;;motor_l_phaseB" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_phaseB.h" value="HEADER;;;;;motor_l_phaseB" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_phaseA_aliases.h" value="HEADER;;;;;motor_r_phaseA" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_phaseA.c" value="SOURCE_C;CortexM3;;;;motor_r_phaseA" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_phaseA.h" value="HEADER;;;;;motor_r_phaseA" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_quaddec.c" value="SOURCE_C;CortexM3;;;;motor_r_quaddec" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_quaddec.h" value="HEADER;;;;;motor_r_quaddec" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_quaddec_INT.c" value="SOURCE_C;CortexM3;;;;motor_r_quaddec" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_quaddec_PM.c" value="SOURCE_C;CortexM3;;;;motor_r_quaddec" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_quaddec_PVT.h" value="HEADER;;;;;motor_r_quaddec" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_phaseB_aliases.h" value="HEADER;;;;;motor_r_phaseB" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_phaseB.c" value="SOURCE_C;CortexM3;;;;motor_r_phaseB" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_phaseB.h" value="HEADER;;;;;motor_r_phaseB" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\p_controller_isr.c" value="SOURCE_C;CortexM3;;;;p_controller_isr" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\p_controller_isr.h" value="HEADER;;;;;p_controller_isr" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\p_controller_timer.c" value="SOURCE_C;CortexM3;;;;p_controller_timer" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\p_controller_timer.h" value="HEADER;;;;;p_controller_timer" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\p_controller_timer_PM.c" value="SOURCE_C;CortexM3;;;;p_controller_timer" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec_isr.c" value="SOURCE_C;CortexM3;;;;motor_l_quaddec_isr" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec_isr.h" value="HEADER;;;;;motor_l_quaddec_isr" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec_Cnt16.c" value="SOURCE_C;CortexM3;;;;motor_l_quaddec_Cnt16" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec_Cnt16.h" value="HEADER;;;;;motor_l_quaddec_Cnt16" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec_Cnt16_PM.c" value="SOURCE_C;CortexM3;;;;motor_l_quaddec_Cnt16" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_quaddec_isr.c" value="SOURCE_C;CortexM3;;;;motor_r_quaddec_isr" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_quaddec_isr.h" value="HEADER;;;;;motor_r_quaddec_isr" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_quaddec_Cnt16.c" value="SOURCE_C;CortexM3;;;;motor_r_quaddec_Cnt16" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_quaddec_Cnt16.h" value="HEADER;;;;;motor_r_quaddec_Cnt16" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_r_quaddec_Cnt16_PM.c" value="SOURCE_C;CortexM3;;;;motor_r_quaddec_Cnt16" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\cm3gcc.ld" value="LINKER_SCRIPT;;;b98f980c-3bd1-4fc7-a887-c56a20a46fdd;;cy_boot" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\Cm3RealView.scat" value="LINKER_SCRIPT;;;fdb8e1ae-f83a-46cf-9446-1d703716f38a;;cy_boot" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\Cm3Start.c" value="SOURCE_C;CortexM3;;;;cy_boot" />

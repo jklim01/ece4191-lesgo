@@ -28,7 +28,7 @@ extern uint8 motor_l_pwm_initVar;
 /***************************************
 * Conditional Compilation Parameters
 ***************************************/
-#define motor_l_pwm_Resolution                     (8u)
+#define motor_l_pwm_Resolution                     (16u)
 #define motor_l_pwm_UsingFixedFunction             (1u)
 #define motor_l_pwm_DeadBandMode                   (0u)
 #define motor_l_pwm_KillModeMinTime                (0u)
@@ -110,9 +110,9 @@ typedef struct
     uint8 PWMEnableState;
 
     #if(!motor_l_pwm_UsingFixedFunction)
-        uint8 PWMUdb;               /* PWM Current Counter value  */
+        uint16 PWMUdb;               /* PWM Current Counter value  */
         #if(!motor_l_pwm_PWMModeIsCenterAligned)
-            uint8 PWMPeriod;
+            uint16 PWMPeriod;
         #endif /* (!motor_l_pwm_PWMModeIsCenterAligned) */
         #if (motor_l_pwm_UseStatus)
             uint8 InterruptMaskValue;   /* PWM Current Interrupt Mask */
@@ -176,32 +176,32 @@ void    motor_l_pwm_Stop(void) ;
 #endif /* (motor_l_pwm_UseOneCompareMode) */
 
 #if (!motor_l_pwm_UsingFixedFunction)
-    uint8   motor_l_pwm_ReadCounter(void) ;
-    uint8 motor_l_pwm_ReadCapture(void) ;
+    uint16   motor_l_pwm_ReadCounter(void) ;
+    uint16 motor_l_pwm_ReadCapture(void) ;
 
     #if (motor_l_pwm_UseStatus)
             void motor_l_pwm_ClearFIFO(void) ;
     #endif /* (motor_l_pwm_UseStatus) */
 
-    void    motor_l_pwm_WriteCounter(uint8 counter)
+    void    motor_l_pwm_WriteCounter(uint16 counter)
             ;
 #endif /* (!motor_l_pwm_UsingFixedFunction) */
 
-void    motor_l_pwm_WritePeriod(uint8 period)
+void    motor_l_pwm_WritePeriod(uint16 period)
         ;
-uint8 motor_l_pwm_ReadPeriod(void) ;
+uint16 motor_l_pwm_ReadPeriod(void) ;
 
 #if (motor_l_pwm_UseOneCompareMode)
-    void    motor_l_pwm_WriteCompare(uint8 compare)
+    void    motor_l_pwm_WriteCompare(uint16 compare)
             ;
-    uint8 motor_l_pwm_ReadCompare(void) ;
+    uint16 motor_l_pwm_ReadCompare(void) ;
 #else
-    void    motor_l_pwm_WriteCompare1(uint8 compare)
+    void    motor_l_pwm_WriteCompare1(uint16 compare)
             ;
-    uint8 motor_l_pwm_ReadCompare1(void) ;
-    void    motor_l_pwm_WriteCompare2(uint8 compare)
+    uint16 motor_l_pwm_ReadCompare1(void) ;
+    void    motor_l_pwm_WriteCompare2(uint16 compare)
             ;
-    uint8 motor_l_pwm_ReadCompare2(void) ;
+    uint16 motor_l_pwm_ReadCompare2(void) ;
 #endif /* (motor_l_pwm_UseOneCompareMode) */
 
 
@@ -226,8 +226,8 @@ void motor_l_pwm_RestoreConfig(void) ;
 /***************************************
 *         Initialization Values
 **************************************/
-#define motor_l_pwm_INIT_PERIOD_VALUE          (255u)
-#define motor_l_pwm_INIT_COMPARE_VALUE1        (255u)
+#define motor_l_pwm_INIT_PERIOD_VALUE          (24999u)
+#define motor_l_pwm_INIT_COMPARE_VALUE1        (12500u)
 #define motor_l_pwm_INIT_COMPARE_VALUE2        (63u)
 #define motor_l_pwm_INIT_INTERRUPTS_MODE       (uint8)(((uint8)(0u <<   \
                                                     motor_l_pwm_STATUS_TC_INT_EN_MASK_SHIFT)) | \
@@ -238,7 +238,7 @@ void motor_l_pwm_RestoreConfig(void) ;
                                                     (uint8)((uint8)(0u <<  \
                                                     motor_l_pwm_STATUS_KILL_INT_EN_MASK_SHIFT )))
 #define motor_l_pwm_DEFAULT_COMPARE2_MODE      (uint8)((uint8)1u <<  motor_l_pwm_CTRL_CMPMODE2_SHIFT)
-#define motor_l_pwm_DEFAULT_COMPARE1_MODE      (uint8)((uint8)2u <<  motor_l_pwm_CTRL_CMPMODE1_SHIFT)
+#define motor_l_pwm_DEFAULT_COMPARE1_MODE      (uint8)((uint8)1u <<  motor_l_pwm_CTRL_CMPMODE1_SHIFT)
 #define motor_l_pwm_INIT_DEAD_TIME             (1u)
 
 
@@ -264,73 +264,73 @@ void motor_l_pwm_RestoreConfig(void) ;
    #if (motor_l_pwm_Resolution == 8u) /* 8bit - PWM */
 
        #if(motor_l_pwm_PWMModeIsCenterAligned)
-           #define motor_l_pwm_PERIOD_LSB      (*(reg8 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D1_REG)
-           #define motor_l_pwm_PERIOD_LSB_PTR  ((reg8 *)   motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D1_REG)
+           #define motor_l_pwm_PERIOD_LSB      (*(reg8 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D1_REG)
+           #define motor_l_pwm_PERIOD_LSB_PTR  ((reg8 *)   motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D1_REG)
        #else
-           #define motor_l_pwm_PERIOD_LSB      (*(reg8 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__F0_REG)
-           #define motor_l_pwm_PERIOD_LSB_PTR  ((reg8 *)   motor_l_pwm_PWMUDB_sP8_pwmdp_u0__F0_REG)
+           #define motor_l_pwm_PERIOD_LSB      (*(reg8 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__F0_REG)
+           #define motor_l_pwm_PERIOD_LSB_PTR  ((reg8 *)   motor_l_pwm_PWMUDB_sP16_pwmdp_u0__F0_REG)
        #endif /* (motor_l_pwm_PWMModeIsCenterAligned) */
 
-       #define motor_l_pwm_COMPARE1_LSB        (*(reg8 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D0_REG)
-       #define motor_l_pwm_COMPARE1_LSB_PTR    ((reg8 *)   motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D0_REG)
-       #define motor_l_pwm_COMPARE2_LSB        (*(reg8 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D1_REG)
-       #define motor_l_pwm_COMPARE2_LSB_PTR    ((reg8 *)   motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D1_REG)
-       #define motor_l_pwm_COUNTERCAP_LSB      (*(reg8 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__A1_REG)
-       #define motor_l_pwm_COUNTERCAP_LSB_PTR  ((reg8 *)   motor_l_pwm_PWMUDB_sP8_pwmdp_u0__A1_REG)
-       #define motor_l_pwm_COUNTER_LSB         (*(reg8 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__A0_REG)
-       #define motor_l_pwm_COUNTER_LSB_PTR     ((reg8 *)   motor_l_pwm_PWMUDB_sP8_pwmdp_u0__A0_REG)
-       #define motor_l_pwm_CAPTURE_LSB         (*(reg8 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__F1_REG)
-       #define motor_l_pwm_CAPTURE_LSB_PTR     ((reg8 *)   motor_l_pwm_PWMUDB_sP8_pwmdp_u0__F1_REG)
+       #define motor_l_pwm_COMPARE1_LSB        (*(reg8 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D0_REG)
+       #define motor_l_pwm_COMPARE1_LSB_PTR    ((reg8 *)   motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D0_REG)
+       #define motor_l_pwm_COMPARE2_LSB        (*(reg8 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D1_REG)
+       #define motor_l_pwm_COMPARE2_LSB_PTR    ((reg8 *)   motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D1_REG)
+       #define motor_l_pwm_COUNTERCAP_LSB      (*(reg8 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__A1_REG)
+       #define motor_l_pwm_COUNTERCAP_LSB_PTR  ((reg8 *)   motor_l_pwm_PWMUDB_sP16_pwmdp_u0__A1_REG)
+       #define motor_l_pwm_COUNTER_LSB         (*(reg8 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__A0_REG)
+       #define motor_l_pwm_COUNTER_LSB_PTR     ((reg8 *)   motor_l_pwm_PWMUDB_sP16_pwmdp_u0__A0_REG)
+       #define motor_l_pwm_CAPTURE_LSB         (*(reg8 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__F1_REG)
+       #define motor_l_pwm_CAPTURE_LSB_PTR     ((reg8 *)   motor_l_pwm_PWMUDB_sP16_pwmdp_u0__F1_REG)
 
    #else
         #if(CY_PSOC3) /* 8-bit address space */
             #if(motor_l_pwm_PWMModeIsCenterAligned)
-               #define motor_l_pwm_PERIOD_LSB      (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D1_REG)
-               #define motor_l_pwm_PERIOD_LSB_PTR  ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D1_REG)
+               #define motor_l_pwm_PERIOD_LSB      (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D1_REG)
+               #define motor_l_pwm_PERIOD_LSB_PTR  ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D1_REG)
             #else
-               #define motor_l_pwm_PERIOD_LSB      (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__F0_REG)
-               #define motor_l_pwm_PERIOD_LSB_PTR  ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__F0_REG)
+               #define motor_l_pwm_PERIOD_LSB      (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__F0_REG)
+               #define motor_l_pwm_PERIOD_LSB_PTR  ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__F0_REG)
             #endif /* (motor_l_pwm_PWMModeIsCenterAligned) */
 
-            #define motor_l_pwm_COMPARE1_LSB       (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D0_REG)
-            #define motor_l_pwm_COMPARE1_LSB_PTR   ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D0_REG)
-            #define motor_l_pwm_COMPARE2_LSB       (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D1_REG)
-            #define motor_l_pwm_COMPARE2_LSB_PTR   ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__D1_REG)
-            #define motor_l_pwm_COUNTERCAP_LSB     (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__A1_REG)
-            #define motor_l_pwm_COUNTERCAP_LSB_PTR ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__A1_REG)
-            #define motor_l_pwm_COUNTER_LSB        (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__A0_REG)
-            #define motor_l_pwm_COUNTER_LSB_PTR    ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__A0_REG)
-            #define motor_l_pwm_CAPTURE_LSB        (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__F1_REG)
-            #define motor_l_pwm_CAPTURE_LSB_PTR    ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__F1_REG)
+            #define motor_l_pwm_COMPARE1_LSB       (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D0_REG)
+            #define motor_l_pwm_COMPARE1_LSB_PTR   ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D0_REG)
+            #define motor_l_pwm_COMPARE2_LSB       (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D1_REG)
+            #define motor_l_pwm_COMPARE2_LSB_PTR   ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__D1_REG)
+            #define motor_l_pwm_COUNTERCAP_LSB     (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__A1_REG)
+            #define motor_l_pwm_COUNTERCAP_LSB_PTR ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__A1_REG)
+            #define motor_l_pwm_COUNTER_LSB        (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__A0_REG)
+            #define motor_l_pwm_COUNTER_LSB_PTR    ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__A0_REG)
+            #define motor_l_pwm_CAPTURE_LSB        (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__F1_REG)
+            #define motor_l_pwm_CAPTURE_LSB_PTR    ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__F1_REG)
         #else
             #if(motor_l_pwm_PWMModeIsCenterAligned)
-               #define motor_l_pwm_PERIOD_LSB      (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
-               #define motor_l_pwm_PERIOD_LSB_PTR  ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
+               #define motor_l_pwm_PERIOD_LSB      (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
+               #define motor_l_pwm_PERIOD_LSB_PTR  ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
             #else
-               #define motor_l_pwm_PERIOD_LSB      (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_F0_REG)
-               #define motor_l_pwm_PERIOD_LSB_PTR  ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_F0_REG)
+               #define motor_l_pwm_PERIOD_LSB      (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_F0_REG)
+               #define motor_l_pwm_PERIOD_LSB_PTR  ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_F0_REG)
             #endif /* (motor_l_pwm_PWMModeIsCenterAligned) */
 
-            #define motor_l_pwm_COMPARE1_LSB       (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_D0_REG)
-            #define motor_l_pwm_COMPARE1_LSB_PTR   ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_D0_REG)
-            #define motor_l_pwm_COMPARE2_LSB       (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
-            #define motor_l_pwm_COMPARE2_LSB_PTR   ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
-            #define motor_l_pwm_COUNTERCAP_LSB     (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_A1_REG)
-            #define motor_l_pwm_COUNTERCAP_LSB_PTR ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_A1_REG)
-            #define motor_l_pwm_COUNTER_LSB        (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_A0_REG)
-            #define motor_l_pwm_COUNTER_LSB_PTR    ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_A0_REG)
-            #define motor_l_pwm_CAPTURE_LSB        (*(reg16 *) motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_F1_REG)
-            #define motor_l_pwm_CAPTURE_LSB_PTR    ((reg16 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__16BIT_F1_REG)
+            #define motor_l_pwm_COMPARE1_LSB       (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_D0_REG)
+            #define motor_l_pwm_COMPARE1_LSB_PTR   ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_D0_REG)
+            #define motor_l_pwm_COMPARE2_LSB       (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
+            #define motor_l_pwm_COMPARE2_LSB_PTR   ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
+            #define motor_l_pwm_COUNTERCAP_LSB     (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_A1_REG)
+            #define motor_l_pwm_COUNTERCAP_LSB_PTR ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_A1_REG)
+            #define motor_l_pwm_COUNTER_LSB        (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_A0_REG)
+            #define motor_l_pwm_COUNTER_LSB_PTR    ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_A0_REG)
+            #define motor_l_pwm_CAPTURE_LSB        (*(reg16 *) motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_F1_REG)
+            #define motor_l_pwm_CAPTURE_LSB_PTR    ((reg16 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__16BIT_F1_REG)
         #endif /* (CY_PSOC3) */
 
-       #define motor_l_pwm_AUX_CONTROLDP1          (*(reg8 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u1__DP_AUX_CTL_REG)
-       #define motor_l_pwm_AUX_CONTROLDP1_PTR      ((reg8 *)   motor_l_pwm_PWMUDB_sP8_pwmdp_u1__DP_AUX_CTL_REG)
+       #define motor_l_pwm_AUX_CONTROLDP1          (*(reg8 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u1__DP_AUX_CTL_REG)
+       #define motor_l_pwm_AUX_CONTROLDP1_PTR      ((reg8 *)   motor_l_pwm_PWMUDB_sP16_pwmdp_u1__DP_AUX_CTL_REG)
 
    #endif /* (motor_l_pwm_Resolution == 8) */
 
-   #define motor_l_pwm_COUNTERCAP_LSB_PTR_8BIT ( (reg8 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__A1_REG)
-   #define motor_l_pwm_AUX_CONTROLDP0          (*(reg8 *)  motor_l_pwm_PWMUDB_sP8_pwmdp_u0__DP_AUX_CTL_REG)
-   #define motor_l_pwm_AUX_CONTROLDP0_PTR      ((reg8 *)   motor_l_pwm_PWMUDB_sP8_pwmdp_u0__DP_AUX_CTL_REG)
+   #define motor_l_pwm_COUNTERCAP_LSB_PTR_8BIT ( (reg8 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__A1_REG)
+   #define motor_l_pwm_AUX_CONTROLDP0          (*(reg8 *)  motor_l_pwm_PWMUDB_sP16_pwmdp_u0__DP_AUX_CTL_REG)
+   #define motor_l_pwm_AUX_CONTROLDP0_PTR      ((reg8 *)   motor_l_pwm_PWMUDB_sP16_pwmdp_u0__DP_AUX_CTL_REG)
 
 #endif /* (motor_l_pwm_UsingFixedFunction) */
 

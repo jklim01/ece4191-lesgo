@@ -1,13 +1,85 @@
 dont_use_io iocell 1 0
 dont_use_io iocell 1 1
 dont_use_io iocell 1 3
-set_location "__ONE__" macrocell 3 0 0 0
-set_io "motor_r_en(0)" iocell 0 0
-set_location "\motor_l_pwm:PWMHW\" timercell -1 -1 0
-set_location "\motor_r_pwm:PWMHW\" timercell -1 -1 1
+set_location "\motor_l_quaddec:bQuadDec:state_0\" macrocell 0 0 1 1
+set_location "\motor_r_quaddec:bQuadDec:state_0\" macrocell 1 2 1 1
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:status_3\" macrocell 0 0 0 1
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:status_3\" macrocell 1 4 0 1
+set_location "\motor_r_quaddec:bQuadDec:quad_A_filt\" macrocell 0 4 0 0
+set_location "\motor_l_quaddec:bQuadDec:quad_A_delayed_2\" macrocell 0 2 0 2
+set_location "\motor_r_quaddec:bQuadDec:quad_A_delayed_2\" macrocell 0 4 1 1
+set_location "\motor_l_quaddec:bQuadDec:quad_B_delayed_2\" macrocell 0 0 1 0
+set_location "\motor_r_quaddec:bQuadDec:quad_B_delayed_2\" macrocell 0 4 1 2
+set_location "\motor_l_quaddec:Net_1251_split\" macrocell 0 2 1 0
+set_location "\motor_r_quaddec:Net_1251_split\" macrocell 1 3 1 0
+set_location "\motor_l_quaddec:bQuadDec:error\" macrocell 0 3 0 0
+set_location "\motor_r_quaddec:bQuadDec:error\" macrocell 0 3 1 0
+set_location "\motor_l_quaddec:Net_1203\" macrocell 0 1 0 1
+set_location "\motor_r_quaddec:Net_1203\" macrocell 1 2 1 0
+set_location "\motor_l_quaddec:Net_1251\" macrocell 0 2 0 0
+set_location "\motor_r_quaddec:Net_1251\" macrocell 1 3 0 0
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:sC16:counterdp:u1\" datapathcell 0 1 2 
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:sC16:counterdp:u1\" datapathcell 1 3 2 
+set_location "\motor_r_quaddec:bQuadDec:quad_A_delayed_0\" macrocell 1 4 1 3
+set_location "\motor_l_quaddec:bQuadDec:quad_A_delayed_0\" macrocell 0 4 0 3
+set_location "\motor_r_quaddec:bQuadDec:quad_B_delayed_0\" macrocell 0 4 1 3
+set_location "\motor_l_quaddec:bQuadDec:quad_B_delayed_0\" macrocell 0 0 1 3
+set_location "\motor_l_quaddec:bQuadDec:quad_A_filt\" macrocell 0 1 1 0
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:overflow_reg_i\" macrocell 1 0 1 1
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:overflow_reg_i\" macrocell 1 4 1 1
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:sSTSReg:stsreg\" statusicell 0 0 4 
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:sSTSReg:stsreg\" statusicell 1 4 4 
+set_location "__ONE__" macrocell 3 3 0 3
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:count_stored_i\" macrocell 0 1 0 3
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:count_stored_i\" macrocell 1 2 0 3
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:underflow_reg_i\" macrocell 1 0 1 3
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:underflow_reg_i\" macrocell 1 4 1 0
+set_location "\motor_r_quaddec:bQuadDec:quad_B_filt\" macrocell 0 4 1 0
+set_location "\motor_l_quaddec:Net_1275\" macrocell 1 0 0 2
+set_location "\motor_r_quaddec:Net_1275\" macrocell 1 4 1 2
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:status_0\" macrocell 1 0 1 0
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:status_0\" macrocell 1 3 0 3
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:prevCompare\" macrocell 1 0 0 0
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:prevCompare\" macrocell 1 4 0 0
+set_location "\motor_l_quaddec:bQuadDec:state_1\" macrocell 0 3 0 1
+set_location "\motor_r_quaddec:bQuadDec:state_1\" macrocell 0 4 0 2
+set_location "\motor_l_quaddec:bQuadDec:quad_A_delayed_1\" macrocell 0 2 0 3
+set_location "\motor_l_quaddec:bQuadDec:quad_B_delayed_1\" macrocell 0 0 1 2
+set_location "\motor_l_quaddec:bQuadDec:Stsreg\" statusicell 1 1 4 
+set_location "\motor_r_quaddec:bQuadDec:Stsreg\" statusicell 1 2 4 
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:status_2\" macrocell 0 0 0 2
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:status_2\" macrocell 1 4 0 2
+set_location "\motor_l_quaddec:bQuadDec:quad_B_filt\" macrocell 0 0 0 3
+set_location "\motor_l_quaddec:Net_1260\" macrocell 0 1 1 1
+set_location "\motor_r_quaddec:Net_1260\" macrocell 1 2 0 1
+set_location "\motor_l_quaddec:Net_611\" macrocell 1 1 0 1
+set_location "\motor_r_quaddec:Net_611\" macrocell 1 3 0 1
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:sC16:counterdp:u0\" datapathcell 1 1 2 
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:sC16:counterdp:u0\" datapathcell 0 3 2 
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:reload\" macrocell 0 1 0 0
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:reload\" macrocell 1 2 0 0
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:count_enable\" macrocell 0 1 0 2
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:count_enable\" macrocell 1 2 0 2
+set_location "\motor_l_quaddec:Net_530\" macrocell 1 0 0 3
+set_location "\motor_r_quaddec:Net_530\" macrocell 1 3 0 2
+set_location "\motor_r_quaddec:bQuadDec:quad_A_delayed_1\" macrocell 1 4 0 3
+set_location "\motor_r_quaddec:bQuadDec:quad_B_delayed_1\" macrocell 0 4 0 1
+set_io "motor_r_phaseB(0)" iocell 2 7
+set_io "motor_r_phaseA(0)" iocell 2 6
 set_location "ClockBlock" clockblockcell -1 -1 0
-set_io "motor_l_in1(0)" iocell 0 1
-set_io "motor_r_in1(0)" iocell 0 2
-set_io "motor_l_in2(0)" iocell 0 3
-set_io "motor_r_in2(0)" iocell 0 4
-set_io "motor_l_en(0)" iocell 0 5
+set_location "\p_controller_timer:TimerHW\" timercell -1 -1 2
+set_io "motor_l_phaseB(0)" iocell 1 7
+set_io "motor_r_en(0)" iocell 2 2
+set_location "\motor_l_quaddec:Cnt16:CounterUDB:sCTRLReg:ctrlreg\" controlcell 0 1 6 
+set_location "\motor_r_quaddec:Cnt16:CounterUDB:sCTRLReg:ctrlreg\" controlcell 1 2 6 
+set_location "\motor_r_pwm:PWMHW\" timercell -1 -1 1
+set_location "\motor_l_pwm:PWMHW\" timercell -1 -1 0
+set_io "motor_l_phaseA(0)" iocell 1 6
+set_location "\motor_l_quaddec:isr\" interrupt -1 -1 0
+set_location "\motor_r_quaddec:isr\" interrupt -1 -1 1
+set_location "p_controller_isr" interrupt -1 -1 19
+set_io "motor_l_in1(0)" iocell 1 5
+set_io "motor_r_in1(0)" iocell 2 5
+set_io "motor_l_in2(0)" iocell 1 4
+set_io "motor_r_in2(0)" iocell 2 4
+set_io "motor_l_en(0)" iocell 1 2

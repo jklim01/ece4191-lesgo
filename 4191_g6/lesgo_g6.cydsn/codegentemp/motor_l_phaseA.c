@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: motor_l_en.c  
+* File Name: motor_l_phaseA.c  
 * Version 2.20
 *
 * Description:
@@ -15,15 +15,15 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "motor_l_en.h"
+#include "motor_l_phaseA.h"
 
 /* APIs are not generated for P15[7:6] on PSoC 5 */
 #if !(CY_PSOC5A &&\
-	 motor_l_en__PORT == 15 && ((motor_l_en__MASK & 0xC0) != 0))
+	 motor_l_phaseA__PORT == 15 && ((motor_l_phaseA__MASK & 0xC0) != 0))
 
 
 /*******************************************************************************
-* Function Name: motor_l_en_Write
+* Function Name: motor_l_phaseA_Write
 ****************************************************************************//**
 *
 * \brief Writes the value to the physical port (data output register), masking
@@ -52,17 +52,17 @@
 *  this function.
 *
 * \funcusage
-*  \snippet motor_l_en_SUT.c usage_motor_l_en_Write
+*  \snippet motor_l_phaseA_SUT.c usage_motor_l_phaseA_Write
 *******************************************************************************/
-void motor_l_en_Write(uint8 value)
+void motor_l_phaseA_Write(uint8 value)
 {
-    uint8 staticBits = (motor_l_en_DR & (uint8)(~motor_l_en_MASK));
-    motor_l_en_DR = staticBits | ((uint8)(value << motor_l_en_SHIFT) & motor_l_en_MASK);
+    uint8 staticBits = (motor_l_phaseA_DR & (uint8)(~motor_l_phaseA_MASK));
+    motor_l_phaseA_DR = staticBits | ((uint8)(value << motor_l_phaseA_SHIFT) & motor_l_phaseA_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: motor_l_en_SetDriveMode
+* Function Name: motor_l_phaseA_SetDriveMode
 ****************************************************************************//**
 *
 * \brief Sets the drive mode for each of the Pins component's pins.
@@ -85,16 +85,16 @@ void motor_l_en_Write(uint8 value)
 *  APIs (primary method) or disable interrupts around this function.
 *
 * \funcusage
-*  \snippet motor_l_en_SUT.c usage_motor_l_en_SetDriveMode
+*  \snippet motor_l_phaseA_SUT.c usage_motor_l_phaseA_SetDriveMode
 *******************************************************************************/
-void motor_l_en_SetDriveMode(uint8 mode)
+void motor_l_phaseA_SetDriveMode(uint8 mode)
 {
-	CyPins_SetPinDriveMode(motor_l_en_0, mode);
+	CyPins_SetPinDriveMode(motor_l_phaseA_0, mode);
 }
 
 
 /*******************************************************************************
-* Function Name: motor_l_en_Read
+* Function Name: motor_l_phaseA_Read
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port (pin status register) and masks 
@@ -108,16 +108,16 @@ void motor_l_en_SetDriveMode(uint8 mode)
 *  The current value for the pins in the component as a right justified number.
 *
 * \funcusage
-*  \snippet motor_l_en_SUT.c usage_motor_l_en_Read  
+*  \snippet motor_l_phaseA_SUT.c usage_motor_l_phaseA_Read  
 *******************************************************************************/
-uint8 motor_l_en_Read(void)
+uint8 motor_l_phaseA_Read(void)
 {
-    return (motor_l_en_PS & motor_l_en_MASK) >> motor_l_en_SHIFT;
+    return (motor_l_phaseA_PS & motor_l_phaseA_MASK) >> motor_l_phaseA_SHIFT;
 }
 
 
 /*******************************************************************************
-* Function Name: motor_l_en_ReadDataReg
+* Function Name: motor_l_phaseA_ReadDataReg
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port's data output register and masks 
@@ -126,8 +126,8 @@ uint8 motor_l_en_Read(void)
 *
 * The data output register controls the signal applied to the physical pin in 
 * conjunction with the drive mode parameter. This is not the same as the 
-* preferred motor_l_en_Read() API because the 
-* motor_l_en_ReadDataReg() reads the data register instead of the status 
+* preferred motor_l_phaseA_Read() API because the 
+* motor_l_phaseA_ReadDataReg() reads the data register instead of the status 
 * register. For output pins this is a useful function to determine the value 
 * just written to the pin.
 *
@@ -136,19 +136,19 @@ uint8 motor_l_en_Read(void)
 *  justified number for the component instance.
 *
 * \funcusage
-*  \snippet motor_l_en_SUT.c usage_motor_l_en_ReadDataReg 
+*  \snippet motor_l_phaseA_SUT.c usage_motor_l_phaseA_ReadDataReg 
 *******************************************************************************/
-uint8 motor_l_en_ReadDataReg(void)
+uint8 motor_l_phaseA_ReadDataReg(void)
 {
-    return (motor_l_en_DR & motor_l_en_MASK) >> motor_l_en_SHIFT;
+    return (motor_l_phaseA_DR & motor_l_phaseA_MASK) >> motor_l_phaseA_SHIFT;
 }
 
 
 /* If interrupt is connected for this Pins component */ 
-#if defined(motor_l_en_INTSTAT) 
+#if defined(motor_l_phaseA_INTSTAT) 
 
     /*******************************************************************************
-    * Function Name: motor_l_en_SetInterruptMode
+    * Function Name: motor_l_phaseA_SetInterruptMode
     ****************************************************************************//**
     *
     * \brief Configures the interrupt mode for each of the Pins component's
@@ -161,12 +161,12 @@ uint8 motor_l_en_ReadDataReg(void)
     * \param position
     *  The pin position as listed in the Pins component. You may OR these to be 
     *  able to configure the interrupt mode of multiple pins within a Pins 
-    *  component. Or you may use motor_l_en_INTR_ALL to configure the
+    *  component. Or you may use motor_l_phaseA_INTR_ALL to configure the
     *  interrupt mode of all the pins in the Pins component.       
-    *  - motor_l_en_0_INTR       (First pin in the list)
-    *  - motor_l_en_1_INTR       (Second pin in the list)
+    *  - motor_l_phaseA_0_INTR       (First pin in the list)
+    *  - motor_l_phaseA_1_INTR       (Second pin in the list)
     *  - ...
-    *  - motor_l_en_INTR_ALL     (All pins in Pins component)
+    *  - motor_l_phaseA_INTR_ALL     (All pins in Pins component)
     *
     * \param mode
     *  Interrupt mode for the selected pins. Valid options are documented in
@@ -182,19 +182,19 @@ uint8 motor_l_en_ReadDataReg(void)
     *  port.
     *
     * \funcusage
-    *  \snippet motor_l_en_SUT.c usage_motor_l_en_SetInterruptMode
+    *  \snippet motor_l_phaseA_SUT.c usage_motor_l_phaseA_SetInterruptMode
     *******************************************************************************/
-    void motor_l_en_SetInterruptMode(uint16 position, uint16 mode)
+    void motor_l_phaseA_SetInterruptMode(uint16 position, uint16 mode)
     {
-		if((position & motor_l_en_0_INTR) != 0u) 
+		if((position & motor_l_phaseA_0_INTR) != 0u) 
 		{ 
-			 motor_l_en_0_INTTYPE_REG = (uint8)mode; 
+			 motor_l_phaseA_0_INTTYPE_REG = (uint8)mode; 
 		}
     }
     
     
     /*******************************************************************************
-    * Function Name: motor_l_en_ClearInterrupt
+    * Function Name: motor_l_phaseA_ClearInterrupt
     ****************************************************************************//**
     *
     * \brief Clears any active interrupts attached with the component and returns 
@@ -211,11 +211,11 @@ uint8 motor_l_en_ReadDataReg(void)
     *  those associated with the Pins component.
     *
     * \funcusage
-    *  \snippet motor_l_en_SUT.c usage_motor_l_en_ClearInterrupt
+    *  \snippet motor_l_phaseA_SUT.c usage_motor_l_phaseA_ClearInterrupt
     *******************************************************************************/
-    uint8 motor_l_en_ClearInterrupt(void)
+    uint8 motor_l_phaseA_ClearInterrupt(void)
     {
-        return (motor_l_en_INTSTAT & motor_l_en_MASK) >> motor_l_en_SHIFT;
+        return (motor_l_phaseA_INTSTAT & motor_l_phaseA_MASK) >> motor_l_phaseA_SHIFT;
     }
 
 #endif /* If Interrupts Are Enabled for this Pins component */ 

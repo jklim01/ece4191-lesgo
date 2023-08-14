@@ -11,19 +11,21 @@
 */
 
 /*
-    motor_*_pwm: pwm blocks used to control motor speeds
+    motor_*_pwm         : PWM blocks used to control motor speeds
+    motor_*_quaddec     : QuadDec blocks used to count the shaft encoder ticks
+    p_controller_timer  : timer block used to periodically run the P controller
 
-    Pin Connections to H Bridge:
-        - motor_l_en    (out)   -> ENA
-        - motor_r_en    (out)   -> ENB
-        - motor_l_in1   (out)   -> IN1
-        - motor_l_in2   (out)   -> IN2
-        - motor_r_in1   (out)   -> IN3
-        - motor_r_in2   (out)   -> IN4
-
-    ! Setup:
-    motor_l_pwm_Start();
-    motor_r_pwm_Start();
+    Pin Connections:
+        - motor_l_en        (out)   -> ENA
+        - motor_r_en        (out)   -> ENB
+        - motor_l_in1       (out)   -> IN1
+        - motor_l_in2       (out)   -> IN2
+        - motor_r_in1       (out)   -> IN3
+        - motor_r_in2       (out)   -> IN4
+        - motor_l_phaseA    (out)   -> Left Pin 5
+        - motor_l_phaseB    (out)   -> Left Pin 6
+        - motor_r_phaseA    (out)   -> Right Pin 5
+        - motor_r_phaseB    (out)   -> Right Pin 6
 */
 
 
@@ -31,54 +33,32 @@
 #define LOCOMOTION_H
 
 
-#include "MOTOR_L_PWM.h"
-#include "MOTOR_R_PWM.h"
-#include "Clock_1.h"
-#include "motor_l_en_aliases.h"
-#include "motor_l_en.h"
-#include "motor_r_en_aliases.h"
-#include "motor_r_en.h"
-#include "motor_l_in1_aliases.h"
-#include "motor_l_in1.h"
-#include "motor_l_in2_aliases.h"
-#include "motor_l_in2.h"
-#include "motor_r_in1_aliases.h"
-#include "motor_r_in1.h"
-#include "motor_r_in2_aliases.h"
-#include "motor_r_in2.h"
+#include "cytypes.h"
 
 
-#define L_SPEED 200
-#define R_SPEED 200
-#define L_TURN_SPEED 200
-#define R_TURN_SPEED 200
-#define TURN_TIME 100
-#define DIST_TO_TIME_MS 100
-
-// typedef enum {
-//     STOP,
-//     TURN_LEFT,
-//     TURN_RIGHT,
-//     FORWARD,
-//     REVERSE
-// } Movement;
-
-typedef enum __attribute__ ((__packed__)) {
-    FORWARD,
-    REVERSE
-} Direction;
+// typedefs
+typedef enum __attribute__ ((__packed__)) LinearMovement {
+    STOP,
+    FRONT,
+    BACK
+} LinearMovement;
 
 
-void set_speed_l(uint8 speed, Direction dir);
-void set_speed_r(uint8 speed, Direction dir);
-void set_speed(uint8 speed_l, Direction dir_l, uint8 speed_r, Direction dir_r);
-// void set_movement(Movement movement);
+// globals
+extern LinearMovement current_linear_movement;
 
-void stop();
-void turn_left();
-void turn_right();
-void move_forward_by(unsigned int distance);
-void move_backward_by(unsigned int distance);
+
+// ISRs
+CY_ISR_PROTO(controller_update);
+
+
+// API
+void setup_locomotion(void);
+void stop(void);
+void turn_left(void);
+void turn_right(void);
+void move_forward_by(uint8 dist_cm);
+void move_backward_by(uint8 dist_cm);
 
 
 #endif  // LOCOMOTION_H
