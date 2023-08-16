@@ -50,7 +50,7 @@ extern uint8 motor_l_quaddec_initVar;
 *   Conditional Compilation Parameters
 ***************************************/
 
-#define motor_l_quaddec_COUNTER_RESOLUTION         (2u)
+#define motor_l_quaddec_COUNTER_RESOLUTION         (4u)
 
 
 /***************************************

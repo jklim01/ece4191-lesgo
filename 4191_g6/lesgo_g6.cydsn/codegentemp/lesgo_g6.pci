@@ -1,5 +1,5 @@
 # lesgo_g6
-# 2023-08-14 11:05:56Z
+# 2023-08-16 16:29:06Z
 
 # IO_0@[IOP=(1)][IoId=(0)] is reserved: SWDDebugEnabled
 dont_use_io iocell 1 0
@@ -15,5 +15,7 @@ set_io "motor_r_in1(0)" iocell 2 5
 set_io "motor_r_in2(0)" iocell 2 4
 set_io "motor_l_phaseA(0)" iocell 1 6
 set_io "motor_l_phaseB(0)" iocell 1 7
-set_io "motor_r_phaseA(0)" iocell 2 6
-set_io "motor_r_phaseB(0)" iocell 2 7
+set_io "motor_r_phaseA(0)" iocell 15 2
+set_io "motor_r_phaseB(0)" iocell 15 3
+set_io "Rx_1(0)" iocell 12 6
+set_io "Tx_1(0)" iocell 12 7

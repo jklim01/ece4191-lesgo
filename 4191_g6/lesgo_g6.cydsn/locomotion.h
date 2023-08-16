@@ -49,16 +49,25 @@ extern LinearMovement current_linear_movement;
 
 
 // ISRs
-CY_ISR_PROTO(controller_update);
+CY_ISR_PROTO(controller_update_isr);
 
 
 // API
 void setup_locomotion(void);
+
 void stop(void);
 void turn_left(void);
 void turn_right(void);
 void move_forward_by(uint8 dist_cm);
 void move_backward_by(uint8 dist_cm);
+void move_forward_by_counts(uint32 counts);
+
+// non-blocking versions
+void stop_nb(void);
+void turn_left_nb(void);
+void turn_right_nb(void);
+void move_forward_by_nb(uint8 dist_cm);
+void move_backward_by_nb(uint8 dist_cm);
 
 
 #endif  // LOCOMOTION_H

@@ -1,6 +1,6 @@
-C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\lesgo_g6.cyprj|60aa066a-bbb3-457a-9572-e96114fe0337
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|6b4e643a-e5e8-47b6-9d99-cfbba38741b8
-C:\Users\LJK\Documents\PSoC Creator\4.4\Downloads ( 4.4).cylib\Downloads ( 4.4).cyprj|7afef052-a344-4e29-b0b2-203e921af0ba
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|3100a6ed-6a2d-4b92-9e0a-6dca002f5883
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|f85d6d6b-7c55-447a-a9dd-dd03c99657a3
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|7ef51bef-9ec2-4c3e-abe1-77a2d0e603fb
+C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\lesgo_g6.cyprj|63783e48-d644-4afc-864e-5d6039f02835
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|caf98705-e280-4db6-8946-f4c8696a0453
+C:\Users\LJK\Documents\PSoC Creator\4.4\Downloads ( 4.4).cylib\Downloads ( 4.4).cyprj|7376b313-f865-4528-b1ce-e7c3e3ab8731
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|abb74db8-cf8b-4c54-ba9e-f007b6c48a63
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|7907d4d4-c8db-49e1-995c-458eb223ca41
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|3366085b-b1ba-466c-ab81-4af9a899cb49
