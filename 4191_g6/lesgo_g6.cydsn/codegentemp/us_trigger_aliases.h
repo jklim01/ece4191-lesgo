@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: trigger.h  
+* File Name: us_trigger.h  
 * Version 2.20
 *
 * Description:
@@ -15,8 +15,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_PINS_trigger_ALIASES_H) /* Pins trigger_ALIASES_H */
-#define CY_PINS_trigger_ALIASES_H
+#if !defined(CY_PINS_us_trigger_ALIASES_H) /* Pins us_trigger_ALIASES_H */
+#define CY_PINS_us_trigger_ALIASES_H
 
 #include "cytypes.h"
 #include "cyfitter.h"
@@ -25,12 +25,12 @@
 /***************************************
 *              Constants        
 ***************************************/
-#define trigger_0			(trigger__0__PC)
-#define trigger_0_INTR	((uint16)((uint16)0x0001u << trigger__0__SHIFT))
+#define us_trigger_0			(us_trigger__0__PC)
+#define us_trigger_0_INTR	((uint16)((uint16)0x0001u << us_trigger__0__SHIFT))
 
-#define trigger_INTR_ALL	 ((uint16)(trigger_0_INTR))
+#define us_trigger_INTR_ALL	 ((uint16)(us_trigger_0_INTR))
 
-#endif /* End Pins trigger_ALIASES_H */
+#endif /* End Pins us_trigger_ALIASES_H */
 
 
 /* [] END OF FILE */

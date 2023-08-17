@@ -1,939 +1,226 @@
 /*******************************************************************************
-* File Name: us_trigger.c
-* Version 3.30
+* File Name: us_trigger.c  
+* Version 2.20
 *
 * Description:
-*  The PWM User Module consist of an 8 or 16-bit counter with two 8 or 16-bit
-*  comparitors. Each instance of this user module is capable of generating
-*  two PWM outputs with the same period. The pulse width is selectable between
-*  1 and 255/65535. The period is selectable between 2 and 255/65536 clocks.
-*  The compare value output may be configured to be active when the present
-*  counter is less than or less than/equal to the compare value.
-*  A terminal count output is also provided. It generates a pulse one clock
-*  width wide when the counter is equal to zero.
+*  This file contains API to enable firmware control of a Pins component.
 *
 * Note:
 *
-*******************************************************************************
-* Copyright 2008-2014, Cypress Semiconductor Corporation.  All rights reserved.
-* You may use this file only in accordance with the license, terms, conditions,
-* disclaimers, and limitations in the end user license agreement accompanying
+********************************************************************************
+* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* You may use this file only in accordance with the license, terms, conditions, 
+* disclaimers, and limitations in the end user license agreement accompanying 
 * the software package with which this file was provided.
-********************************************************************************/
+*******************************************************************************/
 
+#include "cytypes.h"
 #include "us_trigger.h"
 
-/* Error message for removed <resource> through optimization */
-#ifdef us_trigger_PWMUDB_genblk1_ctrlreg__REMOVED
-    #error PWM_v3_30 detected with a constant 0 for the enable or \
-         constant 1 for reset. This will prevent the component from operating.
-#endif /* us_trigger_PWMUDB_genblk1_ctrlreg__REMOVED */
-
-uint8 us_trigger_initVar = 0u;
+/* APIs are not generated for P15[7:6] on PSoC 5 */
+#if !(CY_PSOC5A &&\
+	 us_trigger__PORT == 15 && ((us_trigger__MASK & 0xC0) != 0))
 
 
 /*******************************************************************************
-* Function Name: us_trigger_Start
-********************************************************************************
+* Function Name: us_trigger_Write
+****************************************************************************//**
 *
-* Summary:
-*  The start function initializes the pwm with the default values, the
-*  enables the counter to begin counting.  It does not enable interrupts,
-*  the EnableInt command should be called if interrupt generation is required.
+* \brief Writes the value to the physical port (data output register), masking
+*  and shifting the bits appropriately. 
 *
-* Parameters:
-*  None
+* The data output register controls the signal applied to the physical pin in 
+* conjunction with the drive mode parameter. This function avoids changing 
+* other bits in the port by using the appropriate method (read-modify-write or
+* bit banding).
 *
-* Return:
-*  None
+* <b>Note</b> This function should not be used on a hardware digital output pin 
+* as it is driven by the hardware signal attached to it.
 *
-* Global variables:
-*  us_trigger_initVar: Is modified when this function is called for the
-*   first time. Is used to ensure that initialization happens only once.
+* \param value
+*  Value to write to the component instance.
 *
+* \return 
+*  None 
+*
+* \sideeffect
+*  If you use read-modify-write operations that are not atomic; the Interrupt 
+*  Service Routines (ISR) can cause corruption of this function. An ISR that 
+*  interrupts this function and performs writes to the Pins component data 
+*  register can cause corrupted port data. To avoid this issue, you should 
+*  either use the Per-Pin APIs (primary method) or disable interrupts around 
+*  this function.
+*
+* \funcusage
+*  \snippet us_trigger_SUT.c usage_us_trigger_Write
 *******************************************************************************/
-void us_trigger_Start(void) 
+void us_trigger_Write(uint8 value)
 {
-    /* If not Initialized then initialize all required hardware and software */
-    if(us_trigger_initVar == 0u)
-    {
-        us_trigger_Init();
-        us_trigger_initVar = 1u;
-    }
-    us_trigger_Enable();
-
+    uint8 staticBits = (us_trigger_DR & (uint8)(~us_trigger_MASK));
+    us_trigger_DR = staticBits | ((uint8)(value << us_trigger_SHIFT) & us_trigger_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: us_trigger_Init
-********************************************************************************
+* Function Name: us_trigger_SetDriveMode
+****************************************************************************//**
 *
-* Summary:
-*  Initialize component's parameters to the parameters set by user in the
-*  customizer of the component placed onto schematic. Usually called in
-*  us_trigger_Start().
+* \brief Sets the drive mode for each of the Pins component's pins.
+* 
+* <b>Note</b> This affects all pins in the Pins component instance. Use the
+* Per-Pin APIs if you wish to control individual pin's drive modes.
 *
-* Parameters:
+* \param mode
+*  Mode for the selected signals. Valid options are documented in 
+*  \ref driveMode.
+*
+* \return
 *  None
 *
-* Return:
-*  None
+* \sideeffect
+*  If you use read-modify-write operations that are not atomic, the ISR can
+*  cause corruption of this function. An ISR that interrupts this function 
+*  and performs writes to the Pins component Drive Mode registers can cause 
+*  corrupted port data. To avoid this issue, you should either use the Per-Pin
+*  APIs (primary method) or disable interrupts around this function.
 *
+* \funcusage
+*  \snippet us_trigger_SUT.c usage_us_trigger_SetDriveMode
 *******************************************************************************/
-void us_trigger_Init(void) 
+void us_trigger_SetDriveMode(uint8 mode)
 {
-    #if (us_trigger_UsingFixedFunction || us_trigger_UseControl)
-        uint8 ctrl;
-    #endif /* (us_trigger_UsingFixedFunction || us_trigger_UseControl) */
-
-    #if(!us_trigger_UsingFixedFunction)
-        #if(us_trigger_UseStatus)
-            /* Interrupt State Backup for Critical Region*/
-            uint8 us_trigger_interruptState;
-        #endif /* (us_trigger_UseStatus) */
-    #endif /* (!us_trigger_UsingFixedFunction) */
-
-    #if (us_trigger_UsingFixedFunction)
-        /* You are allowed to write the compare value (FF only) */
-        us_trigger_CONTROL |= us_trigger_CFG0_MODE;
-        #if (us_trigger_DeadBand2_4)
-            us_trigger_CONTROL |= us_trigger_CFG0_DB;
-        #endif /* (us_trigger_DeadBand2_4) */
-
-        ctrl = us_trigger_CONTROL3 & ((uint8 )(~us_trigger_CTRL_CMPMODE1_MASK));
-        us_trigger_CONTROL3 = ctrl | us_trigger_DEFAULT_COMPARE1_MODE;
-
-         /* Clear and Set SYNCTC and SYNCCMP bits of RT1 register */
-        us_trigger_RT1 &= ((uint8)(~us_trigger_RT1_MASK));
-        us_trigger_RT1 |= us_trigger_SYNC;
-
-        /*Enable DSI Sync all all inputs of the PWM*/
-        us_trigger_RT1 &= ((uint8)(~us_trigger_SYNCDSI_MASK));
-        us_trigger_RT1 |= us_trigger_SYNCDSI_EN;
-
-    #elif (us_trigger_UseControl)
-        /* Set the default compare mode defined in the parameter */
-        ctrl = us_trigger_CONTROL & ((uint8)(~us_trigger_CTRL_CMPMODE2_MASK)) &
-                ((uint8)(~us_trigger_CTRL_CMPMODE1_MASK));
-        us_trigger_CONTROL = ctrl | us_trigger_DEFAULT_COMPARE2_MODE |
-                                   us_trigger_DEFAULT_COMPARE1_MODE;
-    #endif /* (us_trigger_UsingFixedFunction) */
-
-    #if (!us_trigger_UsingFixedFunction)
-        #if (us_trigger_Resolution == 8)
-            /* Set FIFO 0 to 1 byte register for period*/
-            us_trigger_AUX_CONTROLDP0 |= (us_trigger_AUX_CTRL_FIFO0_CLR);
-        #else /* (us_trigger_Resolution == 16)*/
-            /* Set FIFO 0 to 1 byte register for period */
-            us_trigger_AUX_CONTROLDP0 |= (us_trigger_AUX_CTRL_FIFO0_CLR);
-            us_trigger_AUX_CONTROLDP1 |= (us_trigger_AUX_CTRL_FIFO0_CLR);
-        #endif /* (us_trigger_Resolution == 8) */
-
-        us_trigger_WriteCounter(us_trigger_INIT_PERIOD_VALUE);
-    #endif /* (!us_trigger_UsingFixedFunction) */
-
-    us_trigger_WritePeriod(us_trigger_INIT_PERIOD_VALUE);
-
-        #if (us_trigger_UseOneCompareMode)
-            us_trigger_WriteCompare(us_trigger_INIT_COMPARE_VALUE1);
-        #else
-            us_trigger_WriteCompare1(us_trigger_INIT_COMPARE_VALUE1);
-            us_trigger_WriteCompare2(us_trigger_INIT_COMPARE_VALUE2);
-        #endif /* (us_trigger_UseOneCompareMode) */
-
-        #if (us_trigger_KillModeMinTime)
-            us_trigger_WriteKillTime(us_trigger_MinimumKillTime);
-        #endif /* (us_trigger_KillModeMinTime) */
-
-        #if (us_trigger_DeadBandUsed)
-            us_trigger_WriteDeadTime(us_trigger_INIT_DEAD_TIME);
-        #endif /* (us_trigger_DeadBandUsed) */
-
-    #if (us_trigger_UseStatus || us_trigger_UsingFixedFunction)
-        us_trigger_SetInterruptMode(us_trigger_INIT_INTERRUPTS_MODE);
-    #endif /* (us_trigger_UseStatus || us_trigger_UsingFixedFunction) */
-
-    #if (us_trigger_UsingFixedFunction)
-        /* Globally Enable the Fixed Function Block chosen */
-        us_trigger_GLOBAL_ENABLE |= us_trigger_BLOCK_EN_MASK;
-        /* Set the Interrupt source to come from the status register */
-        us_trigger_CONTROL2 |= us_trigger_CTRL2_IRQ_SEL;
-    #else
-        #if(us_trigger_UseStatus)
-
-            /* CyEnterCriticalRegion and CyExitCriticalRegion are used to mark following region critical*/
-            /* Enter Critical Region*/
-            us_trigger_interruptState = CyEnterCriticalSection();
-            /* Use the interrupt output of the status register for IRQ output */
-            us_trigger_STATUS_AUX_CTRL |= us_trigger_STATUS_ACTL_INT_EN_MASK;
-
-             /* Exit Critical Region*/
-            CyExitCriticalSection(us_trigger_interruptState);
-
-            /* Clear the FIFO to enable the us_trigger_STATUS_FIFOFULL
-                   bit to be set on FIFO full. */
-            us_trigger_ClearFIFO();
-        #endif /* (us_trigger_UseStatus) */
-    #endif /* (us_trigger_UsingFixedFunction) */
+	CyPins_SetPinDriveMode(us_trigger_0, mode);
 }
 
 
 /*******************************************************************************
-* Function Name: us_trigger_Enable
-********************************************************************************
+* Function Name: us_trigger_Read
+****************************************************************************//**
 *
-* Summary:
-*  Enables the PWM block operation
+* \brief Reads the associated physical port (pin status register) and masks 
+*  the required bits according to the width and bit position of the component
+*  instance. 
 *
-* Parameters:
-*  None
+* The pin's status register returns the current logic level present on the 
+* physical pin.
 *
-* Return:
-*  None
+* \return 
+*  The current value for the pins in the component as a right justified number.
 *
-* Side Effects:
-*  This works only if software enable mode is chosen
-*
+* \funcusage
+*  \snippet us_trigger_SUT.c usage_us_trigger_Read  
 *******************************************************************************/
-void us_trigger_Enable(void) 
+uint8 us_trigger_Read(void)
 {
-    /* Globally Enable the Fixed Function Block chosen */
-    #if (us_trigger_UsingFixedFunction)
-        us_trigger_GLOBAL_ENABLE |= us_trigger_BLOCK_EN_MASK;
-        us_trigger_GLOBAL_STBY_ENABLE |= us_trigger_BLOCK_STBY_EN_MASK;
-    #endif /* (us_trigger_UsingFixedFunction) */
-
-    /* Enable the PWM from the control register  */
-    #if (us_trigger_UseControl || us_trigger_UsingFixedFunction)
-        us_trigger_CONTROL |= us_trigger_CTRL_ENABLE;
-    #endif /* (us_trigger_UseControl || us_trigger_UsingFixedFunction) */
+    return (us_trigger_PS & us_trigger_MASK) >> us_trigger_SHIFT;
 }
 
 
 /*******************************************************************************
-* Function Name: us_trigger_Stop
-********************************************************************************
+* Function Name: us_trigger_ReadDataReg
+****************************************************************************//**
 *
-* Summary:
-*  The stop function halts the PWM, but does not change any modes or disable
-*  interrupts.
+* \brief Reads the associated physical port's data output register and masks 
+*  the correct bits according to the width and bit position of the component 
+*  instance. 
 *
-* Parameters:
-*  None
+* The data output register controls the signal applied to the physical pin in 
+* conjunction with the drive mode parameter. This is not the same as the 
+* preferred us_trigger_Read() API because the 
+* us_trigger_ReadDataReg() reads the data register instead of the status 
+* register. For output pins this is a useful function to determine the value 
+* just written to the pin.
 *
-* Return:
-*  None
+* \return 
+*  The current value of the data register masked and shifted into a right 
+*  justified number for the component instance.
 *
-* Side Effects:
-*  If the Enable mode is set to Hardware only then this function
-*  has no effect on the operation of the PWM
-*
+* \funcusage
+*  \snippet us_trigger_SUT.c usage_us_trigger_ReadDataReg 
 *******************************************************************************/
-void us_trigger_Stop(void) 
+uint8 us_trigger_ReadDataReg(void)
 {
-    #if (us_trigger_UseControl || us_trigger_UsingFixedFunction)
-        us_trigger_CONTROL &= ((uint8)(~us_trigger_CTRL_ENABLE));
-    #endif /* (us_trigger_UseControl || us_trigger_UsingFixedFunction) */
-
-    /* Globally disable the Fixed Function Block chosen */
-    #if (us_trigger_UsingFixedFunction)
-        us_trigger_GLOBAL_ENABLE &= ((uint8)(~us_trigger_BLOCK_EN_MASK));
-        us_trigger_GLOBAL_STBY_ENABLE &= ((uint8)(~us_trigger_BLOCK_STBY_EN_MASK));
-    #endif /* (us_trigger_UsingFixedFunction) */
+    return (us_trigger_DR & us_trigger_MASK) >> us_trigger_SHIFT;
 }
 
-#if (us_trigger_UseOneCompareMode)
-    #if (us_trigger_CompareMode1SW)
 
-
-        /*******************************************************************************
-        * Function Name: us_trigger_SetCompareMode
-        ********************************************************************************
-        *
-        * Summary:
-        *  This function writes the Compare Mode for the pwm output when in Dither mode,
-        *  Center Align Mode or One Output Mode.
-        *
-        * Parameters:
-        *  comparemode:  The new compare mode for the PWM output. Use the compare types
-        *                defined in the H file as input arguments.
-        *
-        * Return:
-        *  None
-        *
-        *******************************************************************************/
-        void us_trigger_SetCompareMode(uint8 comparemode) 
-        {
-            #if(us_trigger_UsingFixedFunction)
-
-                #if(0 != us_trigger_CTRL_CMPMODE1_SHIFT)
-                    uint8 comparemodemasked = ((uint8)((uint8)comparemode << us_trigger_CTRL_CMPMODE1_SHIFT));
-                #else
-                    uint8 comparemodemasked = comparemode;
-                #endif /* (0 != us_trigger_CTRL_CMPMODE1_SHIFT) */
-
-                us_trigger_CONTROL3 &= ((uint8)(~us_trigger_CTRL_CMPMODE1_MASK)); /*Clear Existing Data */
-                us_trigger_CONTROL3 |= comparemodemasked;
-
-            #elif (us_trigger_UseControl)
-
-                #if(0 != us_trigger_CTRL_CMPMODE1_SHIFT)
-                    uint8 comparemode1masked = ((uint8)((uint8)comparemode << us_trigger_CTRL_CMPMODE1_SHIFT)) &
-                                                us_trigger_CTRL_CMPMODE1_MASK;
-                #else
-                    uint8 comparemode1masked = comparemode & us_trigger_CTRL_CMPMODE1_MASK;
-                #endif /* (0 != us_trigger_CTRL_CMPMODE1_SHIFT) */
-
-                #if(0 != us_trigger_CTRL_CMPMODE2_SHIFT)
-                    uint8 comparemode2masked = ((uint8)((uint8)comparemode << us_trigger_CTRL_CMPMODE2_SHIFT)) &
-                                               us_trigger_CTRL_CMPMODE2_MASK;
-                #else
-                    uint8 comparemode2masked = comparemode & us_trigger_CTRL_CMPMODE2_MASK;
-                #endif /* (0 != us_trigger_CTRL_CMPMODE2_SHIFT) */
-
-                /*Clear existing mode */
-                us_trigger_CONTROL &= ((uint8)(~(us_trigger_CTRL_CMPMODE1_MASK |
-                                            us_trigger_CTRL_CMPMODE2_MASK)));
-                us_trigger_CONTROL |= (comparemode1masked | comparemode2masked);
-
-            #else
-                uint8 temp = comparemode;
-            #endif /* (us_trigger_UsingFixedFunction) */
-        }
-    #endif /* us_trigger_CompareMode1SW */
-
-#else /* UseOneCompareMode */
-
-    #if (us_trigger_CompareMode1SW)
-
-
-        /*******************************************************************************
-        * Function Name: us_trigger_SetCompareMode1
-        ********************************************************************************
-        *
-        * Summary:
-        *  This function writes the Compare Mode for the pwm or pwm1 output
-        *
-        * Parameters:
-        *  comparemode:  The new compare mode for the PWM output. Use the compare types
-        *                defined in the H file as input arguments.
-        *
-        * Return:
-        *  None
-        *
-        *******************************************************************************/
-        void us_trigger_SetCompareMode1(uint8 comparemode) 
-        {
-            #if(0 != us_trigger_CTRL_CMPMODE1_SHIFT)
-                uint8 comparemodemasked = ((uint8)((uint8)comparemode << us_trigger_CTRL_CMPMODE1_SHIFT)) &
-                                           us_trigger_CTRL_CMPMODE1_MASK;
-            #else
-                uint8 comparemodemasked = comparemode & us_trigger_CTRL_CMPMODE1_MASK;
-            #endif /* (0 != us_trigger_CTRL_CMPMODE1_SHIFT) */
-
-            #if (us_trigger_UseControl)
-                us_trigger_CONTROL &= ((uint8)(~us_trigger_CTRL_CMPMODE1_MASK)); /*Clear existing mode */
-                us_trigger_CONTROL |= comparemodemasked;
-            #endif /* (us_trigger_UseControl) */
-        }
-    #endif /* us_trigger_CompareMode1SW */
-
-#if (us_trigger_CompareMode2SW)
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_SetCompareMode2
-    ********************************************************************************
-    *
-    * Summary:
-    *  This function writes the Compare Mode for the pwm or pwm2 output
-    *
-    * Parameters:
-    *  comparemode:  The new compare mode for the PWM output. Use the compare types
-    *                defined in the H file as input arguments.
-    *
-    * Return:
-    *  None
-    *
-    *******************************************************************************/
-    void us_trigger_SetCompareMode2(uint8 comparemode) 
-    {
-
-        #if(0 != us_trigger_CTRL_CMPMODE2_SHIFT)
-            uint8 comparemodemasked = ((uint8)((uint8)comparemode << us_trigger_CTRL_CMPMODE2_SHIFT)) &
-                                                 us_trigger_CTRL_CMPMODE2_MASK;
-        #else
-            uint8 comparemodemasked = comparemode & us_trigger_CTRL_CMPMODE2_MASK;
-        #endif /* (0 != us_trigger_CTRL_CMPMODE2_SHIFT) */
-
-        #if (us_trigger_UseControl)
-            us_trigger_CONTROL &= ((uint8)(~us_trigger_CTRL_CMPMODE2_MASK)); /*Clear existing mode */
-            us_trigger_CONTROL |= comparemodemasked;
-        #endif /* (us_trigger_UseControl) */
-    }
-    #endif /*us_trigger_CompareMode2SW */
-
-#endif /* UseOneCompareMode */
-
-
-#if (!us_trigger_UsingFixedFunction)
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_WriteCounter
-    ********************************************************************************
-    *
-    * Summary:
-    *  Writes a new counter value directly to the counter register. This will be
-    *  implemented for that currently running period and only that period. This API
-    *  is valid only for UDB implementation and not available for fixed function
-    *  PWM implementation.
-    *
-    * Parameters:
-    *  counter:  The period new period counter value.
-    *
-    * Return:
-    *  None
-    *
-    * Side Effects:
-    *  The PWM Period will be reloaded when a counter value will be a zero
-    *
-    *******************************************************************************/
-    void us_trigger_WriteCounter(uint16 counter) \
-                                       
-    {
-        CY_SET_REG16(us_trigger_COUNTER_LSB_PTR, counter);
-    }
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_ReadCounter
-    ********************************************************************************
-    *
-    * Summary:
-    *  This function returns the current value of the counter.  It doesn't matter
-    *  if the counter is enabled or running.
-    *
-    * Parameters:
-    *  None
-    *
-    * Return:
-    *  The current value of the counter.
-    *
-    *******************************************************************************/
-    uint16 us_trigger_ReadCounter(void) 
-    {
-        /* Force capture by reading Accumulator */
-        /* Must first do a software capture to be able to read the counter */
-        /* It is up to the user code to make sure there isn't already captured data in the FIFO */
-          (void)CY_GET_REG8(us_trigger_COUNTERCAP_LSB_PTR_8BIT);
-
-        /* Read the data from the FIFO */
-        return (CY_GET_REG16(us_trigger_CAPTURE_LSB_PTR));
-    }
-
-    #if (us_trigger_UseStatus)
-
-
-        /*******************************************************************************
-        * Function Name: us_trigger_ClearFIFO
-        ********************************************************************************
-        *
-        * Summary:
-        *  This function clears all capture data from the capture FIFO
-        *
-        * Parameters:
-        *  None
-        *
-        * Return:
-        *  None
-        *
-        *******************************************************************************/
-        void us_trigger_ClearFIFO(void) 
-        {
-            while(0u != (us_trigger_ReadStatusRegister() & us_trigger_STATUS_FIFONEMPTY))
-            {
-                (void)us_trigger_ReadCapture();
-            }
-        }
-
-    #endif /* us_trigger_UseStatus */
-
-#endif /* !us_trigger_UsingFixedFunction */
-
-
-/*******************************************************************************
-* Function Name: us_trigger_WritePeriod
-********************************************************************************
-*
-* Summary:
-*  This function is used to change the period of the counter.  The new period
-*  will be loaded the next time terminal count is detected.
-*
-* Parameters:
-*  period:  Period value. May be between 1 and (2^Resolution)-1.  A value of 0
-*           will result in the counter remaining at zero.
-*
-* Return:
-*  None
-*
-*******************************************************************************/
-void us_trigger_WritePeriod(uint16 period) 
-{
-    #if(us_trigger_UsingFixedFunction)
-        CY_SET_REG16(us_trigger_PERIOD_LSB_PTR, (uint16)period);
-    #else
-        CY_SET_REG16(us_trigger_PERIOD_LSB_PTR, period);
-    #endif /* (us_trigger_UsingFixedFunction) */
-}
-
-#if (us_trigger_UseOneCompareMode)
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_WriteCompare
-    ********************************************************************************
-    *
-    * Summary:
-    *  This funtion is used to change the compare1 value when the PWM is in Dither
-    *  mode. The compare output will reflect the new value on the next UDB clock.
-    *  The compare output will be driven high when the present counter value is
-    *  compared to the compare value based on the compare mode defined in
-    *  Dither Mode.
-    *
-    * Parameters:
-    *  compare:  New compare value.
-    *
-    * Return:
-    *  None
-    *
-    * Side Effects:
-    *  This function is only available if the PWM mode parameter is set to
-    *  Dither Mode, Center Aligned Mode or One Output Mode
-    *
-    *******************************************************************************/
-    void us_trigger_WriteCompare(uint16 compare) \
-                                       
-    {
-        #if(us_trigger_UsingFixedFunction)
-            CY_SET_REG16(us_trigger_COMPARE1_LSB_PTR, (uint16)compare);
-        #else
-            CY_SET_REG16(us_trigger_COMPARE1_LSB_PTR, compare);
-        #endif /* (us_trigger_UsingFixedFunction) */
-
-        #if (us_trigger_PWMMode == us_trigger__B_PWM__DITHER)
-            #if(us_trigger_UsingFixedFunction)
-                CY_SET_REG16(us_trigger_COMPARE2_LSB_PTR, (uint16)(compare + 1u));
-            #else
-                CY_SET_REG16(us_trigger_COMPARE2_LSB_PTR, (compare + 1u));
-            #endif /* (us_trigger_UsingFixedFunction) */
-        #endif /* (us_trigger_PWMMode == us_trigger__B_PWM__DITHER) */
-    }
-
-
-#else
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_WriteCompare1
-    ********************************************************************************
-    *
-    * Summary:
-    *  This funtion is used to change the compare1 value.  The compare output will
-    *  reflect the new value on the next UDB clock.  The compare output will be
-    *  driven high when the present counter value is less than or less than or
-    *  equal to the compare register, depending on the mode.
-    *
-    * Parameters:
-    *  compare:  New compare value.
-    *
-    * Return:
-    *  None
-    *
-    *******************************************************************************/
-    void us_trigger_WriteCompare1(uint16 compare) \
-                                        
-    {
-        #if(us_trigger_UsingFixedFunction)
-            CY_SET_REG16(us_trigger_COMPARE1_LSB_PTR, (uint16)compare);
-        #else
-            CY_SET_REG16(us_trigger_COMPARE1_LSB_PTR, compare);
-        #endif /* (us_trigger_UsingFixedFunction) */
-    }
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_WriteCompare2
-    ********************************************************************************
-    *
-    * Summary:
-    *  This funtion is used to change the compare value, for compare1 output.
-    *  The compare output will reflect the new value on the next UDB clock.
-    *  The compare output will be driven high when the present counter value is
-    *  less than or less than or equal to the compare register, depending on the
-    *  mode.
-    *
-    * Parameters:
-    *  compare:  New compare value.
-    *
-    * Return:
-    *  None
-    *
-    *******************************************************************************/
-    void us_trigger_WriteCompare2(uint16 compare) \
-                                        
-    {
-        #if(us_trigger_UsingFixedFunction)
-            CY_SET_REG16(us_trigger_COMPARE2_LSB_PTR, compare);
-        #else
-            CY_SET_REG16(us_trigger_COMPARE2_LSB_PTR, compare);
-        #endif /* (us_trigger_UsingFixedFunction) */
-    }
-#endif /* UseOneCompareMode */
-
-#if (us_trigger_DeadBandUsed)
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_WriteDeadTime
-    ********************************************************************************
-    *
-    * Summary:
-    *  This function writes the dead-band counts to the corresponding register
-    *
-    * Parameters:
-    *  deadtime:  Number of counts for dead time
-    *
-    * Return:
-    *  None
-    *
-    *******************************************************************************/
-    void us_trigger_WriteDeadTime(uint8 deadtime) 
-    {
-        /* If using the Dead Band 1-255 mode then just write the register */
-        #if(!us_trigger_DeadBand2_4)
-            CY_SET_REG8(us_trigger_DEADBAND_COUNT_PTR, deadtime);
-        #else
-            /* Otherwise the data has to be masked and offset */
-            /* Clear existing data */
-            us_trigger_DEADBAND_COUNT &= ((uint8)(~us_trigger_DEADBAND_COUNT_MASK));
-
-            /* Set new dead time */
-            #if(us_trigger_DEADBAND_COUNT_SHIFT)
-                us_trigger_DEADBAND_COUNT |= ((uint8)((uint8)deadtime << us_trigger_DEADBAND_COUNT_SHIFT)) &
-                                                    us_trigger_DEADBAND_COUNT_MASK;
-            #else
-                us_trigger_DEADBAND_COUNT |= deadtime & us_trigger_DEADBAND_COUNT_MASK;
-            #endif /* (us_trigger_DEADBAND_COUNT_SHIFT) */
-
-        #endif /* (!us_trigger_DeadBand2_4) */
-    }
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_ReadDeadTime
-    ********************************************************************************
-    *
-    * Summary:
-    *  This function reads the dead-band counts from the corresponding register
-    *
-    * Parameters:
-    *  None
-    *
-    * Return:
-    *  Dead Band Counts
-    *
-    *******************************************************************************/
-    uint8 us_trigger_ReadDeadTime(void) 
-    {
-        /* If using the Dead Band 1-255 mode then just read the register */
-        #if(!us_trigger_DeadBand2_4)
-            return (CY_GET_REG8(us_trigger_DEADBAND_COUNT_PTR));
-        #else
-
-            /* Otherwise the data has to be masked and offset */
-            #if(us_trigger_DEADBAND_COUNT_SHIFT)
-                return ((uint8)(((uint8)(us_trigger_DEADBAND_COUNT & us_trigger_DEADBAND_COUNT_MASK)) >>
-                                                                           us_trigger_DEADBAND_COUNT_SHIFT));
-            #else
-                return (us_trigger_DEADBAND_COUNT & us_trigger_DEADBAND_COUNT_MASK);
-            #endif /* (us_trigger_DEADBAND_COUNT_SHIFT) */
-        #endif /* (!us_trigger_DeadBand2_4) */
-    }
-#endif /* DeadBandUsed */
-
-#if (us_trigger_UseStatus || us_trigger_UsingFixedFunction)
-
+/* If interrupt is connected for this Pins component */ 
+#if defined(us_trigger_INTSTAT) 
 
     /*******************************************************************************
     * Function Name: us_trigger_SetInterruptMode
-    ********************************************************************************
+    ****************************************************************************//**
     *
-    * Summary:
-    *  This function configures the interrupts mask control of theinterrupt
-    *  source status register.
+    * \brief Configures the interrupt mode for each of the Pins component's
+    *  pins. Alternatively you may set the interrupt mode for all the pins
+    *  specified in the Pins component.
     *
-    * Parameters:
-    *  uint8 interruptMode: Bit field containing the interrupt sources enabled
+    *  <b>Note</b> The interrupt is port-wide and therefore any enabled pin
+    *  interrupt may trigger it.
     *
-    * Return:
+    * \param position
+    *  The pin position as listed in the Pins component. You may OR these to be 
+    *  able to configure the interrupt mode of multiple pins within a Pins 
+    *  component. Or you may use us_trigger_INTR_ALL to configure the
+    *  interrupt mode of all the pins in the Pins component.       
+    *  - us_trigger_0_INTR       (First pin in the list)
+    *  - us_trigger_1_INTR       (Second pin in the list)
+    *  - ...
+    *  - us_trigger_INTR_ALL     (All pins in Pins component)
+    *
+    * \param mode
+    *  Interrupt mode for the selected pins. Valid options are documented in
+    *  \ref intrMode.
+    *
+    * \return 
     *  None
+    *  
+    * \sideeffect
+    *  It is recommended that the interrupt be disabled before calling this 
+    *  function to avoid unintended interrupt requests. Note that the interrupt
+    *  type is port wide, and therefore will trigger for any enabled pin on the 
+    *  port.
     *
+    * \funcusage
+    *  \snippet us_trigger_SUT.c usage_us_trigger_SetInterruptMode
     *******************************************************************************/
-    void us_trigger_SetInterruptMode(uint8 interruptMode) 
+    void us_trigger_SetInterruptMode(uint16 position, uint16 mode)
     {
-        CY_SET_REG8(us_trigger_STATUS_MASK_PTR, interruptMode);
+		if((position & us_trigger_0_INTR) != 0u) 
+		{ 
+			 us_trigger_0_INTTYPE_REG = (uint8)mode; 
+		}
     }
-
-
+    
+    
     /*******************************************************************************
-    * Function Name: us_trigger_ReadStatusRegister
-    ********************************************************************************
+    * Function Name: us_trigger_ClearInterrupt
+    ****************************************************************************//**
     *
-    * Summary:
-    *  This function returns the current state of the status register.
+    * \brief Clears any active interrupts attached with the component and returns 
+    *  the value of the interrupt status register allowing determination of which
+    *  pins generated an interrupt event.
     *
-    * Parameters:
-    *  None
+    * \return 
+    *  The right-shifted current value of the interrupt status register. Each pin 
+    *  has one bit set if it generated an interrupt event. For example, bit 0 is 
+    *  for pin 0 and bit 1 is for pin 1 of the Pins component.
+    *  
+    * \sideeffect
+    *  Clears all bits of the physical port's interrupt status register, not just
+    *  those associated with the Pins component.
     *
-    * Return:
-    *  uint8 : Current status register value. The status register bits are:
-    *  [7:6] : Unused(0)
-    *  [5]   : Kill event output
-    *  [4]   : FIFO not empty
-    *  [3]   : FIFO full
-    *  [2]   : Terminal count
-    *  [1]   : Compare output 2
-    *  [0]   : Compare output 1
-    *
+    * \funcusage
+    *  \snippet us_trigger_SUT.c usage_us_trigger_ClearInterrupt
     *******************************************************************************/
-    uint8 us_trigger_ReadStatusRegister(void) 
+    uint8 us_trigger_ClearInterrupt(void)
     {
-        return (CY_GET_REG8(us_trigger_STATUS_PTR));
+        return (us_trigger_INTSTAT & us_trigger_MASK) >> us_trigger_SHIFT;
     }
 
-#endif /* (us_trigger_UseStatus || us_trigger_UsingFixedFunction) */
+#endif /* If Interrupts Are Enabled for this Pins component */ 
 
+#endif /* CY_PSOC5A... */
 
-#if (us_trigger_UseControl)
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_ReadControlRegister
-    ********************************************************************************
-    *
-    * Summary:
-    *  Returns the current state of the control register. This API is available
-    *  only if the control register is not removed.
-    *
-    * Parameters:
-    *  None
-    *
-    * Return:
-    *  uint8 : Current control register value
-    *
-    *******************************************************************************/
-    uint8 us_trigger_ReadControlRegister(void) 
-    {
-        uint8 result;
-
-        result = CY_GET_REG8(us_trigger_CONTROL_PTR);
-        return (result);
-    }
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_WriteControlRegister
-    ********************************************************************************
-    *
-    * Summary:
-    *  Sets the bit field of the control register. This API is available only if
-    *  the control register is not removed.
-    *
-    * Parameters:
-    *  uint8 control: Control register bit field, The status register bits are:
-    *  [7]   : PWM Enable
-    *  [6]   : Reset
-    *  [5:3] : Compare Mode2
-    *  [2:0] : Compare Mode2
-    *
-    * Return:
-    *  None
-    *
-    *******************************************************************************/
-    void us_trigger_WriteControlRegister(uint8 control) 
-    {
-        CY_SET_REG8(us_trigger_CONTROL_PTR, control);
-    }
-
-#endif /* (us_trigger_UseControl) */
-
-
-#if (!us_trigger_UsingFixedFunction)
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_ReadCapture
-    ********************************************************************************
-    *
-    * Summary:
-    *  Reads the capture value from the capture FIFO.
-    *
-    * Parameters:
-    *  None
-    *
-    * Return:
-    *  uint8/uint16: The current capture value
-    *
-    *******************************************************************************/
-    uint16 us_trigger_ReadCapture(void) 
-    {
-        return (CY_GET_REG16(us_trigger_CAPTURE_LSB_PTR));
-    }
-
-#endif /* (!us_trigger_UsingFixedFunction) */
-
-
-#if (us_trigger_UseOneCompareMode)
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_ReadCompare
-    ********************************************************************************
-    *
-    * Summary:
-    *  Reads the compare value for the compare output when the PWM Mode parameter is
-    *  set to Dither mode, Center Aligned mode, or One Output mode.
-    *
-    * Parameters:
-    *  None
-    *
-    * Return:
-    *  uint8/uint16: Current compare value
-    *
-    *******************************************************************************/
-    uint16 us_trigger_ReadCompare(void) 
-    {
-        #if(us_trigger_UsingFixedFunction)
-            return ((uint16)CY_GET_REG16(us_trigger_COMPARE1_LSB_PTR));
-        #else
-            return (CY_GET_REG16(us_trigger_COMPARE1_LSB_PTR));
-        #endif /* (us_trigger_UsingFixedFunction) */
-    }
-
-#else
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_ReadCompare1
-    ********************************************************************************
-    *
-    * Summary:
-    *  Reads the compare value for the compare1 output.
-    *
-    * Parameters:
-    *  None
-    *
-    * Return:
-    *  uint8/uint16: Current compare value.
-    *
-    *******************************************************************************/
-    uint16 us_trigger_ReadCompare1(void) 
-    {
-        return (CY_GET_REG16(us_trigger_COMPARE1_LSB_PTR));
-    }
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_ReadCompare2
-    ********************************************************************************
-    *
-    * Summary:
-    *  Reads the compare value for the compare2 output.
-    *
-    * Parameters:
-    *  None
-    *
-    * Return:
-    *  uint8/uint16: Current compare value.
-    *
-    *******************************************************************************/
-    uint16 us_trigger_ReadCompare2(void) 
-    {
-        return (CY_GET_REG16(us_trigger_COMPARE2_LSB_PTR));
-    }
-
-#endif /* (us_trigger_UseOneCompareMode) */
-
-
-/*******************************************************************************
-* Function Name: us_trigger_ReadPeriod
-********************************************************************************
-*
-* Summary:
-*  Reads the period value used by the PWM hardware.
-*
-* Parameters:
-*  None
-*
-* Return:
-*  uint8/16: Period value
-*
-*******************************************************************************/
-uint16 us_trigger_ReadPeriod(void) 
-{
-    #if(us_trigger_UsingFixedFunction)
-        return ((uint16)CY_GET_REG16(us_trigger_PERIOD_LSB_PTR));
-    #else
-        return (CY_GET_REG16(us_trigger_PERIOD_LSB_PTR));
-    #endif /* (us_trigger_UsingFixedFunction) */
-}
-
-#if ( us_trigger_KillModeMinTime)
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_WriteKillTime
-    ********************************************************************************
-    *
-    * Summary:
-    *  Writes the kill time value used by the hardware when the Kill Mode
-    *  is set to Minimum Time.
-    *
-    * Parameters:
-    *  uint8: Minimum Time kill counts
-    *
-    * Return:
-    *  None
-    *
-    *******************************************************************************/
-    void us_trigger_WriteKillTime(uint8 killtime) 
-    {
-        CY_SET_REG8(us_trigger_KILLMODEMINTIME_PTR, killtime);
-    }
-
-
-    /*******************************************************************************
-    * Function Name: us_trigger_ReadKillTime
-    ********************************************************************************
-    *
-    * Summary:
-    *  Reads the kill time value used by the hardware when the Kill Mode is set
-    *  to Minimum Time.
-    *
-    * Parameters:
-    *  None
-    *
-    * Return:
-    *  uint8: The current Minimum Time kill counts
-    *
-    *******************************************************************************/
-    uint8 us_trigger_ReadKillTime(void) 
-    {
-        return (CY_GET_REG8(us_trigger_KILLMODEMINTIME_PTR));
-    }
-
-#endif /* ( us_trigger_KillModeMinTime) */
-
+    
 /* [] END OF FILE */
