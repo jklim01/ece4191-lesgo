@@ -1,0 +1,6 @@
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|700e6c3d-05d0-4318-9d8e-a888b0a1e790
+C:\Users\LJK\Documents\PSoC Creator\4.4\Downloads ( 4.4).cylib\Downloads ( 4.4).cyprj|d6e72c59-13b7-4ebd-9cee-8af026badd45
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|e8f6e595-1328-4c98-bc2f-f59161c1eb2b
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|c5890638-5824-4d33-8b6c-ca9070cccb53
+C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|873008c6-3f84-44a1-9984-85135c67e033
+C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\IR_sensor\Design01.cydsn\Design01.cyprj|b3e12e97-c24b-406a-8b30-f1decf1b841d

@@ -45,7 +45,7 @@ typedef enum __attribute__ ((__packed__)) LinearMovement {
 
 
 // globals
-extern LinearMovement current_linear_movement;
+extern volatile LinearMovement current_linear_movement;
 
 
 // ISRs

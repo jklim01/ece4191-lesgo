@@ -26,7 +26,7 @@
 #include "p_controller_isr.h"
 
 // globals
-LinearMovement current_linear_movement = STOP;
+volatile LinearMovement current_linear_movement = STOP;
 
 // static globals
 static volatile uint32 target_count = 0;
@@ -58,6 +58,7 @@ void set_wheeldir_r(WheelDir dir);
 void set_wheeldir(WheelDir dir_l, WheelDir dir_r);
 
 
+// ISRs
 CY_ISR(controller_update_isr) {
     // clear timer interrupt flag
     p_controller_timer_ReadStatusRegister();
