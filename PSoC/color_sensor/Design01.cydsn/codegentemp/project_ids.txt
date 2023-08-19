@@ -1,6 +1,0 @@
-C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\Design01.cyprj|6ca7a2ed-287f-4d4f-8a0e-259c4d48988d
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|487bf501-24c0-46b5-ad47-39120b3a3de9
-C:\Users\LJK\Documents\PSoC Creator\4.4\Downloads ( 4.4).cylib\Downloads ( 4.4).cyprj|aa4a87b0-d2a9-416b-be78-142df38951a5
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|4f7fd729-9b4f-4d54-a27e-5841b4b7550f
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|2b25f7f7-8378-4143-bd1b-4f0d80613f11
-C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|0f4e5315-6ea5-43bd-8198-74a73892fd7b
