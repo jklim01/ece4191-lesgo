@@ -17,23 +17,20 @@
 #include "cytypes.h"
 
 
-// globals
-extern volatile bool ir_detected;
-
-
-// ISRs
-CY_ISR_PROTO(ir_posedge_handler);
-CY_ISR_PROTO(ir_negedge_handler);
-CY_ISR_PROTO(ir_posedge_handler_extended);
-CY_ISR_PROTO(ir_negedge_handler_extended);
-
-
 // API
-void setup_ir_sensor(void (*ir_detected_posedge_handler)(void), void (*ir_detected_negedge_handler)(void));
+void setup_ir_sensor(
+    void (*ir_l_detected_handler_)(void),
+    void (*ir_r_detected_handler_)(void),
+    void (*ir_side_detected_handler_)(void)
+);
+
 void pause_ir_sensor(void);
 void resume_ir_sensor(void);
+bool is_ir_l_detected();
+bool is_ir_r_detected();
+bool is_ir_side_detected();
 
 
-#endif
+#endif  // IR_SENSOR_H
 
 /* [] END OF FILE */

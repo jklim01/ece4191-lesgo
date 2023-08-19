@@ -146,24 +146,24 @@
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_l_out.h" value="HEADER;;;;;ir_l_out" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_l_posedge_isr.c" value="SOURCE_C;CortexM3;;;;ir_l_posedge_isr" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_l_posedge_isr.h" value="HEADER;;;;;ir_l_posedge_isr" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_debouncer_clk.c" value="SOURCE_C;CortexM3;;;;ir_debouncer_clk" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_debouncer_clk.h" value="HEADER;;;;;ir_debouncer_clk" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_l_negedge_isr.c" value="SOURCE_C;CortexM3;;;;ir_l_negedge_isr" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_l_negedge_isr.h" value="HEADER;;;;;ir_l_negedge_isr" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_clk.c" value="SOURCE_C;CortexM3;;;;ir_clk" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_clk.h" value="HEADER;;;;;ir_clk" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_r_out_aliases.h" value="HEADER;;;;;ir_r_out" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_r_out.c" value="SOURCE_C;CortexM3;;;;ir_r_out" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_r_out.h" value="HEADER;;;;;ir_r_out" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_r_posedge_isr.c" value="SOURCE_C;CortexM3;;;;ir_r_posedge_isr" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_r_posedge_isr.h" value="HEADER;;;;;ir_r_posedge_isr" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_r_negedge_isr.c" value="SOURCE_C;CortexM3;;;;ir_r_negedge_isr" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_r_negedge_isr.h" value="HEADER;;;;;ir_r_negedge_isr" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_side_out_aliases.h" value="HEADER;;;;;ir_side_out" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_side_out.c" value="SOURCE_C;CortexM3;;;;ir_side_out" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_side_out.h" value="HEADER;;;;;ir_side_out" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_side_posedge_isr.c" value="SOURCE_C;CortexM3;;;;ir_side_posedge_isr" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_side_posedge_isr.h" value="HEADER;;;;;ir_side_posedge_isr" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_side_negedge_isr.c" value="SOURCE_C;CortexM3;;;;ir_side_negedge_isr" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_side_negedge_isr.h" value="HEADER;;;;;ir_side_negedge_isr" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_l_status_reg.c" value="SOURCE_C;CortexM3;;;;ir_l_status_reg" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_l_status_reg.h" value="HEADER;;;;;ir_l_status_reg" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_r_status_reg.c" value="SOURCE_C;CortexM3;;;;ir_r_status_reg" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_r_status_reg.h" value="HEADER;;;;;ir_r_status_reg" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_side_status_reg.c" value="SOURCE_C;CortexM3;;;;ir_side_status_reg" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\ir_side_status_reg.h" value="HEADER;;;;;ir_side_status_reg" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec_isr.c" value="SOURCE_C;CortexM3;;;;motor_l_quaddec_isr" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec_isr.h" value="HEADER;;;;;motor_l_quaddec_isr" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\4191_g6\lesgo_g6.cydsn\codegentemp\motor_l_quaddec_Cnt16.c" value="SOURCE_C;CortexM3;;;;motor_l_quaddec_Cnt16" />

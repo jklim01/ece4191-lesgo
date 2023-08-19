@@ -1,6 +1,6 @@
 // ======================================================================
 // lesgo_g6.v generated from TopDesign.cysch
-// 08/20/2023 at 00:30
+// 08/20/2023 at 00:56
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -1630,23 +1630,60 @@ endmodule
 `include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyComponentLibrary\CyComponentLibrary.cylib\Debouncer_v1_0\Debouncer_v1_0.v"
 `endif
 
+// Component: CyStatusReg_v1_90
+`ifdef CY_BLK_DIR
+`undef CY_BLK_DIR
+`endif
+
+`ifdef WARP
+`define CY_BLK_DIR "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\CyStatusReg_v1_90"
+`include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\CyStatusReg_v1_90\CyStatusReg_v1_90.v"
+`else
+`define CY_BLK_DIR "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\CyStatusReg_v1_90"
+`include "C:\Program Files (x86)\Cypress\PSoC Creator\4.4\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\CyStatusReg_v1_90\CyStatusReg_v1_90.v"
+`endif
+
 // top
 module top ;
 
-          wire  Net_6482;
-          wire  Net_6481;
-          wire  Net_6480;
+          wire [7:0] Net_6529;
+          wire  Net_6528;
+          wire  Net_6527;
+          wire  Net_6526;
+          wire  Net_6525;
+          wire  Net_6524;
+          wire  Net_6523;
+          wire  Net_6522;
+          wire  Net_6520;
+          wire [7:0] Net_6518;
+          wire  Net_6517;
+          wire  Net_6516;
+          wire  Net_6515;
+          wire  Net_6514;
+          wire  Net_6513;
+          wire  Net_6512;
+          wire  Net_6511;
+          wire  Net_6509;
+          wire [7:0] Net_6503;
+          wire  Net_6502;
+          wire  Net_6501;
+          wire  Net_6500;
+          wire  Net_6499;
+          wire  Net_6498;
+          wire  Net_6485;
+          wire  Net_6476;
+          wire  Net_6497;
+          wire  Net_6507;
+          wire  Net_6540;
           wire  Net_6478;
           wire  Net_6477;
-          wire  Net_6476;
-          wire  Net_6475;
-          wire  Net_6474;
+          wire  Net_6506;
+          wire  Net_6539;
           wire  Net_6472;
           wire  Net_6471;
           wire  Net_6470;
-          wire  Net_6468;
-          wire  Net_6467;
-          wire  Net_6466;
+          wire  Net_6505;
+          wire  Net_6538;
           wire  Net_6464;
           wire  Net_6463;
           wire  Net_2706;
@@ -1749,7 +1786,10 @@ module top ;
           wire  Net_6435;
           wire  Net_6434;
           wire  Net_6433;
-          wire  Net_6465;
+          wire  Net_6521;
+          wire  Net_6510;
+          wire  Net_6483;
+          wire  Net_6531;
           wire  Net_1275;
           wire  Net_64;
           wire  Net_2144;
@@ -3901,14 +3941,14 @@ module top ;
 
 
     Debouncer_v1_0 ir_l_debouncer (
-        .clock(Net_6465),
+        .clock(Net_6531),
         .d(Net_6463),
-        .either(Net_6466),
-        .neg(Net_6467),
+        .either(Net_6538),
+        .neg(Net_6505),
         .pos(Net_6464),
-        .q(Net_6468));
+        .q(Net_6483));
     defparam ir_l_debouncer.EitherEdgeDetect = 0;
-    defparam ir_l_debouncer.NegEdgeDetect = 1;
+    defparam ir_l_debouncer.NegEdgeDetect = 0;
     defparam ir_l_debouncer.PosEdgeDetect = 1;
     defparam ir_l_debouncer.SignalWidth = 1;
 
@@ -3917,18 +3957,11 @@ module top ;
 		#(.id("3525d646-fc9a-4dfe-b7eb-42e1c4313803"),
 		  .source_clock_id(""),
 		  .divisor(0),
-		  .period("10000000000000"),
+		  .period("12500000000000"),
 		  .is_direct(0),
 		  .is_digital(1))
-		ir_debouncer_clk
-		 (.clock_out(Net_6465));
-
-
-
-	cy_isr_v1_0
-		#(.int_type(2'b10))
-		ir_l_negedge_isr
-		 (.int_signal(Net_6467));
+		ir_clk
+		 (.clock_out(Net_6531));
 
 
 	wire [0:0] tmpOE__ir_r_out_net;
@@ -4013,23 +4046,16 @@ module top ;
 
 
     Debouncer_v1_0 ir_r_debouncer (
-        .clock(Net_6465),
+        .clock(Net_6531),
         .d(Net_6471),
-        .either(Net_6474),
-        .neg(Net_6475),
+        .either(Net_6539),
+        .neg(Net_6506),
         .pos(Net_6472),
-        .q(Net_6476));
+        .q(Net_6510));
     defparam ir_r_debouncer.EitherEdgeDetect = 0;
-    defparam ir_r_debouncer.NegEdgeDetect = 1;
+    defparam ir_r_debouncer.NegEdgeDetect = 0;
     defparam ir_r_debouncer.PosEdgeDetect = 1;
     defparam ir_r_debouncer.SignalWidth = 1;
-
-
-	cy_isr_v1_0
-		#(.int_type(2'b10))
-		ir_r_negedge_isr
-		 (.int_signal(Net_6475));
-
 
 	wire [0:0] tmpOE__ir_side_out_net;
 	wire [0:0] tmpIO_0__ir_side_out_net;
@@ -4113,23 +4139,91 @@ module top ;
 
 
     Debouncer_v1_0 ir_side_debouncer (
-        .clock(Net_6465),
+        .clock(Net_6531),
         .d(Net_6477),
-        .either(Net_6480),
-        .neg(Net_6481),
+        .either(Net_6540),
+        .neg(Net_6507),
         .pos(Net_6478),
-        .q(Net_6482));
+        .q(Net_6521));
     defparam ir_side_debouncer.EitherEdgeDetect = 0;
-    defparam ir_side_debouncer.NegEdgeDetect = 1;
+    defparam ir_side_debouncer.NegEdgeDetect = 0;
     defparam ir_side_debouncer.PosEdgeDetect = 1;
     defparam ir_side_debouncer.SignalWidth = 1;
 
+    CyStatusReg_v1_90 ir_l_status_reg (
+        .clock(Net_6531),
+        .intr(Net_6497),
+        .status_0(Net_6483),
+        .status_1(1'b0),
+        .status_2(1'b0),
+        .status_3(1'b0),
+        .status_4(1'b0),
+        .status_5(1'b0),
+        .status_6(1'b0),
+        .status_7(1'b0),
+        .status_bus(8'b0));
+    defparam ir_l_status_reg.Bit0Mode = 0;
+    defparam ir_l_status_reg.Bit1Mode = 0;
+    defparam ir_l_status_reg.Bit2Mode = 0;
+    defparam ir_l_status_reg.Bit3Mode = 0;
+    defparam ir_l_status_reg.Bit4Mode = 0;
+    defparam ir_l_status_reg.Bit5Mode = 0;
+    defparam ir_l_status_reg.Bit6Mode = 0;
+    defparam ir_l_status_reg.Bit7Mode = 0;
+    defparam ir_l_status_reg.BusDisplay = 0;
+    defparam ir_l_status_reg.Interrupt = 0;
+    defparam ir_l_status_reg.MaskValue = 0;
+    defparam ir_l_status_reg.NumInputs = 1;
 
-	cy_isr_v1_0
-		#(.int_type(2'b10))
-		ir_side_negedge_isr
-		 (.int_signal(Net_6481));
+    CyStatusReg_v1_90 ir_r_status_reg (
+        .clock(Net_6531),
+        .intr(Net_6509),
+        .status_0(Net_6510),
+        .status_1(1'b0),
+        .status_2(1'b0),
+        .status_3(1'b0),
+        .status_4(1'b0),
+        .status_5(1'b0),
+        .status_6(1'b0),
+        .status_7(1'b0),
+        .status_bus(8'b0));
+    defparam ir_r_status_reg.Bit0Mode = 0;
+    defparam ir_r_status_reg.Bit1Mode = 0;
+    defparam ir_r_status_reg.Bit2Mode = 0;
+    defparam ir_r_status_reg.Bit3Mode = 0;
+    defparam ir_r_status_reg.Bit4Mode = 0;
+    defparam ir_r_status_reg.Bit5Mode = 0;
+    defparam ir_r_status_reg.Bit6Mode = 0;
+    defparam ir_r_status_reg.Bit7Mode = 0;
+    defparam ir_r_status_reg.BusDisplay = 0;
+    defparam ir_r_status_reg.Interrupt = 0;
+    defparam ir_r_status_reg.MaskValue = 0;
+    defparam ir_r_status_reg.NumInputs = 1;
 
+    CyStatusReg_v1_90 ir_side_status_reg (
+        .clock(Net_6531),
+        .intr(Net_6520),
+        .status_0(Net_6521),
+        .status_1(1'b0),
+        .status_2(1'b0),
+        .status_3(1'b0),
+        .status_4(1'b0),
+        .status_5(1'b0),
+        .status_6(1'b0),
+        .status_7(1'b0),
+        .status_bus(8'b0));
+    defparam ir_side_status_reg.Bit0Mode = 0;
+    defparam ir_side_status_reg.Bit1Mode = 0;
+    defparam ir_side_status_reg.Bit2Mode = 0;
+    defparam ir_side_status_reg.Bit3Mode = 0;
+    defparam ir_side_status_reg.Bit4Mode = 0;
+    defparam ir_side_status_reg.Bit5Mode = 0;
+    defparam ir_side_status_reg.Bit6Mode = 0;
+    defparam ir_side_status_reg.Bit7Mode = 0;
+    defparam ir_side_status_reg.BusDisplay = 0;
+    defparam ir_side_status_reg.Interrupt = 0;
+    defparam ir_side_status_reg.MaskValue = 0;
+    defparam ir_side_status_reg.NumInputs = 1;
 
 
 

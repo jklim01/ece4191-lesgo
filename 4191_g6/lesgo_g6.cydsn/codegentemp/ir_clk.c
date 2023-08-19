@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ir_debouncer_clk.c
+* File Name: ir_clk.c
 * Version 2.20
 *
 *  Description:
@@ -15,7 +15,7 @@
 *******************************************************************************/
 
 #include <cydevice_trm.h>
-#include "ir_debouncer_clk.h"
+#include "ir_clk.h"
 
 /* Clock Distribution registers. */
 #define CLK_DIST_LD              (* (reg8 *) CYREG_CLKDIST_LD)
@@ -28,7 +28,7 @@
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_Start
+* Function Name: ir_clk_Start
 ********************************************************************************
 *
 * Summary:
@@ -42,16 +42,16 @@
 *  None
 *
 *******************************************************************************/
-void ir_debouncer_clk_Start(void) 
+void ir_clk_Start(void) 
 {
     /* Set the bit to enable the clock. */
-    ir_debouncer_clk_CLKEN |= ir_debouncer_clk_CLKEN_MASK;
-	ir_debouncer_clk_CLKSTBY |= ir_debouncer_clk_CLKSTBY_MASK;
+    ir_clk_CLKEN |= ir_clk_CLKEN_MASK;
+	ir_clk_CLKSTBY |= ir_clk_CLKSTBY_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_Stop
+* Function Name: ir_clk_Stop
 ********************************************************************************
 *
 * Summary:
@@ -68,11 +68,11 @@ void ir_debouncer_clk_Start(void)
 *  None
 *
 *******************************************************************************/
-void ir_debouncer_clk_Stop(void) 
+void ir_clk_Stop(void) 
 {
     /* Clear the bit to disable the clock. */
-    ir_debouncer_clk_CLKEN &= (uint8)(~ir_debouncer_clk_CLKEN_MASK);
-	ir_debouncer_clk_CLKSTBY &= (uint8)(~ir_debouncer_clk_CLKSTBY_MASK);
+    ir_clk_CLKEN &= (uint8)(~ir_clk_CLKEN_MASK);
+	ir_clk_CLKSTBY &= (uint8)(~ir_clk_CLKSTBY_MASK);
 }
 
 
@@ -80,7 +80,7 @@ void ir_debouncer_clk_Stop(void)
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_StopBlock
+* Function Name: ir_clk_StopBlock
 ********************************************************************************
 *
 * Summary:
@@ -97,9 +97,9 @@ void ir_debouncer_clk_Stop(void)
 *  None
 *
 *******************************************************************************/
-void ir_debouncer_clk_StopBlock(void) 
+void ir_clk_StopBlock(void) 
 {
-    if ((ir_debouncer_clk_CLKEN & ir_debouncer_clk_CLKEN_MASK) != 0u)
+    if ((ir_clk_CLKEN & ir_clk_CLKEN_MASK) != 0u)
     {
 #if HAS_CLKDIST_LD_DISABLE
         uint16 oldDivider;
@@ -107,18 +107,18 @@ void ir_debouncer_clk_StopBlock(void)
         CLK_DIST_LD = 0u;
 
         /* Clear all the mask bits except ours. */
-#if defined(ir_debouncer_clk__CFG3)
-        CLK_DIST_AMASK = ir_debouncer_clk_CLKEN_MASK;
+#if defined(ir_clk__CFG3)
+        CLK_DIST_AMASK = ir_clk_CLKEN_MASK;
         CLK_DIST_DMASK = 0x00u;
 #else
-        CLK_DIST_DMASK = ir_debouncer_clk_CLKEN_MASK;
+        CLK_DIST_DMASK = ir_clk_CLKEN_MASK;
         CLK_DIST_AMASK = 0x00u;
-#endif /* ir_debouncer_clk__CFG3 */
+#endif /* ir_clk__CFG3 */
 
         /* Clear mask of bus clock. */
         CLK_DIST_BCFG2 &= (uint8)(~BCFG2_MASK);
 
-        oldDivider = CY_GET_REG16(ir_debouncer_clk_DIV_PTR);
+        oldDivider = CY_GET_REG16(ir_clk_DIV_PTR);
         CY_SET_REG16(CYREG_CLKDIST_WRK0, oldDivider);
         CLK_DIST_LD = CYCLK_LD_DISABLE | CYCLK_LD_SYNC_EN | CYCLK_LD_LOAD;
 
@@ -127,13 +127,13 @@ void ir_debouncer_clk_StopBlock(void)
 #endif /* HAS_CLKDIST_LD_DISABLE */
 
         /* Clear the bit to disable the clock. */
-        ir_debouncer_clk_CLKEN &= (uint8)(~ir_debouncer_clk_CLKEN_MASK);
-        ir_debouncer_clk_CLKSTBY &= (uint8)(~ir_debouncer_clk_CLKSTBY_MASK);
+        ir_clk_CLKEN &= (uint8)(~ir_clk_CLKEN_MASK);
+        ir_clk_CLKSTBY &= (uint8)(~ir_clk_CLKSTBY_MASK);
 
 #if HAS_CLKDIST_LD_DISABLE
         /* Clear the disable bit */
         CLK_DIST_LD = 0x00u;
-        CY_SET_REG16(ir_debouncer_clk_DIV_PTR, oldDivider);
+        CY_SET_REG16(ir_clk_DIV_PTR, oldDivider);
 #endif /* HAS_CLKDIST_LD_DISABLE */
     }
 }
@@ -141,7 +141,7 @@ void ir_debouncer_clk_StopBlock(void)
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_StandbyPower
+* Function Name: ir_clk_StandbyPower
 ********************************************************************************
 *
 * Summary:
@@ -154,21 +154,21 @@ void ir_debouncer_clk_StopBlock(void)
 *  None
 *
 *******************************************************************************/
-void ir_debouncer_clk_StandbyPower(uint8 state) 
+void ir_clk_StandbyPower(uint8 state) 
 {
     if(state == 0u)
     {
-        ir_debouncer_clk_CLKSTBY &= (uint8)(~ir_debouncer_clk_CLKSTBY_MASK);
+        ir_clk_CLKSTBY &= (uint8)(~ir_clk_CLKSTBY_MASK);
     }
     else
     {
-        ir_debouncer_clk_CLKSTBY |= ir_debouncer_clk_CLKSTBY_MASK;
+        ir_clk_CLKSTBY |= ir_clk_CLKSTBY_MASK;
     }
 }
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_SetDividerRegister
+* Function Name: ir_clk_SetDividerRegister
 ********************************************************************************
 *
 * Summary:
@@ -190,17 +190,17 @@ void ir_debouncer_clk_StandbyPower(uint8 state)
 *  None
 *
 *******************************************************************************/
-void ir_debouncer_clk_SetDividerRegister(uint16 clkDivider, uint8 restart)
+void ir_clk_SetDividerRegister(uint16 clkDivider, uint8 restart)
                                 
 {
     uint8 enabled;
 
-    uint8 currSrc = ir_debouncer_clk_GetSourceRegister();
-    uint16 oldDivider = ir_debouncer_clk_GetDividerRegister();
+    uint8 currSrc = ir_clk_GetSourceRegister();
+    uint16 oldDivider = ir_clk_GetDividerRegister();
 
     if (clkDivider != oldDivider)
     {
-        enabled = ir_debouncer_clk_CLKEN & ir_debouncer_clk_CLKEN_MASK;
+        enabled = ir_clk_CLKEN & ir_clk_CLKEN_MASK;
 
         if ((currSrc == (uint8)CYCLK_SRC_SEL_CLK_SYNC_D) && ((oldDivider == 0u) || (clkDivider == 0u)))
         {
@@ -210,15 +210,15 @@ void ir_debouncer_clk_SetDividerRegister(uint16 clkDivider, uint8 restart)
                 /* Moving away from SSS, set the divider first so when SSS is cleared we    */
                 /* don't halt the clock.  Using the shadow load isn't required as the       */
                 /* divider is ignored while SSS is set.                                     */
-                CY_SET_REG16(ir_debouncer_clk_DIV_PTR, clkDivider);
-                ir_debouncer_clk_MOD_SRC &= (uint8)(~CYCLK_SSS);
+                CY_SET_REG16(ir_clk_DIV_PTR, clkDivider);
+                ir_clk_MOD_SRC &= (uint8)(~CYCLK_SSS);
             }
             else
             {
                 /* Moving to SSS, set SSS which then ignores the divider and we can set     */
                 /* it without bothering with the shadow load.                               */
-                ir_debouncer_clk_MOD_SRC |= CYCLK_SSS;
-                CY_SET_REG16(ir_debouncer_clk_DIV_PTR, clkDivider);
+                ir_clk_MOD_SRC |= CYCLK_SSS;
+                CY_SET_REG16(ir_clk_DIV_PTR, clkDivider);
             }
         }
         else
@@ -229,18 +229,18 @@ void ir_debouncer_clk_SetDividerRegister(uint16 clkDivider, uint8 restart)
                 CLK_DIST_LD = 0x00u;
 
                 /* Clear all the mask bits except ours. */
-#if defined(ir_debouncer_clk__CFG3)
-                CLK_DIST_AMASK = ir_debouncer_clk_CLKEN_MASK;
+#if defined(ir_clk__CFG3)
+                CLK_DIST_AMASK = ir_clk_CLKEN_MASK;
                 CLK_DIST_DMASK = 0x00u;
 #else
-                CLK_DIST_DMASK = ir_debouncer_clk_CLKEN_MASK;
+                CLK_DIST_DMASK = ir_clk_CLKEN_MASK;
                 CLK_DIST_AMASK = 0x00u;
-#endif /* ir_debouncer_clk__CFG3 */
+#endif /* ir_clk__CFG3 */
                 /* Clear mask of bus clock. */
                 CLK_DIST_BCFG2 &= (uint8)(~BCFG2_MASK);
 
                 /* If clock is currently enabled, disable it if async or going from N-to-1*/
-                if (((ir_debouncer_clk_MOD_SRC & CYCLK_SYNC) == 0u) || (clkDivider == 0u))
+                if (((ir_clk_MOD_SRC & CYCLK_SYNC) == 0u) || (clkDivider == 0u))
                 {
 #if HAS_CLKDIST_LD_DISABLE
                     CY_SET_REG16(CYREG_CLKDIST_WRK0, oldDivider);
@@ -250,7 +250,7 @@ void ir_debouncer_clk_SetDividerRegister(uint16 clkDivider, uint8 restart)
                     while ((CLK_DIST_LD & CYCLK_LD_LOAD) != 0u) { }
 #endif /* HAS_CLKDIST_LD_DISABLE */
 
-                    ir_debouncer_clk_CLKEN &= (uint8)(~ir_debouncer_clk_CLKEN_MASK);
+                    ir_clk_CLKEN &= (uint8)(~ir_clk_CLKEN_MASK);
 
 #if HAS_CLKDIST_LD_DISABLE
                     /* Clear the disable bit */
@@ -260,7 +260,7 @@ void ir_debouncer_clk_SetDividerRegister(uint16 clkDivider, uint8 restart)
             }
 
             /* Load divide value. */
-            if ((ir_debouncer_clk_CLKEN & ir_debouncer_clk_CLKEN_MASK) != 0u)
+            if ((ir_clk_CLKEN & ir_clk_CLKEN_MASK) != 0u)
             {
                 /* If the clock is still enabled, use the shadow registers */
                 CY_SET_REG16(CYREG_CLKDIST_WRK0, clkDivider);
@@ -271,8 +271,8 @@ void ir_debouncer_clk_SetDividerRegister(uint16 clkDivider, uint8 restart)
             else
             {
                 /* If the clock is disabled, set the divider directly */
-                CY_SET_REG16(ir_debouncer_clk_DIV_PTR, clkDivider);
-				ir_debouncer_clk_CLKEN |= enabled;
+                CY_SET_REG16(ir_clk_DIV_PTR, clkDivider);
+				ir_clk_CLKEN |= enabled;
             }
         }
     }
@@ -280,7 +280,7 @@ void ir_debouncer_clk_SetDividerRegister(uint16 clkDivider, uint8 restart)
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_GetDividerRegister
+* Function Name: ir_clk_GetDividerRegister
 ********************************************************************************
 *
 * Summary:
@@ -294,14 +294,14 @@ void ir_debouncer_clk_SetDividerRegister(uint16 clkDivider, uint8 restart)
 *  divide by 2, the return value will be 1.
 *
 *******************************************************************************/
-uint16 ir_debouncer_clk_GetDividerRegister(void) 
+uint16 ir_clk_GetDividerRegister(void) 
 {
-    return CY_GET_REG16(ir_debouncer_clk_DIV_PTR);
+    return CY_GET_REG16(ir_clk_DIV_PTR);
 }
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_SetModeRegister
+* Function Name: ir_clk_SetModeRegister
 ********************************************************************************
 *
 * Summary:
@@ -329,14 +329,14 @@ uint16 ir_debouncer_clk_GetDividerRegister(void)
 *  None
 *
 *******************************************************************************/
-void ir_debouncer_clk_SetModeRegister(uint8 modeBitMask) 
+void ir_clk_SetModeRegister(uint8 modeBitMask) 
 {
-    ir_debouncer_clk_MOD_SRC |= modeBitMask & (uint8)ir_debouncer_clk_MODE_MASK;
+    ir_clk_MOD_SRC |= modeBitMask & (uint8)ir_clk_MODE_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_ClearModeRegister
+* Function Name: ir_clk_ClearModeRegister
 ********************************************************************************
 *
 * Summary:
@@ -364,14 +364,14 @@ void ir_debouncer_clk_SetModeRegister(uint8 modeBitMask)
 *  None
 *
 *******************************************************************************/
-void ir_debouncer_clk_ClearModeRegister(uint8 modeBitMask) 
+void ir_clk_ClearModeRegister(uint8 modeBitMask) 
 {
-    ir_debouncer_clk_MOD_SRC &= (uint8)(~modeBitMask) | (uint8)(~(uint8)(ir_debouncer_clk_MODE_MASK));
+    ir_clk_MOD_SRC &= (uint8)(~modeBitMask) | (uint8)(~(uint8)(ir_clk_MODE_MASK));
 }
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_GetModeRegister
+* Function Name: ir_clk_GetModeRegister
 ********************************************************************************
 *
 * Summary:
@@ -385,14 +385,14 @@ void ir_debouncer_clk_ClearModeRegister(uint8 modeBitMask)
 *  ClearModeRegister descriptions for details about the mode bits.
 *
 *******************************************************************************/
-uint8 ir_debouncer_clk_GetModeRegister(void) 
+uint8 ir_clk_GetModeRegister(void) 
 {
-    return ir_debouncer_clk_MOD_SRC & (uint8)(ir_debouncer_clk_MODE_MASK);
+    return ir_clk_MOD_SRC & (uint8)(ir_clk_MODE_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_SetSourceRegister
+* Function Name: ir_clk_SetSourceRegister
 ********************************************************************************
 *
 * Summary:
@@ -416,39 +416,39 @@ uint8 ir_debouncer_clk_GetModeRegister(void)
 *  None
 *
 *******************************************************************************/
-void ir_debouncer_clk_SetSourceRegister(uint8 clkSource) 
+void ir_clk_SetSourceRegister(uint8 clkSource) 
 {
-    uint16 currDiv = ir_debouncer_clk_GetDividerRegister();
-    uint8 oldSrc = ir_debouncer_clk_GetSourceRegister();
+    uint16 currDiv = ir_clk_GetDividerRegister();
+    uint8 oldSrc = ir_clk_GetSourceRegister();
 
     if (((oldSrc != ((uint8)CYCLK_SRC_SEL_CLK_SYNC_D)) && 
         (clkSource == ((uint8)CYCLK_SRC_SEL_CLK_SYNC_D))) && (currDiv == 0u))
     {
         /* Switching to Master and divider is 1, set SSS, which will output master, */
         /* then set the source so we are consistent.                                */
-        ir_debouncer_clk_MOD_SRC |= CYCLK_SSS;
-        ir_debouncer_clk_MOD_SRC =
-            (ir_debouncer_clk_MOD_SRC & (uint8)(~ir_debouncer_clk_SRC_SEL_MSK)) | clkSource;
+        ir_clk_MOD_SRC |= CYCLK_SSS;
+        ir_clk_MOD_SRC =
+            (ir_clk_MOD_SRC & (uint8)(~ir_clk_SRC_SEL_MSK)) | clkSource;
     }
     else if (((oldSrc == ((uint8)CYCLK_SRC_SEL_CLK_SYNC_D)) && 
             (clkSource != ((uint8)CYCLK_SRC_SEL_CLK_SYNC_D))) && (currDiv == 0u))
     {
         /* Switching from Master to not and divider is 1, set source, so we don't   */
         /* lock when we clear SSS.                                                  */
-        ir_debouncer_clk_MOD_SRC =
-            (ir_debouncer_clk_MOD_SRC & (uint8)(~ir_debouncer_clk_SRC_SEL_MSK)) | clkSource;
-        ir_debouncer_clk_MOD_SRC &= (uint8)(~CYCLK_SSS);
+        ir_clk_MOD_SRC =
+            (ir_clk_MOD_SRC & (uint8)(~ir_clk_SRC_SEL_MSK)) | clkSource;
+        ir_clk_MOD_SRC &= (uint8)(~CYCLK_SSS);
     }
     else
     {
-        ir_debouncer_clk_MOD_SRC =
-            (ir_debouncer_clk_MOD_SRC & (uint8)(~ir_debouncer_clk_SRC_SEL_MSK)) | clkSource;
+        ir_clk_MOD_SRC =
+            (ir_clk_MOD_SRC & (uint8)(~ir_clk_SRC_SEL_MSK)) | clkSource;
     }
 }
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_GetSourceRegister
+* Function Name: ir_clk_GetSourceRegister
 ********************************************************************************
 *
 * Summary:
@@ -461,17 +461,17 @@ void ir_debouncer_clk_SetSourceRegister(uint8 clkSource)
 *  The input source of the clock. See SetSourceRegister for details.
 *
 *******************************************************************************/
-uint8 ir_debouncer_clk_GetSourceRegister(void) 
+uint8 ir_clk_GetSourceRegister(void) 
 {
-    return ir_debouncer_clk_MOD_SRC & ir_debouncer_clk_SRC_SEL_MSK;
+    return ir_clk_MOD_SRC & ir_clk_SRC_SEL_MSK;
 }
 
 
-#if defined(ir_debouncer_clk__CFG3)
+#if defined(ir_clk__CFG3)
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_SetPhaseRegister
+* Function Name: ir_clk_SetPhaseRegister
 ********************************************************************************
 *
 * Summary:
@@ -489,14 +489,14 @@ uint8 ir_debouncer_clk_GetSourceRegister(void)
 *  None
 *
 *******************************************************************************/
-void ir_debouncer_clk_SetPhaseRegister(uint8 clkPhase) 
+void ir_clk_SetPhaseRegister(uint8 clkPhase) 
 {
-    ir_debouncer_clk_PHASE = clkPhase & ir_debouncer_clk_PHASE_MASK;
+    ir_clk_PHASE = clkPhase & ir_clk_PHASE_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_debouncer_clk_GetPhase
+* Function Name: ir_clk_GetPhase
 ********************************************************************************
 *
 * Summary:
@@ -510,12 +510,12 @@ void ir_debouncer_clk_SetPhaseRegister(uint8 clkPhase)
 *  Phase of the analog clock. See SetPhaseRegister for details.
 *
 *******************************************************************************/
-uint8 ir_debouncer_clk_GetPhaseRegister(void) 
+uint8 ir_clk_GetPhaseRegister(void) 
 {
-    return ir_debouncer_clk_PHASE & ir_debouncer_clk_PHASE_MASK;
+    return ir_clk_PHASE & ir_clk_PHASE_MASK;
 }
 
-#endif /* ir_debouncer_clk__CFG3 */
+#endif /* ir_clk__CFG3 */
 
 
 /* [] END OF FILE */

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ir_r_negedge_isr.c  
+* File Name: ir_r_edge_isr.c  
 * Version 1.70
 *
 *  Description:
@@ -18,15 +18,15 @@
 
 #include <cydevice_trm.h>
 #include <CyLib.h>
-#include <ir_r_negedge_isr.h>
+#include <ir_r_edge_isr.h>
 #include "cyapicallbacks.h"
 
-#if !defined(ir_r_negedge_isr__REMOVED) /* Check for removal by optimization */
+#if !defined(ir_r_edge_isr__REMOVED) /* Check for removal by optimization */
 
 /*******************************************************************************
 *  Place your includes, defines and code here 
 ********************************************************************************/
-/* `#START ir_r_negedge_isr_intc` */
+/* `#START ir_r_edge_isr_intc` */
 
 /* `#END` */
 
@@ -42,7 +42,7 @@ CY_ISR_PROTO(IntDefaultHandler);
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_Start
+* Function Name: ir_r_edge_isr_Start
 ********************************************************************************
 *
 * Summary:
@@ -58,24 +58,24 @@ CY_ISR_PROTO(IntDefaultHandler);
 *   None
 *
 *******************************************************************************/
-void ir_r_negedge_isr_Start(void)
+void ir_r_edge_isr_Start(void)
 {
     /* For all we know the interrupt is active. */
-    ir_r_negedge_isr_Disable();
+    ir_r_edge_isr_Disable();
 
-    /* Set the ISR to point to the ir_r_negedge_isr Interrupt. */
-    ir_r_negedge_isr_SetVector(&ir_r_negedge_isr_Interrupt);
+    /* Set the ISR to point to the ir_r_edge_isr Interrupt. */
+    ir_r_edge_isr_SetVector(&ir_r_edge_isr_Interrupt);
 
     /* Set the priority. */
-    ir_r_negedge_isr_SetPriority((uint8)ir_r_negedge_isr_INTC_PRIOR_NUMBER);
+    ir_r_edge_isr_SetPriority((uint8)ir_r_edge_isr_INTC_PRIOR_NUMBER);
 
     /* Enable it. */
-    ir_r_negedge_isr_Enable();
+    ir_r_edge_isr_Enable();
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_StartEx
+* Function Name: ir_r_edge_isr_StartEx
 ********************************************************************************
 *
 * Summary:
@@ -101,24 +101,24 @@ void ir_r_negedge_isr_Start(void)
 *   None
 *
 *******************************************************************************/
-void ir_r_negedge_isr_StartEx(cyisraddress address)
+void ir_r_edge_isr_StartEx(cyisraddress address)
 {
     /* For all we know the interrupt is active. */
-    ir_r_negedge_isr_Disable();
+    ir_r_edge_isr_Disable();
 
-    /* Set the ISR to point to the ir_r_negedge_isr Interrupt. */
-    ir_r_negedge_isr_SetVector(address);
+    /* Set the ISR to point to the ir_r_edge_isr Interrupt. */
+    ir_r_edge_isr_SetVector(address);
 
     /* Set the priority. */
-    ir_r_negedge_isr_SetPriority((uint8)ir_r_negedge_isr_INTC_PRIOR_NUMBER);
+    ir_r_edge_isr_SetPriority((uint8)ir_r_edge_isr_INTC_PRIOR_NUMBER);
 
     /* Enable it. */
-    ir_r_negedge_isr_Enable();
+    ir_r_edge_isr_Enable();
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_Stop
+* Function Name: ir_r_edge_isr_Stop
 ********************************************************************************
 *
 * Summary:
@@ -131,22 +131,22 @@ void ir_r_negedge_isr_StartEx(cyisraddress address)
 *   None
 *
 *******************************************************************************/
-void ir_r_negedge_isr_Stop(void)
+void ir_r_edge_isr_Stop(void)
 {
     /* Disable this interrupt. */
-    ir_r_negedge_isr_Disable();
+    ir_r_edge_isr_Disable();
 
     /* Set the ISR to point to the passive one. */
-    ir_r_negedge_isr_SetVector(&IntDefaultHandler);
+    ir_r_edge_isr_SetVector(&IntDefaultHandler);
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_Interrupt
+* Function Name: ir_r_edge_isr_Interrupt
 ********************************************************************************
 *
 * Summary:
-*   The default Interrupt Service Routine for ir_r_negedge_isr.
+*   The default Interrupt Service Routine for ir_r_edge_isr.
 *
 *   Add custom code between the coments to keep the next version of this file
 *   from over writting your code.
@@ -157,27 +157,27 @@ void ir_r_negedge_isr_Stop(void)
 *   None
 *
 *******************************************************************************/
-CY_ISR(ir_r_negedge_isr_Interrupt)
+CY_ISR(ir_r_edge_isr_Interrupt)
 {
-    #ifdef ir_r_negedge_isr_INTERRUPT_INTERRUPT_CALLBACK
-        ir_r_negedge_isr_Interrupt_InterruptCallback();
-    #endif /* ir_r_negedge_isr_INTERRUPT_INTERRUPT_CALLBACK */ 
+    #ifdef ir_r_edge_isr_INTERRUPT_INTERRUPT_CALLBACK
+        ir_r_edge_isr_Interrupt_InterruptCallback();
+    #endif /* ir_r_edge_isr_INTERRUPT_INTERRUPT_CALLBACK */ 
 
     /*  Place your Interrupt code here. */
-    /* `#START ir_r_negedge_isr_Interrupt` */
+    /* `#START ir_r_edge_isr_Interrupt` */
 
     /* `#END` */
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_SetVector
+* Function Name: ir_r_edge_isr_SetVector
 ********************************************************************************
 *
 * Summary:
-*   Change the ISR vector for the Interrupt. Note calling ir_r_negedge_isr_Start
+*   Change the ISR vector for the Interrupt. Note calling ir_r_edge_isr_Start
 *   will override any effect this method would have had. To set the vector 
-*   before the component has been started use ir_r_negedge_isr_StartEx instead.
+*   before the component has been started use ir_r_edge_isr_StartEx instead.
 * 
 *   When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
 *   used to provide consistent definition across compilers:
@@ -197,18 +197,18 @@ CY_ISR(ir_r_negedge_isr_Interrupt)
 *   None
 *
 *******************************************************************************/
-void ir_r_negedge_isr_SetVector(cyisraddress address)
+void ir_r_edge_isr_SetVector(cyisraddress address)
 {
     cyisraddress * ramVectorTable;
 
     ramVectorTable = (cyisraddress *) *CYINT_VECT_TABLE;
 
-    ramVectorTable[CYINT_IRQ_BASE + (uint32)ir_r_negedge_isr__INTC_NUMBER] = address;
+    ramVectorTable[CYINT_IRQ_BASE + (uint32)ir_r_edge_isr__INTC_NUMBER] = address;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_GetVector
+* Function Name: ir_r_edge_isr_GetVector
 ********************************************************************************
 *
 * Summary:
@@ -221,26 +221,26 @@ void ir_r_negedge_isr_SetVector(cyisraddress address)
 *   Address of the ISR in the interrupt vector table.
 *
 *******************************************************************************/
-cyisraddress ir_r_negedge_isr_GetVector(void)
+cyisraddress ir_r_edge_isr_GetVector(void)
 {
     cyisraddress * ramVectorTable;
 
     ramVectorTable = (cyisraddress *) *CYINT_VECT_TABLE;
 
-    return ramVectorTable[CYINT_IRQ_BASE + (uint32)ir_r_negedge_isr__INTC_NUMBER];
+    return ramVectorTable[CYINT_IRQ_BASE + (uint32)ir_r_edge_isr__INTC_NUMBER];
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_SetPriority
+* Function Name: ir_r_edge_isr_SetPriority
 ********************************************************************************
 *
 * Summary:
 *   Sets the Priority of the Interrupt. 
 *
-*   Note calling ir_r_negedge_isr_Start or ir_r_negedge_isr_StartEx will 
+*   Note calling ir_r_edge_isr_Start or ir_r_edge_isr_StartEx will 
 *   override any effect this API would have had. This API should only be called
-*   after ir_r_negedge_isr_Start or ir_r_negedge_isr_StartEx has been called. 
+*   after ir_r_edge_isr_Start or ir_r_edge_isr_StartEx has been called. 
 *   To set the initial priority for the component, use the Design-Wide Resources
 *   Interrupt Editor.
 *
@@ -255,14 +255,14 @@ cyisraddress ir_r_negedge_isr_GetVector(void)
 *   None
 *
 *******************************************************************************/
-void ir_r_negedge_isr_SetPriority(uint8 priority)
+void ir_r_edge_isr_SetPriority(uint8 priority)
 {
-    *ir_r_negedge_isr_INTC_PRIOR = priority << 5;
+    *ir_r_edge_isr_INTC_PRIOR = priority << 5;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_GetPriority
+* Function Name: ir_r_edge_isr_GetPriority
 ********************************************************************************
 *
 * Summary:
@@ -277,19 +277,19 @@ void ir_r_negedge_isr_SetPriority(uint8 priority)
 *    PSoC 4: Priority is from 0 to 3.
 *
 *******************************************************************************/
-uint8 ir_r_negedge_isr_GetPriority(void)
+uint8 ir_r_edge_isr_GetPriority(void)
 {
     uint8 priority;
 
 
-    priority = *ir_r_negedge_isr_INTC_PRIOR >> 5;
+    priority = *ir_r_edge_isr_INTC_PRIOR >> 5;
 
     return priority;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_Enable
+* Function Name: ir_r_edge_isr_Enable
 ********************************************************************************
 *
 * Summary:
@@ -304,15 +304,15 @@ uint8 ir_r_negedge_isr_GetPriority(void)
 *   None
 *
 *******************************************************************************/
-void ir_r_negedge_isr_Enable(void)
+void ir_r_edge_isr_Enable(void)
 {
     /* Enable the general interrupt. */
-    *ir_r_negedge_isr_INTC_SET_EN = ir_r_negedge_isr__INTC_MASK;
+    *ir_r_edge_isr_INTC_SET_EN = ir_r_edge_isr__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_GetState
+* Function Name: ir_r_edge_isr_GetState
 ********************************************************************************
 *
 * Summary:
@@ -325,15 +325,15 @@ void ir_r_negedge_isr_Enable(void)
 *   1 if enabled, 0 if disabled.
 *
 *******************************************************************************/
-uint8 ir_r_negedge_isr_GetState(void)
+uint8 ir_r_edge_isr_GetState(void)
 {
     /* Get the state of the general interrupt. */
-    return ((*ir_r_negedge_isr_INTC_SET_EN & (uint32)ir_r_negedge_isr__INTC_MASK) != 0u) ? 1u:0u;
+    return ((*ir_r_edge_isr_INTC_SET_EN & (uint32)ir_r_edge_isr__INTC_MASK) != 0u) ? 1u:0u;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_Disable
+* Function Name: ir_r_edge_isr_Disable
 ********************************************************************************
 *
 * Summary:
@@ -346,15 +346,15 @@ uint8 ir_r_negedge_isr_GetState(void)
 *   None
 *
 *******************************************************************************/
-void ir_r_negedge_isr_Disable(void)
+void ir_r_edge_isr_Disable(void)
 {
     /* Disable the general interrupt. */
-    *ir_r_negedge_isr_INTC_CLR_EN = ir_r_negedge_isr__INTC_MASK;
+    *ir_r_edge_isr_INTC_CLR_EN = ir_r_edge_isr__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_SetPending
+* Function Name: ir_r_edge_isr_SetPending
 ********************************************************************************
 *
 * Summary:
@@ -373,14 +373,14 @@ void ir_r_negedge_isr_Disable(void)
 *   interrupts).
 *
 *******************************************************************************/
-void ir_r_negedge_isr_SetPending(void)
+void ir_r_edge_isr_SetPending(void)
 {
-    *ir_r_negedge_isr_INTC_SET_PD = ir_r_negedge_isr__INTC_MASK;
+    *ir_r_edge_isr_INTC_SET_PD = ir_r_edge_isr__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_r_negedge_isr_ClearPending
+* Function Name: ir_r_edge_isr_ClearPending
 ********************************************************************************
 *
 * Summary:
@@ -398,9 +398,9 @@ void ir_r_negedge_isr_SetPending(void)
 *   None
 *
 *******************************************************************************/
-void ir_r_negedge_isr_ClearPending(void)
+void ir_r_edge_isr_ClearPending(void)
 {
-    *ir_r_negedge_isr_INTC_CLR_PD = ir_r_negedge_isr__INTC_MASK;
+    *ir_r_edge_isr_INTC_CLR_PD = ir_r_edge_isr__INTC_MASK;
 }
 
 #endif /* End check for removal by optimization */
