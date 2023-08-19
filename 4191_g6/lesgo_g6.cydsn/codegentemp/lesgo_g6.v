@@ -1,6 +1,6 @@
 // ======================================================================
 // lesgo_g6.v generated from TopDesign.cysch
-// 08/20/2023 at 00:56
+// 08/20/2023 at 01:16
 // This file is auto generated. ANY EDITS YOU MAKE MAY BE LOST WHEN THIS FILE IS REGENERATED!!!
 // ======================================================================
 
@@ -1786,6 +1786,7 @@ module top ;
           wire  Net_6435;
           wire  Net_6434;
           wire  Net_6433;
+          wire  Net_35;
           wire  Net_6521;
           wire  Net_6510;
           wire  Net_6483;
@@ -1803,7 +1804,6 @@ module top ;
           wire  Net_375;
           wire  Net_39;
           wire  Net_311;
-          wire  Net_35;
           wire  Net_188;
           wire  Net_659;
           wire  Net_1457;
@@ -2896,7 +2896,7 @@ module top ;
 
 	cy_isr_v1_0
 		#(.int_type(2'b10))
-		color_sensor_ready
+		color_sensor_ready_isr
 		 (.int_signal(Net_2818));
 
 
@@ -4150,7 +4150,7 @@ module top ;
     defparam ir_side_debouncer.PosEdgeDetect = 1;
     defparam ir_side_debouncer.SignalWidth = 1;
 
-    CyStatusReg_v1_90 ir_l_status_reg (
+    CyStatusReg_v1_90 ir_l_sreg (
         .clock(Net_6531),
         .intr(Net_6497),
         .status_0(Net_6483),
@@ -4162,20 +4162,20 @@ module top ;
         .status_6(1'b0),
         .status_7(1'b0),
         .status_bus(8'b0));
-    defparam ir_l_status_reg.Bit0Mode = 0;
-    defparam ir_l_status_reg.Bit1Mode = 0;
-    defparam ir_l_status_reg.Bit2Mode = 0;
-    defparam ir_l_status_reg.Bit3Mode = 0;
-    defparam ir_l_status_reg.Bit4Mode = 0;
-    defparam ir_l_status_reg.Bit5Mode = 0;
-    defparam ir_l_status_reg.Bit6Mode = 0;
-    defparam ir_l_status_reg.Bit7Mode = 0;
-    defparam ir_l_status_reg.BusDisplay = 0;
-    defparam ir_l_status_reg.Interrupt = 0;
-    defparam ir_l_status_reg.MaskValue = 0;
-    defparam ir_l_status_reg.NumInputs = 1;
+    defparam ir_l_sreg.Bit0Mode = 0;
+    defparam ir_l_sreg.Bit1Mode = 0;
+    defparam ir_l_sreg.Bit2Mode = 0;
+    defparam ir_l_sreg.Bit3Mode = 0;
+    defparam ir_l_sreg.Bit4Mode = 0;
+    defparam ir_l_sreg.Bit5Mode = 0;
+    defparam ir_l_sreg.Bit6Mode = 0;
+    defparam ir_l_sreg.Bit7Mode = 0;
+    defparam ir_l_sreg.BusDisplay = 0;
+    defparam ir_l_sreg.Interrupt = 0;
+    defparam ir_l_sreg.MaskValue = 0;
+    defparam ir_l_sreg.NumInputs = 1;
 
-    CyStatusReg_v1_90 ir_r_status_reg (
+    CyStatusReg_v1_90 ir_r_sreg (
         .clock(Net_6531),
         .intr(Net_6509),
         .status_0(Net_6510),
@@ -4187,20 +4187,20 @@ module top ;
         .status_6(1'b0),
         .status_7(1'b0),
         .status_bus(8'b0));
-    defparam ir_r_status_reg.Bit0Mode = 0;
-    defparam ir_r_status_reg.Bit1Mode = 0;
-    defparam ir_r_status_reg.Bit2Mode = 0;
-    defparam ir_r_status_reg.Bit3Mode = 0;
-    defparam ir_r_status_reg.Bit4Mode = 0;
-    defparam ir_r_status_reg.Bit5Mode = 0;
-    defparam ir_r_status_reg.Bit6Mode = 0;
-    defparam ir_r_status_reg.Bit7Mode = 0;
-    defparam ir_r_status_reg.BusDisplay = 0;
-    defparam ir_r_status_reg.Interrupt = 0;
-    defparam ir_r_status_reg.MaskValue = 0;
-    defparam ir_r_status_reg.NumInputs = 1;
+    defparam ir_r_sreg.Bit0Mode = 0;
+    defparam ir_r_sreg.Bit1Mode = 0;
+    defparam ir_r_sreg.Bit2Mode = 0;
+    defparam ir_r_sreg.Bit3Mode = 0;
+    defparam ir_r_sreg.Bit4Mode = 0;
+    defparam ir_r_sreg.Bit5Mode = 0;
+    defparam ir_r_sreg.Bit6Mode = 0;
+    defparam ir_r_sreg.Bit7Mode = 0;
+    defparam ir_r_sreg.BusDisplay = 0;
+    defparam ir_r_sreg.Interrupt = 0;
+    defparam ir_r_sreg.MaskValue = 0;
+    defparam ir_r_sreg.NumInputs = 1;
 
-    CyStatusReg_v1_90 ir_side_status_reg (
+    CyStatusReg_v1_90 ir_side_sreg (
         .clock(Net_6531),
         .intr(Net_6520),
         .status_0(Net_6521),
@@ -4212,18 +4212,18 @@ module top ;
         .status_6(1'b0),
         .status_7(1'b0),
         .status_bus(8'b0));
-    defparam ir_side_status_reg.Bit0Mode = 0;
-    defparam ir_side_status_reg.Bit1Mode = 0;
-    defparam ir_side_status_reg.Bit2Mode = 0;
-    defparam ir_side_status_reg.Bit3Mode = 0;
-    defparam ir_side_status_reg.Bit4Mode = 0;
-    defparam ir_side_status_reg.Bit5Mode = 0;
-    defparam ir_side_status_reg.Bit6Mode = 0;
-    defparam ir_side_status_reg.Bit7Mode = 0;
-    defparam ir_side_status_reg.BusDisplay = 0;
-    defparam ir_side_status_reg.Interrupt = 0;
-    defparam ir_side_status_reg.MaskValue = 0;
-    defparam ir_side_status_reg.NumInputs = 1;
+    defparam ir_side_sreg.Bit0Mode = 0;
+    defparam ir_side_sreg.Bit1Mode = 0;
+    defparam ir_side_sreg.Bit2Mode = 0;
+    defparam ir_side_sreg.Bit3Mode = 0;
+    defparam ir_side_sreg.Bit4Mode = 0;
+    defparam ir_side_sreg.Bit5Mode = 0;
+    defparam ir_side_sreg.Bit6Mode = 0;
+    defparam ir_side_sreg.Bit7Mode = 0;
+    defparam ir_side_sreg.BusDisplay = 0;
+    defparam ir_side_sreg.Interrupt = 0;
+    defparam ir_side_sreg.MaskValue = 0;
+    defparam ir_side_sreg.NumInputs = 1;
 
 
 

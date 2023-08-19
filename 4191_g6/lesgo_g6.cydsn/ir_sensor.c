@@ -14,9 +14,9 @@
 #include "ir_l_posedge_isr.h"
 #include "ir_r_posedge_isr.h"
 #include "ir_side_posedge_isr.h"
-#include "ir_l_status_reg.h"
-#include "ir_r_status_reg.h"
-#include "ir_side_status_reg.h"
+#include "ir_l_sreg.h"
+#include "ir_r_sreg.h"
+#include "ir_side_sreg.h"
 
 #include "ir_sensor.h"
 
@@ -57,15 +57,15 @@ void resume_ir_sensor(void) {
 }
 
 bool is_ir_l_detected() {
-    return ir_l_status_reg_Read();
+    return ir_l_sreg_Read();
 }
 
 bool is_ir_r_detected() {
-    return ir_r_status_reg_Read();
+    return ir_r_sreg_Read();
 }
 
 bool is_ir_side_detected() {
-    return ir_side_status_reg_Read();
+    return ir_side_sreg_Read();
 }
 
 

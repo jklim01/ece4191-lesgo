@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ir_side_status_reg.c  
+* File Name: ir_side_sreg.c  
 * Version 1.90
 *
 * Description:
@@ -15,13 +15,13 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "ir_side_status_reg.h"
+#include "ir_side_sreg.h"
 
-#if !defined(ir_side_status_reg_sts_sts_reg__REMOVED) /* Check for removal by optimization */
+#if !defined(ir_side_sreg_sts_sts_reg__REMOVED) /* Check for removal by optimization */
 
 
 /*******************************************************************************
-* Function Name: ir_side_status_reg_Read
+* Function Name: ir_side_sreg_Read
 ********************************************************************************
 *
 * Summary:
@@ -34,14 +34,14 @@
 *  The current value in the Status Register.
 *
 *******************************************************************************/
-uint8 ir_side_status_reg_Read(void) 
+uint8 ir_side_sreg_Read(void) 
 { 
-    return ir_side_status_reg_Status;
+    return ir_side_sreg_Status;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_side_status_reg_InterruptEnable
+* Function Name: ir_side_sreg_InterruptEnable
 ********************************************************************************
 *
 * Summary:
@@ -54,17 +54,17 @@ uint8 ir_side_status_reg_Read(void)
 *  None.
 *
 *******************************************************************************/
-void ir_side_status_reg_InterruptEnable(void) 
+void ir_side_sreg_InterruptEnable(void) 
 {
     uint8 interruptState;
     interruptState = CyEnterCriticalSection();
-    ir_side_status_reg_Status_Aux_Ctrl |= ir_side_status_reg_STATUS_INTR_ENBL;
+    ir_side_sreg_Status_Aux_Ctrl |= ir_side_sreg_STATUS_INTR_ENBL;
     CyExitCriticalSection(interruptState);
 }
 
 
 /*******************************************************************************
-* Function Name: ir_side_status_reg_InterruptDisable
+* Function Name: ir_side_sreg_InterruptDisable
 ********************************************************************************
 *
 * Summary:
@@ -77,17 +77,17 @@ void ir_side_status_reg_InterruptEnable(void)
 *  None.
 *
 *******************************************************************************/
-void ir_side_status_reg_InterruptDisable(void) 
+void ir_side_sreg_InterruptDisable(void) 
 {
     uint8 interruptState;
     interruptState = CyEnterCriticalSection();
-    ir_side_status_reg_Status_Aux_Ctrl &= (uint8)(~ir_side_status_reg_STATUS_INTR_ENBL);
+    ir_side_sreg_Status_Aux_Ctrl &= (uint8)(~ir_side_sreg_STATUS_INTR_ENBL);
     CyExitCriticalSection(interruptState);
 }
 
 
 /*******************************************************************************
-* Function Name: ir_side_status_reg_WriteMask
+* Function Name: ir_side_sreg_WriteMask
 ********************************************************************************
 *
 * Summary:
@@ -100,17 +100,17 @@ void ir_side_status_reg_InterruptDisable(void)
 *  None.
 *
 *******************************************************************************/
-void ir_side_status_reg_WriteMask(uint8 mask) 
+void ir_side_sreg_WriteMask(uint8 mask) 
 {
-    #if(ir_side_status_reg_INPUTS < 8u)
-    	mask &= ((uint8)(1u << ir_side_status_reg_INPUTS) - 1u);
-	#endif /* End ir_side_status_reg_INPUTS < 8u */
-    ir_side_status_reg_Status_Mask = mask;
+    #if(ir_side_sreg_INPUTS < 8u)
+    	mask &= ((uint8)(1u << ir_side_sreg_INPUTS) - 1u);
+	#endif /* End ir_side_sreg_INPUTS < 8u */
+    ir_side_sreg_Status_Mask = mask;
 }
 
 
 /*******************************************************************************
-* Function Name: ir_side_status_reg_ReadMask
+* Function Name: ir_side_sreg_ReadMask
 ********************************************************************************
 *
 * Summary:
@@ -123,9 +123,9 @@ void ir_side_status_reg_WriteMask(uint8 mask)
 *  The value of the interrupt mask of the Status Register.
 *
 *******************************************************************************/
-uint8 ir_side_status_reg_ReadMask(void) 
+uint8 ir_side_sreg_ReadMask(void) 
 {
-    return ir_side_status_reg_Status_Mask;
+    return ir_side_sreg_Status_Mask;
 }
 
 #endif /* End check for removal by optimization */

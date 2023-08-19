@@ -18,12 +18,12 @@
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\cyfitteriar.inc" value="HEADER;;;;;" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\cyfitter.h" value="HEADER;;;;;" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\cydisabledsheets.h" value="HEADER;;;;;" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\PWM_1.c" value="SOURCE_C;CortexM3;;;;PWM_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\PWM_1.h" value="HEADER;;;;;PWM_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\PWM_1_PM.c" value="SOURCE_C;CortexM3;;;;PWM_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\Counter_1.c" value="SOURCE_C;CortexM3;;;;Counter_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\Counter_1.h" value="HEADER;;;;;Counter_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\Counter_1_PM.c" value="SOURCE_C;CortexM3;;;;Counter_1" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_pwm.c" value="SOURCE_C;CortexM3;;;;color_sensor_pwm" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_pwm.h" value="HEADER;;;;;color_sensor_pwm" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_pwm_PM.c" value="SOURCE_C;CortexM3;;;;color_sensor_pwm" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_counter.c" value="SOURCE_C;CortexM3;;;;color_sensor_counter" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_counter.h" value="HEADER;;;;;color_sensor_counter" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_counter_PM.c" value="SOURCE_C;CortexM3;;;;color_sensor_counter" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_s0_aliases.h" value="HEADER;;;;;color_sensor_s0" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_s0.c" value="SOURCE_C;CortexM3;;;;color_sensor_s0" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_s0.h" value="HEADER;;;;;color_sensor_s0" />
@@ -42,18 +42,18 @@
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_out_aliases.h" value="HEADER;;;;;color_sensor_out" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_out.c" value="SOURCE_C;CortexM3;;;;color_sensor_out" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_out.h" value="HEADER;;;;;color_sensor_out" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\Clock_1.c" value="SOURCE_C;CortexM3;;;;Clock_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\Clock_1.h" value="HEADER;;;;;Clock_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\isr_1.c" value="SOURCE_C;CortexM3;;;;isr_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\isr_1.h" value="HEADER;;;;;isr_1" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_clk.c" value="SOURCE_C;CortexM3;;;;color_sensor_clk" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_clk.h" value="HEADER;;;;;color_sensor_clk" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_ready_isr.c" value="SOURCE_C;CortexM3;;;;color_sensor_ready_isr" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_ready_isr.h" value="HEADER;;;;;color_sensor_ready_isr" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\UART_1.c" value="SOURCE_C;CortexM3;;;;UART_1" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\UART_1.h" value="HEADER;;;;;UART_1" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\UART_1_PM.c" value="SOURCE_C;CortexM3;;;;UART_1" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\UART_1_INT.c" value="SOURCE_C;CortexM3;;;;UART_1" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\UART_1_BOOT.c" value="SOURCE_C;CortexM3;;;;UART_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\Control_Reg_1.h" value="HEADER;;;;;Control_Reg_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\Control_Reg_1.c" value="SOURCE_C;CortexM3;;;;Control_Reg_1" />
-  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\Control_Reg_1_PM.c" value="SOURCE_C;CortexM3;;;;Control_Reg_1" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_creg.h" value="HEADER;;;;;color_sensor_creg" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_creg.c" value="SOURCE_C;CortexM3;;;;color_sensor_creg" />
+  <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\color_sensor_creg_PM.c" value="SOURCE_C;CortexM3;;;;color_sensor_creg" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\isr_2.c" value="SOURCE_C;CortexM3;;;;isr_2" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\isr_2.h" value="HEADER;;;;;isr_2" />
   <file name="C:\Users\LJK\Desktop\Classes\ECE 4191\ece4191-lesgo\PSoC\color_sensor\Design01.cydsn\codegentemp\UART_1_IntClock.c" value="SOURCE_C;CortexM3;;;;UART_1_IntClock" />

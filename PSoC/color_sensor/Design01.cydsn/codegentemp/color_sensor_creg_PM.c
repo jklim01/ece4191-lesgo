@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: Control_Reg_1_PM.c
+* File Name: color_sensor_creg_PM.c
 * Version 1.80
 *
 * Description:
@@ -15,16 +15,16 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "Control_Reg_1.h"
+#include "color_sensor_creg.h"
 
 /* Check for removal by optimization */
-#if !defined(Control_Reg_1_Sync_ctrl_reg__REMOVED)
+#if !defined(color_sensor_creg_Sync_ctrl_reg__REMOVED)
 
-static Control_Reg_1_BACKUP_STRUCT  Control_Reg_1_backup = {0u};
+static color_sensor_creg_BACKUP_STRUCT  color_sensor_creg_backup = {0u};
 
     
 /*******************************************************************************
-* Function Name: Control_Reg_1_SaveConfig
+* Function Name: color_sensor_creg_SaveConfig
 ********************************************************************************
 *
 * Summary:
@@ -37,14 +37,14 @@ static Control_Reg_1_BACKUP_STRUCT  Control_Reg_1_backup = {0u};
 *  None
 *
 *******************************************************************************/
-void Control_Reg_1_SaveConfig(void) 
+void color_sensor_creg_SaveConfig(void) 
 {
-    Control_Reg_1_backup.controlState = Control_Reg_1_Control;
+    color_sensor_creg_backup.controlState = color_sensor_creg_Control;
 }
 
 
 /*******************************************************************************
-* Function Name: Control_Reg_1_RestoreConfig
+* Function Name: color_sensor_creg_RestoreConfig
 ********************************************************************************
 *
 * Summary:
@@ -58,14 +58,14 @@ void Control_Reg_1_SaveConfig(void)
 *
 *
 *******************************************************************************/
-void Control_Reg_1_RestoreConfig(void) 
+void color_sensor_creg_RestoreConfig(void) 
 {
-     Control_Reg_1_Control = Control_Reg_1_backup.controlState;
+     color_sensor_creg_Control = color_sensor_creg_backup.controlState;
 }
 
 
 /*******************************************************************************
-* Function Name: Control_Reg_1_Sleep
+* Function Name: color_sensor_creg_Sleep
 ********************************************************************************
 *
 * Summary:
@@ -78,14 +78,14 @@ void Control_Reg_1_RestoreConfig(void)
 *  None
 *
 *******************************************************************************/
-void Control_Reg_1_Sleep(void) 
+void color_sensor_creg_Sleep(void) 
 {
-    Control_Reg_1_SaveConfig();
+    color_sensor_creg_SaveConfig();
 }
 
 
 /*******************************************************************************
-* Function Name: Control_Reg_1_Wakeup
+* Function Name: color_sensor_creg_Wakeup
 ********************************************************************************
 *
 * Summary:
@@ -98,9 +98,9 @@ void Control_Reg_1_Sleep(void)
 *  None
 *
 *******************************************************************************/
-void Control_Reg_1_Wakeup(void)  
+void color_sensor_creg_Wakeup(void)  
 {
-    Control_Reg_1_RestoreConfig();
+    color_sensor_creg_RestoreConfig();
 }
 
 #endif /* End check for removal by optimization */

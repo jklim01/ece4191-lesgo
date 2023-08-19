@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: Control_Reg_1.h  
+* File Name: color_sensor_creg.h  
 * Version 1.80
 *
 * Description:
@@ -14,8 +14,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_CONTROL_REG_Control_Reg_1_H) /* CY_CONTROL_REG_Control_Reg_1_H */
-#define CY_CONTROL_REG_Control_Reg_1_H
+#if !defined(CY_CONTROL_REG_color_sensor_creg_H) /* CY_CONTROL_REG_color_sensor_creg_H */
+#define CY_CONTROL_REG_color_sensor_creg_H
 
 #include "cyfitter.h"
 
@@ -37,20 +37,20 @@ typedef struct
 {
     uint8 controlState;
 
-} Control_Reg_1_BACKUP_STRUCT;
+} color_sensor_creg_BACKUP_STRUCT;
 
 
 /***************************************
 *         Function Prototypes 
 ***************************************/
 
-void    Control_Reg_1_Write(uint8 control) ;
-uint8   Control_Reg_1_Read(void) ;
+void    color_sensor_creg_Write(uint8 control) ;
+uint8   color_sensor_creg_Read(void) ;
 
-void Control_Reg_1_SaveConfig(void) ;
-void Control_Reg_1_RestoreConfig(void) ;
-void Control_Reg_1_Sleep(void) ; 
-void Control_Reg_1_Wakeup(void) ;
+void color_sensor_creg_SaveConfig(void) ;
+void color_sensor_creg_RestoreConfig(void) ;
+void color_sensor_creg_Sleep(void) ; 
+void color_sensor_creg_Wakeup(void) ;
 
 
 /***************************************
@@ -58,10 +58,10 @@ void Control_Reg_1_Wakeup(void) ;
 ***************************************/
 
 /* Control Register */
-#define Control_Reg_1_Control        (* (reg8 *) Control_Reg_1_Sync_ctrl_reg__CONTROL_REG )
-#define Control_Reg_1_Control_PTR    (  (reg8 *) Control_Reg_1_Sync_ctrl_reg__CONTROL_REG )
+#define color_sensor_creg_Control        (* (reg8 *) color_sensor_creg_Sync_ctrl_reg__CONTROL_REG )
+#define color_sensor_creg_Control_PTR    (  (reg8 *) color_sensor_creg_Sync_ctrl_reg__CONTROL_REG )
 
-#endif /* End CY_CONTROL_REG_Control_Reg_1_H */
+#endif /* End CY_CONTROL_REG_color_sensor_creg_H */
 
 
 /* [] END OF FILE */

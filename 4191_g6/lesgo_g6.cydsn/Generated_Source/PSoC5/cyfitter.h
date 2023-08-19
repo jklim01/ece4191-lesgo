@@ -330,6 +330,30 @@
 #define us_r_isr__INTC_SET_EN_REG CYREG_NVIC_SETENA0
 #define us_r_isr__INTC_SET_PD_REG CYREG_NVIC_SETPEND0
 
+/* ir_l_sreg */
+#define ir_l_sreg_sts_sts_reg__0__MASK 0x01u
+#define ir_l_sreg_sts_sts_reg__0__POS 0
+#define ir_l_sreg_sts_sts_reg__16BIT_STATUS_AUX_CTL_REG CYREG_B0_UDB06_07_ACTL
+#define ir_l_sreg_sts_sts_reg__16BIT_STATUS_REG CYREG_B0_UDB06_07_ST
+#define ir_l_sreg_sts_sts_reg__MASK 0x01u
+#define ir_l_sreg_sts_sts_reg__MASK_REG CYREG_B0_UDB06_MSK
+#define ir_l_sreg_sts_sts_reg__MASK_ST_AUX_CTL_REG CYREG_B0_UDB06_MSK_ACTL
+#define ir_l_sreg_sts_sts_reg__PER_ST_AUX_CTL_REG CYREG_B0_UDB06_MSK_ACTL
+#define ir_l_sreg_sts_sts_reg__STATUS_AUX_CTL_REG CYREG_B0_UDB06_ACTL
+#define ir_l_sreg_sts_sts_reg__STATUS_CNT_REG CYREG_B0_UDB06_ST_CTL
+#define ir_l_sreg_sts_sts_reg__STATUS_CONTROL_REG CYREG_B0_UDB06_ST_CTL
+#define ir_l_sreg_sts_sts_reg__STATUS_REG CYREG_B0_UDB06_ST
+
+/* ir_r_sreg */
+#define ir_r_sreg_sts_sts_reg__0__MASK 0x01u
+#define ir_r_sreg_sts_sts_reg__0__POS 0
+#define ir_r_sreg_sts_sts_reg__16BIT_STATUS_AUX_CTL_REG CYREG_B1_UDB07_08_ACTL
+#define ir_r_sreg_sts_sts_reg__16BIT_STATUS_REG CYREG_B1_UDB07_08_ST
+#define ir_r_sreg_sts_sts_reg__MASK 0x01u
+#define ir_r_sreg_sts_sts_reg__MASK_REG CYREG_B1_UDB07_MSK
+#define ir_r_sreg_sts_sts_reg__STATUS_AUX_CTL_REG CYREG_B1_UDB07_ACTL
+#define ir_r_sreg_sts_sts_reg__STATUS_REG CYREG_B1_UDB07_ST
+
 /* motor_clk */
 #define motor_clk__CFG0 CYREG_CLKDIST_DCFG0_CFG0
 #define motor_clk__CFG1 CYREG_CLKDIST_DCFG0_CFG1
@@ -1099,6 +1123,20 @@
 #define motor_r_pwm_PWMHW__RT1 CYREG_TMR1_RT1
 #define motor_r_pwm_PWMHW__SR0 CYREG_TMR1_SR0
 
+/* ir_side_sreg */
+#define ir_side_sreg_sts_sts_reg__0__MASK 0x01u
+#define ir_side_sreg_sts_sts_reg__0__POS 0
+#define ir_side_sreg_sts_sts_reg__16BIT_STATUS_AUX_CTL_REG CYREG_B1_UDB06_07_ACTL
+#define ir_side_sreg_sts_sts_reg__16BIT_STATUS_REG CYREG_B1_UDB06_07_ST
+#define ir_side_sreg_sts_sts_reg__MASK 0x01u
+#define ir_side_sreg_sts_sts_reg__MASK_REG CYREG_B1_UDB06_MSK
+#define ir_side_sreg_sts_sts_reg__MASK_ST_AUX_CTL_REG CYREG_B1_UDB06_MSK_ACTL
+#define ir_side_sreg_sts_sts_reg__PER_ST_AUX_CTL_REG CYREG_B1_UDB06_MSK_ACTL
+#define ir_side_sreg_sts_sts_reg__STATUS_AUX_CTL_REG CYREG_B1_UDB06_ACTL
+#define ir_side_sreg_sts_sts_reg__STATUS_CNT_REG CYREG_B1_UDB06_ST_CTL
+#define ir_side_sreg_sts_sts_reg__STATUS_CONTROL_REG CYREG_B1_UDB06_ST_CTL
+#define ir_side_sreg_sts_sts_reg__STATUS_REG CYREG_B1_UDB06_ST
+
 /* motor_l_phaseA */
 #define motor_l_phaseA__0__INTTYPE CYREG_PICU1_INTTYPE6
 #define motor_l_phaseA__0__MASK 0x40u
@@ -1370,30 +1408,6 @@
 #define color_sensor_s3__PS CYREG_PRT2_PS
 #define color_sensor_s3__SHIFT 6u
 #define color_sensor_s3__SLW CYREG_PRT2_SLW
-
-/* ir_l_status_reg */
-#define ir_l_status_reg_sts_sts_reg__0__MASK 0x01u
-#define ir_l_status_reg_sts_sts_reg__0__POS 0
-#define ir_l_status_reg_sts_sts_reg__16BIT_STATUS_AUX_CTL_REG CYREG_B0_UDB06_07_ACTL
-#define ir_l_status_reg_sts_sts_reg__16BIT_STATUS_REG CYREG_B0_UDB06_07_ST
-#define ir_l_status_reg_sts_sts_reg__MASK 0x01u
-#define ir_l_status_reg_sts_sts_reg__MASK_REG CYREG_B0_UDB06_MSK
-#define ir_l_status_reg_sts_sts_reg__MASK_ST_AUX_CTL_REG CYREG_B0_UDB06_MSK_ACTL
-#define ir_l_status_reg_sts_sts_reg__PER_ST_AUX_CTL_REG CYREG_B0_UDB06_MSK_ACTL
-#define ir_l_status_reg_sts_sts_reg__STATUS_AUX_CTL_REG CYREG_B0_UDB06_ACTL
-#define ir_l_status_reg_sts_sts_reg__STATUS_CNT_REG CYREG_B0_UDB06_ST_CTL
-#define ir_l_status_reg_sts_sts_reg__STATUS_CONTROL_REG CYREG_B0_UDB06_ST_CTL
-#define ir_l_status_reg_sts_sts_reg__STATUS_REG CYREG_B0_UDB06_ST
-
-/* ir_r_status_reg */
-#define ir_r_status_reg_sts_sts_reg__0__MASK 0x01u
-#define ir_r_status_reg_sts_sts_reg__0__POS 0
-#define ir_r_status_reg_sts_sts_reg__16BIT_STATUS_AUX_CTL_REG CYREG_B1_UDB07_08_ACTL
-#define ir_r_status_reg_sts_sts_reg__16BIT_STATUS_REG CYREG_B1_UDB07_08_ST
-#define ir_r_status_reg_sts_sts_reg__MASK 0x01u
-#define ir_r_status_reg_sts_sts_reg__MASK_REG CYREG_B1_UDB07_MSK
-#define ir_r_status_reg_sts_sts_reg__STATUS_AUX_CTL_REG CYREG_B1_UDB07_ACTL
-#define ir_r_status_reg_sts_sts_reg__STATUS_REG CYREG_B1_UDB07_ST
 
 /* motor_l_quaddec */
 #define motor_l_quaddec_bQuadDec_Stsreg__0__MASK 0x01u
@@ -1784,30 +1798,6 @@
 #define color_sensor_creg_Sync_ctrl_reg__PER_CTL_AUX_CTL_REG CYREG_B1_UDB06_MSK_ACTL
 #define color_sensor_creg_Sync_ctrl_reg__PERIOD_REG CYREG_B1_UDB06_MSK
 
-/* color_sensor_ready */
-#define color_sensor_ready__INTC_CLR_EN_REG CYREG_NVIC_CLRENA0
-#define color_sensor_ready__INTC_CLR_PD_REG CYREG_NVIC_CLRPEND0
-#define color_sensor_ready__INTC_MASK 0x04u
-#define color_sensor_ready__INTC_NUMBER 2u
-#define color_sensor_ready__INTC_PRIOR_NUM 7u
-#define color_sensor_ready__INTC_PRIOR_REG CYREG_NVIC_PRI_2
-#define color_sensor_ready__INTC_SET_EN_REG CYREG_NVIC_SETENA0
-#define color_sensor_ready__INTC_SET_PD_REG CYREG_NVIC_SETPEND0
-
-/* ir_side_status_reg */
-#define ir_side_status_reg_sts_sts_reg__0__MASK 0x01u
-#define ir_side_status_reg_sts_sts_reg__0__POS 0
-#define ir_side_status_reg_sts_sts_reg__16BIT_STATUS_AUX_CTL_REG CYREG_B1_UDB06_07_ACTL
-#define ir_side_status_reg_sts_sts_reg__16BIT_STATUS_REG CYREG_B1_UDB06_07_ST
-#define ir_side_status_reg_sts_sts_reg__MASK 0x01u
-#define ir_side_status_reg_sts_sts_reg__MASK_REG CYREG_B1_UDB06_MSK
-#define ir_side_status_reg_sts_sts_reg__MASK_ST_AUX_CTL_REG CYREG_B1_UDB06_MSK_ACTL
-#define ir_side_status_reg_sts_sts_reg__PER_ST_AUX_CTL_REG CYREG_B1_UDB06_MSK_ACTL
-#define ir_side_status_reg_sts_sts_reg__STATUS_AUX_CTL_REG CYREG_B1_UDB06_ACTL
-#define ir_side_status_reg_sts_sts_reg__STATUS_CNT_REG CYREG_B1_UDB06_ST_CTL
-#define ir_side_status_reg_sts_sts_reg__STATUS_CONTROL_REG CYREG_B1_UDB06_ST_CTL
-#define ir_side_status_reg_sts_sts_reg__STATUS_REG CYREG_B1_UDB06_ST
-
 /* p_controller_timer */
 #define p_controller_timer_TimerHW__CAP0 CYREG_TMR2_CAP0
 #define p_controller_timer_TimerHW__CAP1 CYREG_TMR2_CAP1
@@ -1949,6 +1939,16 @@
 #define color_sensor_counter_CounterUDB_sSTSReg_stsreg__MASK_REG CYREG_B0_UDB07_MSK
 #define color_sensor_counter_CounterUDB_sSTSReg_stsreg__STATUS_AUX_CTL_REG CYREG_B0_UDB07_ACTL
 #define color_sensor_counter_CounterUDB_sSTSReg_stsreg__STATUS_REG CYREG_B0_UDB07_ST
+
+/* color_sensor_ready_isr */
+#define color_sensor_ready_isr__INTC_CLR_EN_REG CYREG_NVIC_CLRENA0
+#define color_sensor_ready_isr__INTC_CLR_PD_REG CYREG_NVIC_CLRPEND0
+#define color_sensor_ready_isr__INTC_MASK 0x04u
+#define color_sensor_ready_isr__INTC_NUMBER 2u
+#define color_sensor_ready_isr__INTC_PRIOR_NUM 7u
+#define color_sensor_ready_isr__INTC_PRIOR_REG CYREG_NVIC_PRI_2
+#define color_sensor_ready_isr__INTC_SET_EN_REG CYREG_NVIC_SETENA0
+#define color_sensor_ready_isr__INTC_SET_PD_REG CYREG_NVIC_SETPEND0
 
 /* Miscellaneous */
 #define BCLK__BUS_CLK__HZ 24000000U

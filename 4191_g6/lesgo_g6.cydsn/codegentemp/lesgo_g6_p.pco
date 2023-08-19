@@ -186,9 +186,9 @@ set_io "ir_l_out(0)" iocell 12 2
 set_io "Rx_1(0)" iocell 12 6
 set_location "ClockBlock" clockblockcell -1 -1 0
 set_io "ir_side_out(0)" iocell 0 6
-set_location "\ir_side_status_reg:sts:sts_reg\" statuscell 3 1 3 
-set_location "\ir_r_status_reg:sts:sts_reg\" statuscell 2 1 3 
-set_location "\ir_l_status_reg:sts:sts_reg\" statuscell 3 2 3 
+set_location "\ir_side_sreg:sts:sts_reg\" statuscell 3 1 3 
+set_location "\ir_r_sreg:sts:sts_reg\" statuscell 2 1 3 
+set_location "\ir_l_sreg:sts:sts_reg\" statuscell 3 2 3 
 # Note: port 15 is the logical name for port 8
 set_io "motor_r_phaseA(0)" iocell 15 2
 set_location "\p_controller_timer:TimerHW\" timercell -1 -1 2
@@ -223,7 +223,7 @@ set_location "us_b_isr" interrupt -1 -1 6
 set_location "us_f_isr" interrupt -1 -1 7
 set_location "us_r_isr" interrupt -1 -1 9
 set_location "us_l_isr" interrupt -1 -1 8
-set_location "color_sensor_ready" interrupt -1 -1 2
+set_location "color_sensor_ready_isr" interrupt -1 -1 2
 set_location "\us_trigger_pwm:PWMHW\" timercell -1 -1 3
 set_location "p_controller_isr" interrupt -1 -1 19
 set_io "motor_l_in1(0)" iocell 1 5

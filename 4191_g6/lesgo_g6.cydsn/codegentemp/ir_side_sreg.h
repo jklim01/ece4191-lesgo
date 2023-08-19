@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ir_r_status_reg.h  
+* File Name: ir_side_sreg.h  
 * Version 1.90
 *
 * Description:
@@ -14,8 +14,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_STATUS_REG_ir_r_status_reg_H) /* CY_STATUS_REG_ir_r_status_reg_H */
-#define CY_STATUS_REG_ir_r_status_reg_H
+#if !defined(CY_STATUS_REG_ir_side_sreg_H) /* CY_STATUS_REG_ir_side_sreg_H */
+#define CY_STATUS_REG_ir_side_sreg_H
 
 #include "cyfitter.h"
 
@@ -38,25 +38,25 @@ typedef struct
 {
     uint8 statusState;
 
-} ir_r_status_reg_BACKUP_STRUCT;
+} ir_side_sreg_BACKUP_STRUCT;
 
 
 /***************************************
 *        Function Prototypes
 ***************************************/
 
-uint8 ir_r_status_reg_Read(void) ;
-void ir_r_status_reg_InterruptEnable(void) ;
-void ir_r_status_reg_InterruptDisable(void) ;
-void ir_r_status_reg_WriteMask(uint8 mask) ;
-uint8 ir_r_status_reg_ReadMask(void) ;
+uint8 ir_side_sreg_Read(void) ;
+void ir_side_sreg_InterruptEnable(void) ;
+void ir_side_sreg_InterruptDisable(void) ;
+void ir_side_sreg_WriteMask(uint8 mask) ;
+uint8 ir_side_sreg_ReadMask(void) ;
 
 
 /***************************************
 *           API Constants
 ***************************************/
 
-#define ir_r_status_reg_STATUS_INTR_ENBL    0x10u
+#define ir_side_sreg_STATUS_INTR_ENBL    0x10u
 
 
 /***************************************
@@ -64,7 +64,7 @@ uint8 ir_r_status_reg_ReadMask(void) ;
 ***************************************/
 
 /* Status Register Inputs */
-#define ir_r_status_reg_INPUTS              1
+#define ir_side_sreg_INPUTS              1
 
 
 /***************************************
@@ -72,12 +72,12 @@ uint8 ir_r_status_reg_ReadMask(void) ;
 ***************************************/
 
 /* Status Register */
-#define ir_r_status_reg_Status             (* (reg8 *) ir_r_status_reg_sts_sts_reg__STATUS_REG )
-#define ir_r_status_reg_Status_PTR         (  (reg8 *) ir_r_status_reg_sts_sts_reg__STATUS_REG )
-#define ir_r_status_reg_Status_Mask        (* (reg8 *) ir_r_status_reg_sts_sts_reg__MASK_REG )
-#define ir_r_status_reg_Status_Aux_Ctrl    (* (reg8 *) ir_r_status_reg_sts_sts_reg__STATUS_AUX_CTL_REG )
+#define ir_side_sreg_Status             (* (reg8 *) ir_side_sreg_sts_sts_reg__STATUS_REG )
+#define ir_side_sreg_Status_PTR         (  (reg8 *) ir_side_sreg_sts_sts_reg__STATUS_REG )
+#define ir_side_sreg_Status_Mask        (* (reg8 *) ir_side_sreg_sts_sts_reg__MASK_REG )
+#define ir_side_sreg_Status_Aux_Ctrl    (* (reg8 *) ir_side_sreg_sts_sts_reg__STATUS_AUX_CTL_REG )
 
-#endif /* End CY_STATUS_REG_ir_r_status_reg_H */
+#endif /* End CY_STATUS_REG_ir_side_sreg_H */
 
 
 /* [] END OF FILE */
