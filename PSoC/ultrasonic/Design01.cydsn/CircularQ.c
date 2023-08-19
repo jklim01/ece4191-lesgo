@@ -22,20 +22,20 @@ CircularQ circularq_new() {
     };
 }
 
-void enqueue(CircularQ* q, uint16 elem) {
+void enqueue(volatile CircularQ* q, uint16 elem) {
     CIRCULARQ_IDX_INC(q->head);
     q->buf[q->head] = elem;
 }
 
 
-uint16 dequeue(CircularQ* q) {
+uint16 dequeue(volatile CircularQ* q) {
     uint16 elem = q->buf[q->tail];
     CIRCULARQ_IDX_INC(q->tail);
     return elem;
 }
 
 
-uint16 peek(CircularQ* q) {
+uint16 peek(volatile CircularQ* q) {
     return q->buf[q->tail];
 }
 

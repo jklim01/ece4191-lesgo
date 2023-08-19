@@ -12,8 +12,8 @@
 
 #ifndef CIRCULARQ_H
 #define CIRCULARQ_H
-#define CIRCULARQ_WINDOW_SIZE 8
-#define CIRCULARQ_IDX_INC(expr) (expr) = ((expr) == CIRCULARQ_WINDOW_SIZE-1) ? 0 : ((expr) + 1)
+#define CIRCULARQ_LEN 7
+#define CIRCULARQ_IDX_INC(expr) (expr) = ((expr) == CIRCULARQ_LEN-1) ? 0 : ((expr) + 1)
 
 
 #include "cytypes.h"
@@ -21,14 +21,14 @@
 typedef struct CircularQ {
     int8 head;
     int8 tail;
-    uint16 buf[CIRCULARQ_WINDOW_SIZE];
+    uint16 buf[CIRCULARQ_LEN];
 } CircularQ;
 
 
 CircularQ circularq_new();
-void enqueue(CircularQ* q, uint16 elem);
-uint16 dequeue(CircularQ* q);
-uint16 peek(CircularQ* q);
+void enqueue(volatile CircularQ* q, uint16 elem);
+uint16 dequeue(volatile CircularQ* q);
+uint16 peek(volatile CircularQ* q);
 
 
 #endif  // CIRCULARQ_H

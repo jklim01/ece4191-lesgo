@@ -19,12 +19,8 @@ int main(void)
     CyGlobalIntEnable; /* Enable global interrupts. */
 
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-    us_trigger_Start();
-    Timer_1_Start();
-    Timer_2_Start();
-    isr_1_StartEx(timer_1_isr);
-    isr_2_StartEx(timer_2_isr);
     UART_1_Start();
+    setup_ultrasonic();
 
     for(;;)
     {
@@ -37,11 +33,9 @@ int main(void)
 
         CyDelay(100);
 
-        if ((atomic_load(&us_dist_1) < 5) && (atomic_load(&us_dist_2) < 5)) {
-            led_Write(1);
-            continue;
-        }
-        led_Write(0);
+        uint16_t us_1_dist = get_us_1_dist();
+        uint16_t us_2_dist = get_us_2_dist();
+        led_Write(us_1_dist < 5 && us_2_dist < 5);
     }
 }
 
