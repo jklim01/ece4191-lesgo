@@ -36,6 +36,13 @@
 #include "cytypes.h"
 
 
+#define P 0
+#define PI 1
+#define PD 2
+#define PID 3
+#define CONTROLLER_TYPE PID
+
+
 // typedefs
 typedef enum __attribute__ ((__packed__)) LinearMovement {
     STOP,

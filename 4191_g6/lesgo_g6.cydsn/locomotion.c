@@ -22,8 +22,8 @@
 #include "motor_r_pwm.h"
 #include "motor_l_quaddec.h"
 #include "motor_r_quaddec.h"
-#include "p_controller_timer.h"
-#include "p_controller_isr.h"
+#include "controller_timer.h"
+#include "controller_isr.h"
 
 
 // globals
@@ -40,11 +40,29 @@ static volatile uint32 target_count = 0;
 #define WHEEL_DIAMETER_CM (5.45)
 static const uint32 COUNTS_PER_CM = (uint32)((COUNTS_PER_WHEEL_CYCLE / WHEEL_DIAMETER_CM / 3.14159265358979323846) + 0.5);
 static const uint32 TURN_COUNT = (uint32)((COUNTS_PER_WHEEL_CYCLE / 4 / WHEEL_DIAMETER_CM *  WHEEL_GAP_CM) + 0.5);
+static const uint16 controller_period_ms = 50;
 
 
 // parameters (TODO: tune these values)
-static const float K_P = 0.05;
 static const uint16 MASTER_BASE_SPEED = 12500;
+
+#if CONTROLLER_TYPE == P
+static const float K_P = 0.05;
+
+#elif CONTROLLER_TYPE == PI
+static const float K_P = 0.05;
+static const float K_I = 0.05;
+
+#elif CONTROLLER_TYPE == PD
+static const float K_P = 0.05;
+static const float K_D = 0.05;
+
+#elif CONTROLLER_TYPE == PID
+static const float K_P = 0.05;
+static const float K_I = 0.05;
+static const float K_D = 0.05;
+
+#endif
 
 
 // internals
@@ -63,12 +81,12 @@ void set_wheeldir(WheelDir dir_l, WheelDir dir_r);
 // ISRs
 CY_ISR(controller_update_isr) {
     // clear timer interrupt flag
-    p_controller_timer_ReadStatusRegister();
+    controller_timer_ReadStatusRegister();
 
     if (controller_update()) return;
 
     // stop periodically running controller updates with the ISR
-    p_controller_isr_Stop();
+    controller_isr_Stop();
 }
 
 
@@ -78,7 +96,9 @@ void setup_locomotion(void) {
     motor_r_pwm_Start();
     motor_l_quaddec_Start();
     motor_r_quaddec_Start();
-    p_controller_timer_Start();
+    controller_timer_Start();
+
+    controller_timer_WritePeriod(controller_period_ms * 1000);  // 1MHz locomotion_clk -> 1000 ticks per ms
 }
 
 void stop(void) {
@@ -122,33 +142,33 @@ void move_forward_by_counts(uint32 counts) {
 
 void stop_nb(void) {
     stop();
-    p_controller_isr_Stop();
+    controller_isr_Stop();
 }
 
 void turn_left_nb(void) {
     set_wheeldir(REVERSE, FORWARD);
     setup_controller(TURN_COUNT);
-    p_controller_isr_StartEx(controller_update_isr);
+    controller_isr_StartEx(controller_update_isr);
 }
 
 void turn_right_nb(void) {
     set_wheeldir(FORWARD, REVERSE);
     setup_controller(TURN_COUNT);
-    p_controller_isr_StartEx(controller_update_isr);
+    controller_isr_StartEx(controller_update_isr);
 }
 
 void move_forward_by_nb(uint8 dist_cm) {
     set_wheeldir(FORWARD, FORWARD);
     current_linear_movement = FRONT;
     setup_controller(dist_cm * COUNTS_PER_CM);
-    p_controller_isr_StartEx(controller_update_isr);
+    controller_isr_StartEx(controller_update_isr);
 }
 
 void move_backward_by_nb(uint8 dist_cm) {
     set_wheeldir(REVERSE, REVERSE);
     current_linear_movement = BACK;
     setup_controller(dist_cm * COUNTS_PER_CM);
-    p_controller_isr_StartEx(controller_update_isr);
+    controller_isr_StartEx(controller_update_isr);
 }
 
 
@@ -163,9 +183,32 @@ bool controller_update(void) {
         return false;
     }
 
-    // calculate slave control signal with P controller (+ 0.5 is used for rounding during cast)
-    int32 error = master_count - slave_count;
-    uint16 slave_new_speed = MASTER_BASE_SPEED + (uint16)(K_P * error + 0.5);
+    // calculate slave control signal with controller
+    int16 error = master_count - slave_count;
+#if CONTROLLER_TYPE == P
+    int16 u = (int16)(K_P * error);
+
+#elif CONTROLLER_TYPE == PI
+    static float integral = 0;
+    integral += controller_period_ms * error;
+    int16 u = (int16)(K_P * error + K_I * integral);
+
+#elif CONTROLLER_TYPE == PD
+    static float prev_err = 0;
+    float derivative = (error - prev_err) / controller_period_ms;
+    prev_err = error;
+    int16 u = (int16)(K_P * error + K_D * derivative);
+
+#elif CONTROLLER_TYPE == PID
+    static float integral = 0;
+    static float prev_err = 0;
+    integral += controller_period_ms * error;
+    float derivative = (error - prev_err) / controller_period_ms;
+    prev_err = error;
+    int16 u = (int16)(K_P * error + K_I * integral + K_D * derivative);
+
+#endif
+    uint16 slave_new_speed = (uint16)((int16)MASTER_BASE_SPEED + u);
 
     motor_l_pwm_WriteCompare(slave_new_speed);
     return true;
