@@ -10,27 +10,25 @@
  * ========================================
 */
 
-#ifndef IR_SENSOR_H
-#define IR_SENSOR_H
+#ifndef LIMIT_SW_H
+#define LIMIT_SW_H
 
 #include <stdbool.h>
 #include "cytypes.h"
 
 
 // API
-void setup_ir_sensor(
-    void (*ir_l_handler_)(void),
-    void (*ir_r_handler_)(void),
-    void (*ir_side_handler_)(void)
+void setup_limit_sw(
+    void (*limit_sw_l_handler_)(void),
+    void (*limit_sw_r_handler_)(void)
 );
 
-void pause_ir_sensor(void);
-void resume_ir_sensor(void);
-bool is_ir_l_detected(void);
-bool is_ir_r_detected(void);
-bool is_ir_side_detected(void);
+void pause_limit_sw(void);
+void resume_limit_sw(void);
+bool is_limit_sw_l_on(void);
+bool is_limit_sw_r_on(void);
 
 
-#endif  // IR_SENSOR_H
+#endif  // LIMIT_SW_H
 
 /* [] END OF FILE */
