@@ -40,12 +40,12 @@ void setup_limit_sw(
     }
 }
 
-void pause_limit_switch(void) {
+void pause_limit_sw(void) {
     limit_sw_l_isr_Stop();
     limit_sw_r_isr_Stop();
 }
 
-void resume_limit_switch(void) {
+void resume_limit_sw(void) {
     setup_limit_sw(
         limit_sw_l_handler,
         limit_sw_r_handler

@@ -10,18 +10,34 @@
  * ========================================
 */
 #include "project.h"
-#include "locomotion.h"
+#include "utils.h"
+#include "limit_sw.h"
+// #include "locomotion.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
+
+static volatile int activation_count = 0;
+void limit_sw_handler(void) {
+    static bool is_led_on = false;
+
+    is_led_on = !is_led_on;
+    led_Write(is_led_on);
+    if (is_led_on)
+        activation_count++;
+
+}
 
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-    setup_locomotion();
-    move_backward_by(10);
+    // setup_locomotion();
+    // move_forward_by(10);
+    setup_limit_sw(&limit_sw_handler, NULL);
 
     // UART_1_Start();
     // UART_1_PutString("Im ready!\n");
@@ -53,6 +69,14 @@ int main(void)
         // sprintf(str, "L: %8li\t R: %8li\n", motor_l_quaddec_GetCounter(), motor_r_quaddec_GetCounter());
         // UART_1_PutString(str);
         // CyDelay(10);
+
+        if (activation_count == 5) {
+            pause_limit_sw();
+            show_code(1);
+            resume_limit_sw();
+            activation_count = 0;
+        }
+        CyDelay(10);
     }
 
 }

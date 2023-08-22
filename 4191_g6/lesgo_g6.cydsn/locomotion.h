@@ -40,7 +40,7 @@
 #define PI 1
 #define PD 2
 #define PID 3
-#define CONTROLLER_TYPE PID
+#define CONTROLLER_TYPE P
 
 
 // typedefs

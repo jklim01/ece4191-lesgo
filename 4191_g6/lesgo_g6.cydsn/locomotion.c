@@ -43,45 +43,26 @@ static volatile uint32 target_count = 0;
 static const uint32 COUNTS_PER_CM = (uint32)((COUNTS_PER_WHEEL_CYCLE / WHEEL_DIAMETER_CM / 3.14159265358979323846) + 0.5);
 static const uint32 TURN_COUNT = (uint32)((COUNTS_PER_WHEEL_CYCLE / 4 / WHEEL_DIAMETER_CM *  WHEEL_GAP_CM) + 0.5);
 static const uint16 controller_period_ms = 50;
-static const uint16 controller_period_ms = 50;
 
 
 // parameters (TODO: tune these values)
 static const uint16 MASTER_BASE_SPEED = 12500;
 
 #if CONTROLLER_TYPE == P
-static const float K_P = 0.05;
+static const double K_P = 0.05;
 
 #elif CONTROLLER_TYPE == PI
-static const float K_P = 0.05;
-static const float K_I = 0.05;
+static const double K_P = 0.05;
+static const double K_I = 0.05;
 
 #elif CONTROLLER_TYPE == PD
-static const float K_P = 0.05;
-static const float K_D = 0.05;
+static const double K_P = 0.05;
+static const double K_D = 0.05;
 
 #elif CONTROLLER_TYPE == PID
-static const float K_P = 0.05;
-static const float K_I = 0.05;
-static const float K_D = 0.05;
-
-#endif
-
-#if CONTROLLER_TYPE == P
-static const float K_P = 0.05;
-
-#elif CONTROLLER_TYPE == PI
-static const float K_P = 0.05;
-static const float K_I = 0.05;
-
-#elif CONTROLLER_TYPE == PD
-static const float K_P = 0.05;
-static const float K_D = 0.05;
-
-#elif CONTROLLER_TYPE == PID
-static const float K_P = 0.05;
-static const float K_I = 0.05;
-static const float K_D = 0.05;
+static const double K_P = 0.05;
+static const double K_I = 0.05;
+static const double K_D = 0.05;
 
 #endif
 
@@ -103,12 +84,10 @@ void set_wheeldir(WheelDir dir_l, WheelDir dir_r);
 CY_ISR(controller_update_isr) {
     // clear timer interrupt flag
     controller_timer_ReadStatusRegister();
-    controller_timer_ReadStatusRegister();
 
     if (controller_update()) return;
 
     // stop periodically running controller updates with the ISR
-    controller_isr_Stop();
     controller_isr_Stop();
 }
 
@@ -173,13 +152,11 @@ void turn_left_nb(void) {
     set_wheeldir(REVERSE, FORWARD);
     setup_controller(TURN_COUNT);
     controller_isr_StartEx(controller_update_isr);
-    controller_isr_StartEx(controller_update_isr);
 }
 
 void turn_right_nb(void) {
     set_wheeldir(FORWARD, REVERSE);
     setup_controller(TURN_COUNT);
-    controller_isr_StartEx(controller_update_isr);
     controller_isr_StartEx(controller_update_isr);
 }
 
@@ -188,14 +165,12 @@ void move_forward_by_nb(uint8 dist_cm) {
     current_linear_movement = FRONT;
     setup_controller(dist_cm * COUNTS_PER_CM);
     controller_isr_StartEx(controller_update_isr);
-    controller_isr_StartEx(controller_update_isr);
 }
 
 void move_backward_by_nb(uint8 dist_cm) {
     set_wheeldir(REVERSE, REVERSE);
     current_linear_movement = BACK;
     setup_controller(dist_cm * COUNTS_PER_CM);
-    controller_isr_StartEx(controller_update_isr);
     controller_isr_StartEx(controller_update_isr);
 }
 
@@ -217,47 +192,21 @@ bool controller_update(void) {
     int16 u = (int16)(K_P * error);
 
 #elif CONTROLLER_TYPE == PI
-    static float integral = 0;
+    static double integral = 0;
     integral += controller_period_ms * error;
     int16 u = (int16)(K_P * error + K_I * integral);
 
 #elif CONTROLLER_TYPE == PD
-    static float prev_err = 0;
-    float derivative = (error - prev_err) / controller_period_ms;
+    static double prev_err = 0;
+    double derivative = (error - prev_err) / controller_period_ms;
     prev_err = error;
     int16 u = (int16)(K_P * error + K_D * derivative);
 
 #elif CONTROLLER_TYPE == PID
-    static float integral = 0;
-    static float prev_err = 0;
+    static double integral = 0;
+    static double prev_err = 0;
     integral += controller_period_ms * error;
-    float derivative = (error - prev_err) / controller_period_ms;
-    prev_err = error;
-    int16 u = (int16)(K_P * error + K_I * integral + K_D * derivative);
-
-#endif
-    uint16 slave_new_speed = (uint16)((int16)MASTER_BASE_SPEED + u);
-    // calculate slave control signal with controller
-    int16 error = master_count - slave_count;
-#if CONTROLLER_TYPE == P
-    int16 u = (int16)(K_P * error);
-
-#elif CONTROLLER_TYPE == PI
-    static float integral = 0;
-    integral += controller_period_ms * error;
-    int16 u = (int16)(K_P * error + K_I * integral);
-
-#elif CONTROLLER_TYPE == PD
-    static float prev_err = 0;
-    float derivative = (error - prev_err) / controller_period_ms;
-    prev_err = error;
-    int16 u = (int16)(K_P * error + K_D * derivative);
-
-#elif CONTROLLER_TYPE == PID
-    static float integral = 0;
-    static float prev_err = 0;
-    integral += controller_period_ms * error;
-    float derivative = (error - prev_err) / controller_period_ms;
+    double derivative = (error - prev_err) / controller_period_ms;
     prev_err = error;
     int16 u = (int16)(K_P * error + K_I * integral + K_D * derivative);
 
