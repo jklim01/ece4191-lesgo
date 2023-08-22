@@ -17,7 +17,8 @@
 #include "cytypes.h"
 
 // typedefs
-typedef enum __attribute__ ((__packed__)) Color {
+// typedef enum __attribute__ ((__packed__)) Color {
+typedef enum Color {
     RED,
     GREEN,
     BLUE
