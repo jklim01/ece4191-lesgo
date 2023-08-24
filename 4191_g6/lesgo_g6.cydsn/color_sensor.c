@@ -13,7 +13,7 @@
 #include <stdbool.h>
 #include "shared_pwm.h"
 #include "shared_pwm_demux_select.h"
-#include "color_sensor_creg.h"
+#include "shared_pwm_reset.h"
 #include "color_sensor_ready_isr.h"
 #include "color_sensor_counter.h"
 #include "color_sensor_s0.h"
@@ -43,9 +43,9 @@ uint32 single_sense(uint8 s2, uint8 s3) {
     CyDelay(20);                    // ensure signals have been written
 
     // 1ms high pulse on reset pins
-    color_sensor_creg_Write(1);
+    shared_pwm_reset_Write(1);
     CyDelay(1);
-    color_sensor_creg_Write(0);
+    shared_pwm_reset_Write(0);
 
     while (!ready);
     return color_sensor_counter_ReadCapture();
@@ -61,18 +61,17 @@ CY_ISR(color_sensor_ready_isr) {
 
 // API
 void setup_color_sensor(void) {
-    shared_pwm_Start();
-    color_sensor_counter_Start();
     color_sensor_ready_isr_StartEx(color_sensor_ready_isr);
-    shared_pwm_Sleep();
 }
 
 Color color_sense(void) {
     // gain control of shared pwm resource
-    shared_pwm_Wakeup();
-    shared_pwm_demux_select_Write(0x02);
+    color_sensor_counter_Start();
+    shared_pwm_Start();
     shared_pwm_WritePeriod(COLOR_SENSOR_PERIOD);
-    shared_pwm_SetInterruptMode(0x08);
+    shared_pwm_WriteCompare(COLOR_SENSOR_CMP);
+    shared_pwm_SetInterruptMode(1 << shared_pwm_STATUS_CMP1_INT_EN_MASK_SHIFT);
+    shared_pwm_demux_select_Write(0x03);
 
     // turn on LED and set frequency scaling
     color_sensor_s0_Write(1);
@@ -89,8 +88,10 @@ Color color_sense(void) {
     color_sensor_s0_Write(0);
     color_sensor_s1_Write(0);
     color_sensor_led_Write(0);
+    shared_pwm_reset_Write(1);
     shared_pwm_SetInterruptMode(0x00);
-    shared_pwm_Sleep();
+    shared_pwm_Stop();
+    color_sensor_counter_Stop();
 
     if ((blue >= red) && (blue >= green))
         return BLUE;

@@ -12,22 +12,97 @@
 #include "project.h"
 #include "utils.h"
 #include "limit_sw.h"
-// #include "locomotion.h"
+#include "color_sensor.h"
+#include "servo.h"
+#include "locomotion.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
+void increment_select(void) {
+    static uint8 demux_select = 0x00;
+    static bool is_gripper_open = false;
+    static bool is_lifter_up = false;
+    static char str[200];
 
-static volatile int activation_count = 0;
-void limit_sw_handler(void) {
-    static bool is_led_on = false;
+    shared_pwm_demux_select_Write(demux_select);
+    switch (demux_select) {
+        case 0x00: {
+            shared_pwm_WritePeriod(1999);
+            if (is_gripper_open) {
+                is_gripper_open = false;
+                gripper_close();
+            }
+            else {
+                is_gripper_open = true;
+                gripper_open();
+            }
 
-    is_led_on = !is_led_on;
-    led_Write(is_led_on);
-    if (is_led_on)
-        activation_count++;
+            sprintf(str, "[State 1] select = %x, gripper %s\n", shared_pwm_demux_select_Read(), is_gripper_open ? "open" : "close");
+            UART_1_PutString(str);
 
+            demux_select = 0x01;
+            break;
+        }
+        case 0x01: {
+            if (is_lifter_up) {
+                is_lifter_up = false;
+                lifter_down();
+            }
+            else {
+                is_lifter_up = true;
+                lifter_up();
+            }
+
+            sprintf(str, "[State 2] select = %x, lifter %s\n", shared_pwm_demux_select_Read(), is_lifter_up ? "up" : "down");
+            UART_1_PutString(str);
+
+            demux_select = 0x02;
+            break;
+        }
+        case 0x02: {
+            sprintf(str, "[State 3] select = %x\n", shared_pwm_demux_select_Read());
+            UART_1_PutString(str);
+
+            demux_select = 0x03;
+            break;
+        }
+        case 0x03: {
+            sprintf(str, "[State 4] select = %x\n", shared_pwm_demux_select_Read());
+            UART_1_PutString(str);
+
+            Color color = color_sense();
+            switch (color) {
+                case RED: {
+                    UART_1_PutString("(RED!)\n");
+                    break;
+                }
+                case GREEN: {
+                    UART_1_PutString("(GREEN!)\n");
+                    break;
+                }
+                case BLUE: {
+                    UART_1_PutString("(BLUE!)\n");
+                    break;
+                }
+            }
+
+            demux_select = 0x00;
+            break;
+        }
+    }
+}
+
+void increment_select_1(void) {
+    static bool state = false;
+
+    state = !state;
+    if (state)
+        //gripper_open();
+        lifter_down();
+    else
+        lifter_up();
 }
 
 int main(void)
@@ -37,10 +112,16 @@ int main(void)
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
     // setup_locomotion();
     // move_forward_by(10);
-    setup_limit_sw(&limit_sw_handler, NULL);
+    setup_color_sensor();
+    setup_servo();
+    setup_limit_sw(&increment_select, NULL);
 
-    // UART_1_Start();
-    // UART_1_PutString("Im ready!\n");
+    UART_1_Start();
+    UART_1_PutString("Im ready!\n");
+    // char str[50];
+    // sprintf(str, "%u, CMP=%u\n", shared_pwm_ReadPeriod(), shared_pwm_ReadCompare());
+    // UART_1_PutString(str);
+
     // char str[20];
     // char* str_ptr = str;
     // char c;
@@ -69,16 +150,7 @@ int main(void)
         // sprintf(str, "L: %8li\t R: %8li\n", motor_l_quaddec_GetCounter(), motor_r_quaddec_GetCounter());
         // UART_1_PutString(str);
         // CyDelay(10);
-
-        if (activation_count == 5) {
-            pause_limit_sw();
-            show_code(1);
-            resume_limit_sw();
-            activation_count = 0;
-        }
-        CyDelay(10);
     }
-
 }
 
 /* [] END OF FILE */
