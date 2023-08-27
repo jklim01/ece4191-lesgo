@@ -18,17 +18,17 @@
 
 
 // API
-void setup_ir_sensor(
+void ir_sensor_setup(
     void (*ir_l_handler_)(void),
     void (*ir_r_handler_)(void),
     void (*ir_side_handler_)(void)
 );
 
-void pause_ir_sensor(void);
-void resume_ir_sensor(void);
-bool is_ir_l_detected(void);
-bool is_ir_r_detected(void);
-bool is_ir_side_detected(void);
+void ir_sensor_pause(void);
+void ir_sensor_resume(void);
+bool ir_l_is_detected(void);
+bool ir_r_is_detected(void);
+bool ir_side_is_detected(void);
 
 
 #endif  // IR_SENSOR_H

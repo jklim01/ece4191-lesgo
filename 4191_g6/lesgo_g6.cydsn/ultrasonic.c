@@ -81,7 +81,7 @@ CY_ISR(us_b_isr) {
 
 
 // API
-void setup_ultrasonic(void) {
+void ultrasonic_setup(void) {
     us_trigger_pwm_Start();
 
     us_l_timer_Start();
@@ -95,19 +95,19 @@ void setup_ultrasonic(void) {
     us_b_isr_StartEx(us_b_isr);
 }
 
-uint16 get_us_l_dist(void) {
+uint16 us_l_get_dist(void) {
     return filter_buf(&us_l_buf);
 }
 
-uint16 get_us_r_dist(void) {
+uint16 us_r_get_dist(void) {
     return filter_buf(&us_r_buf);
 }
 
-uint16 get_us_f_dist(void) {
+uint16 us_f_get_dist(void) {
     return filter_buf(&us_f_buf);
 }
 
-uint16 get_us_b_dist(void) {
+uint16 us_b_get_dist(void) {
     return filter_buf(&us_b_buf);
 }
 

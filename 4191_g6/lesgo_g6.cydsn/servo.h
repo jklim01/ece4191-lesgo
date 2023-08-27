@@ -15,7 +15,7 @@
 
 
 // API
-void setup_servo(void);
+void servo_setup(void);
 void gripper_close(void);
 void gripper_open(void);
 void lifter_up(void);

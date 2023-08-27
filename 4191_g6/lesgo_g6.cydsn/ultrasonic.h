@@ -24,11 +24,11 @@ CY_ISR_PROTO(usr_b_isr);
 
 
 // API
-void setup_ultrasonic(void);
-uint16 get_us_l_dist(void);
-uint16 get_us_r_dist(void);
-uint16 get_us_f_dist(void);
-uint16 get_us_rb_dist(void);
+void ultrasonic_setup(void);
+uint16 us_l_get_dist(void);
+uint16 us_r_get_dist(void);
+uint16 us_f_get_dist(void);
+uint16 us_rb_get_dist(void);
 
 
 

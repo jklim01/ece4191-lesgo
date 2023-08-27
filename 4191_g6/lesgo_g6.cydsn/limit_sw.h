@@ -18,15 +18,15 @@
 
 
 // API
-void setup_limit_sw(
+void limit_sw_setup(
     void (*limit_sw_l_handler_)(void),
     void (*limit_sw_r_handler_)(void)
 );
 
-void pause_limit_sw(void);
-void resume_limit_sw(void);
-bool is_limit_sw_l_on(void);
-bool is_limit_sw_r_on(void);
+void limit_sw_pause(void);
+void limit_sw_resume(void);
+bool limit_sw_l_is_on(void);
+bool limit_sw_r_is_on(void);
 
 
 #endif  // LIMIT_SW_H

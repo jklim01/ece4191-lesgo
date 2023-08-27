@@ -28,7 +28,7 @@ static void (*ir_side_handler)(void) = NULL;
 
 
 // API
-void setup_ir_sensor(
+void ir_sensor_setup(
     void (*ir_l_handler_)(void),
     void (*ir_r_handler_)(void),
     void (*ir_side_handler_)(void)
@@ -49,13 +49,13 @@ void setup_ir_sensor(
     }
 }
 
-void pause_ir_sensor(void) {
+void ir_sensor_pause(void) {
     ir_l_isr_Stop();
     ir_r_isr_Stop();
     ir_side_isr_Stop();
 }
 
-void resume_ir_sensor(void) {
+void ir_sensor_resumt(void) {
     setup_ir_sensor(
         ir_l_handler,
         ir_r_handler,
@@ -63,15 +63,15 @@ void resume_ir_sensor(void) {
     );
 }
 
-bool is_ir_l_detected(void) {
+bool ir_l_is_detected(void) {
     return ir_l_sreg_Read();
 }
 
-bool is_ir_r_detected(void) {
+bool ir_r_is_detected(void) {
     return ir_r_sreg_Read();
 }
 
-bool is_ir_side_detected(void) {
+bool ir_side_is_detected(void) {
     return ir_side_sreg_Read();
 }
 

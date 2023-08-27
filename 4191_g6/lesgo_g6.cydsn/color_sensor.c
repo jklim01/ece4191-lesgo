@@ -63,7 +63,7 @@ CY_ISR(color_sensor_ready_isr) {
 
 
 // API
-void setup_color_sensor(void) {
+void color_sensor_setup(void) {
     // color_sensor_ready_isr_StartEx(color_sensor_ready_isr);
 }
 

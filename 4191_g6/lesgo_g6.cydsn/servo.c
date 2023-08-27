@@ -51,12 +51,12 @@ void write_servo(uint8 demux_select, uint16 cmp) {
 
 
 // API
-void setup_servo(void) {
+void servo_setup(void) {
     // reset gripper position
-    // gripper_close();
+    gripper_close();
 
     // reset lifter position
-    // lifter_up();
+    lifter_up();
 }
 
 void gripper_close(void) {

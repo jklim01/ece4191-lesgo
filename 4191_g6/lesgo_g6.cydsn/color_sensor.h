@@ -30,7 +30,7 @@ CY_ISR_PROTO(color_sensor_ready_isr);
 
 
 // API
-void setup_color_sensor(void);
+void color_sensor_setup(void);
 Color color_sense(void);
 
 

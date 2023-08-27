@@ -25,7 +25,7 @@ static void (*limit_sw_r_handler)(void) = NULL;
 
 
 // API
-void setup_limit_sw(
+void limit_sw_setup(
     void (*limit_sw_l_handler_)(void),
     void (*limit_sw_r_handler_)(void)
 ) {
@@ -40,23 +40,23 @@ void setup_limit_sw(
     }
 }
 
-void pause_limit_sw(void) {
+void limit_sw_pause(void) {
     limit_sw_l_isr_Stop();
     limit_sw_r_isr_Stop();
 }
 
-void resume_limit_sw(void) {
+void limit_sw_resume(void) {
     setup_limit_sw(
         limit_sw_l_handler,
         limit_sw_r_handler
     );
 }
 
-bool is_limit_sw_l_on(void) {
+bool limit_sw_l_is_on(void) {
     return limit_sw_l_sreg_Read();
 }
 
-bool is_limit_sw_r_on(void) {
+bool limit_sw_r_is_on(void) {
     return limit_sw_r_sreg_Read();
 }
 

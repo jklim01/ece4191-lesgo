@@ -60,7 +60,7 @@ CY_ISR_PROTO(controller_update_isr);
 
 
 // API
-void setup_locomotion(void);
+void locomotion_setup(void);
 
 void stop(void);
 void turn_left(void);
