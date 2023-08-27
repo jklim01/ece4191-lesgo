@@ -60,7 +60,7 @@ void setup_servo(void) {
 }
 
 void gripper_close(void) {
-    const uint16 GRIPPER_CLOSE_CMP = 208;
+    const uint16 GRIPPER_CLOSE_CMP = 200;
     write_servo(GRIPPER_SELECT, GRIPPER_CLOSE_CMP);
 }
 
@@ -70,12 +70,12 @@ void gripper_open(void) {
 }
 
 void lifter_up(void) {
-    const uint16 LIFTER_UP_CMP = 216;
+    const uint16 LIFTER_UP_CMP = 210;
     write_servo(LIFTER_SELECT, LIFTER_UP_CMP);
 }
 
 void lifter_down(void) {
-    const uint16 LIFTER_DOWN_CMP = 124;
+    const uint16 LIFTER_DOWN_CMP = 115;
     write_servo(LIFTER_SELECT, LIFTER_DOWN_CMP);
 }
 

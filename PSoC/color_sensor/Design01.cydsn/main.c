@@ -30,15 +30,15 @@ int main(void)
         Color c = color_sense();
         switch (c) {
             case RED: {
-                UART_1_PutString("(Red!)\n");
+                UART_1_PutString("(Red!) XD\n");
                 break;
             }
             case GREEN: {
-                UART_1_PutString("(Green!)\n");
+                UART_1_PutString("(Green!) :)\n");
                 break;
             }
             case BLUE: {
-                UART_1_PutString("(Blue!)\n");
+                UART_1_PutString("(Blue!) :(\n");
                 break;
             }
         }

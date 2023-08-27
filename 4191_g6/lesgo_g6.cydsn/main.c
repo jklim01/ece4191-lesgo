@@ -23,13 +23,11 @@
 void increment_select(void) {
     static uint8 demux_select = 0x00;
     static bool is_gripper_open = false;
-    static bool is_lifter_up = false;
+    static bool is_lifter_down = false;
     static char str[200];
 
-    shared_pwm_demux_select_Write(demux_select);
     switch (demux_select) {
         case 0x00: {
-            shared_pwm_WritePeriod(1999);
             if (is_gripper_open) {
                 is_gripper_open = false;
                 gripper_close();
@@ -46,16 +44,16 @@ void increment_select(void) {
             break;
         }
         case 0x01: {
-            if (is_lifter_up) {
-                is_lifter_up = false;
-                lifter_down();
-            }
-            else {
-                is_lifter_up = true;
+            if (is_lifter_down) {
+                is_lifter_down = false;
                 lifter_up();
             }
+            else {
+                is_lifter_down = true;
+                lifter_down();
+            }
 
-            sprintf(str, "[State 2] select = %x, lifter %s\n", shared_pwm_demux_select_Read(), is_lifter_up ? "up" : "down");
+            sprintf(str, "[State 2] select = %x, lifter %s\n", shared_pwm_demux_select_Read(), is_lifter_down ? "down" : "up");
             UART_1_PutString(str);
 
             demux_select = 0x02;
@@ -69,10 +67,10 @@ void increment_select(void) {
             break;
         }
         case 0x03: {
-            sprintf(str, "[State 4] select = %x\n", shared_pwm_demux_select_Read());
+            Color color = color_sense();
+            sprintf(str, "[State 4] select = %x\t", shared_pwm_demux_select_Read());
             UART_1_PutString(str);
 
-            Color color = color_sense();
             switch (color) {
                 case RED: {
                     UART_1_PutString("(RED!)\n");
@@ -99,10 +97,11 @@ void increment_select_1(void) {
 
     state = !state;
     if (state)
-        //gripper_open();
-        lifter_down();
+        gripper_open();
+        // lifter_down();
     else
-        lifter_up();
+        // lifter_up();
+        gripper_close();
 }
 
 int main(void)
@@ -114,6 +113,8 @@ int main(void)
     // move_forward_by(10);
     setup_color_sensor();
     setup_servo();
+    gripper_close();
+    lifter_up();
     setup_limit_sw(&increment_select, NULL);
 
     UART_1_Start();

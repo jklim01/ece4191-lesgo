@@ -34,6 +34,7 @@ static volatile bool ready = false;
 // internals
 uint32 single_sense(uint8 s2, uint8 s3) {
     ready = false;
+    color_sensor_ready_isr_StartEx(color_sensor_ready_isr);
     color_sensor_s2_Write(s2);
     color_sensor_s3_Write(s3);
     CyDelay(20);                    // ensure signals have been written
@@ -50,19 +51,24 @@ uint32 single_sense(uint8 s2, uint8 s3) {
 
 // ISRs
 CY_ISR(color_sensor_ready_isr) {
-    color_sensor_pwm_ReadStatusRegister();
+    color_sensor_creg_Write(1);
+
+    color_sensor_counter_ReadStatusRegister();
+    color_sensor_ready_isr_Stop();
     ready = true;
 }
 
 
 // API
 void setup_color_sensor(void) {
-    color_sensor_pwm_Start();
-    color_sensor_counter_Start();
-    color_sensor_ready_isr_StartEx(color_sensor_ready_isr);
+    // color_sensor_pwm_Start();
+    // color_sensor_counter_Start();
+    // color_sensor_ready_isr_StartEx(color_sensor_ready_isr);
 }
 
 Color color_sense(void) {
+    color_sensor_counter_Start();
+    color_sensor_pwm_Start();
     color_sensor_s0_Write(1);
     color_sensor_s1_Write(1);
     color_sensor_led_Write(1);
@@ -71,6 +77,11 @@ Color color_sense(void) {
     uint32 blue = single_sense(0, 1);
     uint32 clear = single_sense(1, 0);
     uint32 green = single_sense(1, 1);
+
+    color_sensor_creg_Write(1);
+    color_sensor_pwm_Stop();
+    color_sensor_counter_Stop();
+
 
     char str[50];
     sprintf(str, "red: %lu\tgreen: %lu\tblue: %lu\tclear: %lu\t", red, green, blue, clear);

@@ -38,6 +38,7 @@ static volatile bool ready = false;
 // internals
 uint32 single_sense(uint8 s2, uint8 s3) {
     ready = false;
+    color_sensor_ready_isr_StartEx(color_sensor_ready_isr);
     color_sensor_s2_Write(s2);
     color_sensor_s3_Write(s3);
     CyDelay(20);                    // ensure signals have been written
@@ -54,14 +55,16 @@ uint32 single_sense(uint8 s2, uint8 s3) {
 
 // ISRs
 CY_ISR(color_sensor_ready_isr) {
-    shared_pwm_ReadStatusRegister();
+    shared_pwm_reset_Write(1);
+    color_sensor_counter_ReadStatusRegister();
+    color_sensor_ready_isr_Stop();
     ready = true;
 }
 
 
 // API
 void setup_color_sensor(void) {
-    color_sensor_ready_isr_StartEx(color_sensor_ready_isr);
+    // color_sensor_ready_isr_StartEx(color_sensor_ready_isr);
 }
 
 Color color_sense(void) {
@@ -70,12 +73,11 @@ Color color_sense(void) {
     shared_pwm_Start();
     shared_pwm_WritePeriod(COLOR_SENSOR_PERIOD);
     shared_pwm_WriteCompare(COLOR_SENSOR_CMP);
-    shared_pwm_SetInterruptMode(1 << shared_pwm_STATUS_CMP1_INT_EN_MASK_SHIFT);
     shared_pwm_demux_select_Write(0x03);
 
     // turn on LED and set frequency scaling
     color_sensor_s0_Write(1);
-    color_sensor_s1_Write(0);
+    color_sensor_s1_Write(1);
     color_sensor_led_Write(1);
 
     // sense values for each filter
@@ -89,7 +91,6 @@ Color color_sense(void) {
     color_sensor_s1_Write(0);
     color_sensor_led_Write(0);
     shared_pwm_reset_Write(1);
-    shared_pwm_SetInterruptMode(0x00);
     shared_pwm_Stop();
     color_sensor_counter_Stop();
 
