@@ -83,6 +83,12 @@ int main(void)
                 case GREEN: panic(2); break;
                 case BLUE: panic(3); break;
             }
+
+            move_backward_by(12);
+            gripper_open();
+            lifter_down();
+            gripper_close();
+            lifter_up();
         }
     }
 }
