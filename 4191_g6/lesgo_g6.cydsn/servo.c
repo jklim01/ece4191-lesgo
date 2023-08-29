@@ -20,8 +20,6 @@
 #include "lifter_pwm_out.h"
 #include "flicker_pwm_out.h"
 
-#include <stdio.h>
-
 
 // constants
 static const uint16 SERVO_PERIOD = 1999;

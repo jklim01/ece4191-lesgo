@@ -114,6 +114,7 @@ void locomotion_setup(void) {
 void stop(void) {
     motor_l_pwm_WriteCompare(0);
     motor_r_pwm_WriteCompare(0);
+    target_count = 0;
     current_linear_movement = STOP;
 }
 
@@ -133,7 +134,8 @@ void move_forward_by(uint8 dist_cm) {
     set_wheeldir(FORWARD, FORWARD);
     current_linear_movement = FRONT;
     setup_controller(dist_cm * COUNTS_PER_CM);
-    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+    // while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+    while (current_linear_movement != STOP && controller_update()) CyDelay(controller_period_ms);
 }
 
 void move_backward_by(uint8 dist_cm) {
@@ -221,6 +223,7 @@ bool controller_update(void) {
     uint16 slave_new_speed = (uint16)((int16)MASTER_BASE_SPEED + u);
 
     motor_l_pwm_WriteCompare(slave_new_speed);
+    motor_r_pwm_WriteCompare(MASTER_BASE_SPEED);
     return true;
 }
 

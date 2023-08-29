@@ -46,7 +46,7 @@ void limit_sw_pause(void) {
 }
 
 void limit_sw_resume(void) {
-    setup_limit_sw(
+    limit_sw_setup(
         limit_sw_l_handler,
         limit_sw_r_handler
     );

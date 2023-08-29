@@ -17,6 +17,7 @@
 #include "ir_l_sreg.h"
 #include "ir_r_sreg.h"
 #include "ir_side_sreg.h"
+#include "ir_enable.h"
 
 #include "ir_sensor.h"
 
@@ -47,16 +48,19 @@ void ir_sensor_setup(
         ir_side_handler = ir_side_handler_;
         ir_side_isr_StartEx(ir_side_handler);
     }
+
+    ir_enable_Write(1);
 }
 
 void ir_sensor_pause(void) {
+    ir_enable_Write(0);
     ir_l_isr_Stop();
     ir_r_isr_Stop();
     ir_side_isr_Stop();
 }
 
-void ir_sensor_resumt(void) {
-    setup_ir_sensor(
+void ir_sensor_resume(void) {
+    ir_sensor_setup(
         ir_l_handler,
         ir_r_handler,
         ir_side_handler

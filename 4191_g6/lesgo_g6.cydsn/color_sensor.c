@@ -21,6 +21,9 @@
 #include "color_sensor_s2.h"
 #include "color_sensor_s3.h"
 #include "color_sensor_led.h"
+#include "led_r.h"
+#include "led_g.h"
+#include "led_b.h"
 
 #include "cytypes.h"
 #include "color_sensor.h"
@@ -75,6 +78,11 @@ Color color_sense(void) {
     shared_pwm_WriteCompare(COLOR_SENSOR_CMP);
     shared_pwm_demux_select_Write(0x03);
 
+    // turn off indicator leds
+    led_r_Write(0);
+    led_g_Write(0);
+    led_b_Write(0);
+
     // turn on LED and set frequency scaling
     color_sensor_s0_Write(1);
     color_sensor_s1_Write(1);
@@ -94,10 +102,16 @@ Color color_sense(void) {
     shared_pwm_Stop();
     color_sensor_counter_Stop();
 
-    if ((blue >= red) && (blue >= green))
+    // set appropriate indicator led and return detected color
+    if ((blue >= red) && (blue >= green)) {
+        led_b_Write(1);
         return BLUE;
-    if (green >= red)
+    }
+    if (green >= red) {
+        led_g_Write(1);
         return GREEN;
+    }
+    led_r_Write(1);
     return RED;
 }
 

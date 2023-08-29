@@ -10,98 +10,22 @@
  * ========================================
 */
 #include "project.h"
-#include "utils.h"
-#include "limit_sw.h"
-#include "color_sensor.h"
-#include "servo.h"
-#include "locomotion.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
-void increment_select(void) {
-    static uint8 demux_select = 0x00;
-    static bool is_gripper_open = false;
-    static bool is_lifter_down = false;
-    static char str[200];
+#include "utils.h"
+#include "color_sensor.h"
+#include "servo.h"
+#include "locomotion.h"
+#include "ir_sensor.h"
+#include "UART_1.h"
 
-    switch (demux_select) {
-        case 0x00: {
-            if (is_gripper_open) {
-                is_gripper_open = false;
-                gripper_close();
-            }
-            else {
-                is_gripper_open = true;
-                gripper_open();
-            }
 
-            sprintf(str, "[State 1] select = %x, gripper %s\n", shared_pwm_demux_select_Read(), is_gripper_open ? "open" : "close");
-            UART_1_PutString(str);
-
-            demux_select = 0x01;
-            break;
-        }
-        case 0x01: {
-            if (is_lifter_down) {
-                is_lifter_down = false;
-                lifter_up();
-            }
-            else {
-                is_lifter_down = true;
-                lifter_down();
-            }
-
-            sprintf(str, "[State 2] select = %x, lifter %s\n", shared_pwm_demux_select_Read(), is_lifter_down ? "down" : "up");
-            UART_1_PutString(str);
-
-            demux_select = 0x02;
-            break;
-        }
-        case 0x02: {
-            sprintf(str, "[State 3] select = %x\n", shared_pwm_demux_select_Read());
-            UART_1_PutString(str);
-
-            demux_select = 0x03;
-            break;
-        }
-        case 0x03: {
-            Color color = color_sense();
-            sprintf(str, "[State 4] select = %x\t", shared_pwm_demux_select_Read());
-            UART_1_PutString(str);
-
-            switch (color) {
-                case RED: {
-                    UART_1_PutString("(RED!)\n");
-                    break;
-                }
-                case GREEN: {
-                    UART_1_PutString("(GREEN!)\n");
-                    break;
-                }
-                case BLUE: {
-                    UART_1_PutString("(BLUE!)\n");
-                    break;
-                }
-            }
-
-            demux_select = 0x00;
-            break;
-        }
-    }
-}
-
-void increment_select_1(void) {
-    static bool state = false;
-
-    state = !state;
-    if (state)
-        gripper_open();
-        // lifter_down();
-    else
-        // lifter_up();
-        gripper_close();
+static volatile bool found_puck = false;
+CY_ISR(handler) {
+    stop();
+    found_puck = true;
 }
 
 int main(void)
@@ -109,19 +33,14 @@ int main(void)
     CyGlobalIntEnable; /* Enable global interrupts. */
 
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-    // setup_locomotion();
-    // move_forward_by(10);
-    setup_color_sensor();
-    setup_servo();
-    gripper_close();
-    lifter_up();
-    setup_limit_sw(&increment_select, NULL);
+    locomotion_setup();
+    // color_sensor_setup();
+    // servo_setup();
+    ir_sensor_setup(&handler, NULL, NULL);
+    // UART_1_Start();
 
-    UART_1_Start();
-    UART_1_PutString("Im ready!\n");
-    // char str[50];
-    // sprintf(str, "%u, CMP=%u\n", shared_pwm_ReadPeriod(), shared_pwm_ReadCompare());
-    // UART_1_PutString(str);
+    // UART_1_PutString("Im ready!\n");
+    move_forward_by(30);
 
     // char str[20];
     // char* str_ptr = str;
@@ -151,6 +70,20 @@ int main(void)
         // sprintf(str, "L: %8li\t R: %8li\n", motor_l_quaddec_GetCounter(), motor_r_quaddec_GetCounter());
         // UART_1_PutString(str);
         // CyDelay(10);
+
+        if (found_puck) {
+            stop();
+            ir_sensor_pause();
+            show_code(0);
+
+            move_forward_by(9);
+            Color c = color_sense();
+            switch (c) {
+                case RED: panic(1); break;
+                case GREEN: panic(2); break;
+                case BLUE: panic(3); break;
+            }
+        }
     }
 }
 
