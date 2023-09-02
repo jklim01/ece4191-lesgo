@@ -16,16 +16,16 @@
 #include "us_trigger_pwm.h"
 #include "us_l_timer.h"
 #include "us_r_timer.h"
-#include "us_f_timer.h"
-#include "us_b_timer.h"
+#include "us_fl_timer.h"
+#include "us_fr_timer.h"
 #include "us_l_isr.h"
 #include "us_r_isr.h"
-#include "us_f_isr.h"
-#include "us_b_isr.h"
+#include "us_fl_isr.h"
+#include "us_fr_isr.h"
 #include "us_l_echo.h"
 #include "us_r_echo.h"
-#include "us_f_echo.h"
-#include "us_b_echo.h"
+#include "us_fl_echo.h"
+#include "us_fr_echo.h"
 #include "cytypes.h"
 
 #include "ultrasonic.h"
@@ -37,8 +37,8 @@
 // static globals
 static volatile CircularQ us_l_buf = { 0, 0, {0} };
 static volatile CircularQ us_r_buf = { 0, 0, {0} };
-static volatile CircularQ us_f_buf = { 0, 0, {0} };
-static volatile CircularQ us_b_buf = { 0, 0, {0} };
+static volatile CircularQ us_fl_buf = { 0, 0, {0} };
+static volatile CircularQ us_fr_buf = { 0, 0, {0} };
 
 
 // internals
@@ -63,20 +63,20 @@ CY_ISR(us_r_isr) {
     enqueue(&us_r_buf, dist);
 }
 
-CY_ISR(us_f_isr) {
-    us_f_timer_ReadStatusRegister();       // clears the irq
+CY_ISR(us_fl_isr) {
+    us_fl_timer_ReadStatusRegister();       // clears the irq
 
-    uint16 count = UINT16_MAX - us_f_timer_ReadCounter();
+    uint16 count = UINT16_MAX - us_fl_timer_ReadCounter();
     uint16 dist = ROUNDING_DIV(count, 58);
-    enqueue(&us_f_buf, dist);
+    enqueue(&us_fl_buf, dist);
 }
 
-CY_ISR(us_b_isr) {
-    us_b_timer_ReadStatusRegister();       // clears the irq
+CY_ISR(us_fr_isr) {
+    us_fr_timer_ReadStatusRegister();       // clears the irq
 
-    uint16 count = UINT16_MAX - us_b_timer_ReadCounter();
+    uint16 count = UINT16_MAX - us_fr_timer_ReadCounter();
     uint16 dist = ROUNDING_DIV(count, 58);
-    enqueue(&us_b_buf, dist);
+    enqueue(&us_fr_buf, dist);
 }
 
 
@@ -86,13 +86,13 @@ void ultrasonic_setup(void) {
 
     us_l_timer_Start();
     us_r_timer_Start();
-    us_f_timer_Start();
-    us_b_timer_Start();
+    us_fl_timer_Start();
+    us_fr_timer_Start();
 
     us_l_isr_StartEx(us_l_isr);
     us_r_isr_StartEx(us_r_isr);
-    us_f_isr_StartEx(us_f_isr);
-    us_b_isr_StartEx(us_b_isr);
+    us_fl_isr_StartEx(us_fl_isr);
+    us_fr_isr_StartEx(us_fr_isr);
 }
 
 uint16 us_l_get_dist(void) {
@@ -103,12 +103,12 @@ uint16 us_r_get_dist(void) {
     return filter_buf(&us_r_buf);
 }
 
-uint16 us_f_get_dist(void) {
-    return filter_buf(&us_f_buf);
+uint16 us_fl_get_dist(void) {
+    return filter_buf(&us_fl_buf);
 }
 
-uint16 us_b_get_dist(void) {
-    return filter_buf(&us_b_buf);
+uint16 us_fr_get_dist(void) {
+    return filter_buf(&us_fr_buf);
 }
 
 

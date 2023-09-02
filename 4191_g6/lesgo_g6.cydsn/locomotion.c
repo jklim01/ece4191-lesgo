@@ -14,6 +14,7 @@
 #include <stdbool.h>
 
 #include "locomotion.h"
+#include "limit_sw.h"
 #include "motor_l_in1.h"
 #include "motor_l_in2.h"
 #include "motor_r_in1.h"
@@ -74,6 +75,7 @@ typedef enum __attribute__ ((__packed__)) WheelDir {
 } WheelDir;
 
 bool controller_update(void);
+bool alignment_controller_update(void);
 void setup_controller(uint32 target);
 void set_wheeldir_l(WheelDir dir);
 void set_wheeldir_r(WheelDir dir);
@@ -97,6 +99,10 @@ CY_ISR(set_controller_flag_isr) {
     controller_timer_ReadStatusRegister();
     controller_timer_flag = true;
     controller_isr_Stop();
+}
+
+CY_ISR(limit_sw_isr) {
+    stop();
 }
 
 
@@ -130,18 +136,17 @@ void turn_right(void) {
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
 }
 
-void move_forward_by(uint8 dist_cm) {
+void move_forward_by(float dist_cm) {
     set_wheeldir(FORWARD, FORWARD);
     current_linear_movement = FRONT;
-    setup_controller(dist_cm * COUNTS_PER_CM);
-    // while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
-    while (current_linear_movement != STOP && controller_update()) CyDelay(controller_period_ms);
+    setup_controller((uint32)(dist_cm * COUNTS_PER_CM + 0.5));
+    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
 }
 
-void move_backward_by(uint8 dist_cm) {
+void move_backward_by(float dist_cm) {
     set_wheeldir(REVERSE, REVERSE);
     current_linear_movement = BACK;
-    setup_controller(dist_cm * COUNTS_PER_CM);
+    setup_controller((uint32)(dist_cm * COUNTS_PER_CM + 0.5));
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
 }
 
@@ -150,6 +155,30 @@ void move_forward_by_counts(uint32 counts) {
     current_linear_movement = FRONT;
     setup_controller(counts);
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+}
+
+void reverse_to_align(void) {
+    set_wheeldir(REVERSE, REVERSE);
+    current_linear_movement = BACK;
+    setup_controller(UINT32_MAX);
+
+    limit_sw_setup(&limit_sw_isr, &limit_sw_isr);
+    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+    limit_sw_pause();
+
+    current_linear_movement = BACK;
+    if (limit_sw_l_is_on()) {
+        set_wheeldir(FORWARD, REVERSE);
+        motor_l_pwm_WriteCompare(2500);
+        motor_r_pwm_WriteCompare(MASTER_BASE_SPEED);
+    }
+    else if (limit_sw_r_is_on()) {
+        set_wheeldir(REVERSE, FORWARD);
+        motor_l_pwm_WriteCompare(MASTER_BASE_SPEED);
+        motor_r_pwm_WriteCompare(2500);
+    }
+    while (!limit_sw_l_is_on() || !limit_sw_r_is_on());
+    stop();
 }
 
 void stop_nb(void) {
@@ -169,17 +198,17 @@ void turn_right_nb(void) {
     controller_isr_StartEx(&controller_update_isr);
 }
 
-void move_forward_by_nb(uint8 dist_cm) {
+void move_forward_by_nb(float dist_cm) {
     set_wheeldir(FORWARD, FORWARD);
     current_linear_movement = FRONT;
-    setup_controller(dist_cm * COUNTS_PER_CM);
+    setup_controller((uint32)(dist_cm * COUNTS_PER_CM));
     controller_isr_StartEx(&controller_update_isr);
 }
 
-void move_backward_by_nb(uint8 dist_cm) {
+void move_backward_by_nb(float dist_cm) {
     set_wheeldir(REVERSE, REVERSE);
     current_linear_movement = BACK;
-    setup_controller(dist_cm * COUNTS_PER_CM);
+    setup_controller((uint32)(dist_cm * COUNTS_PER_CM));
     controller_isr_StartEx(&controller_update_isr);
 }
 

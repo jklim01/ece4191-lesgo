@@ -50,20 +50,20 @@ void write_servo(uint8 demux_select, uint16 cmp) {
 
 // API
 void servo_setup(void) {
-    // reset gripper position
-    gripper_close();
-
     // reset lifter position
     lifter_up();
+
+    // reset gripper position
+    gripper_close();
 }
 
 void gripper_close(void) {
-    const uint16 GRIPPER_CLOSE_CMP = 200;
+    const uint16 GRIPPER_CLOSE_CMP = 205;
     write_servo(GRIPPER_SELECT, GRIPPER_CLOSE_CMP);
 }
 
 void gripper_open(void) {
-    const uint16 GRIPPER_OPEN_CMP = 250;
+    const uint16 GRIPPER_OPEN_CMP = 260;
     write_servo(GRIPPER_SELECT, GRIPPER_OPEN_CMP);
 }
 

@@ -53,11 +53,11 @@ void limit_sw_resume(void) {
 }
 
 bool limit_sw_l_is_on(void) {
-    return limit_sw_l_sreg_Read();
+    return limit_sw_l_sreg_Read() == 0;
 }
 
 bool limit_sw_r_is_on(void) {
-    return limit_sw_r_sreg_Read();
+    return limit_sw_r_sreg_Read() == 0;
 }
 
 

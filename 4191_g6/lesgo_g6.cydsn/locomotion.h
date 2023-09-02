@@ -57,6 +57,9 @@ extern volatile LinearMovement current_linear_movement;
 
 // ISRs
 CY_ISR_PROTO(controller_update_isr);
+CY_ISR_PROTO(set_controller_flag_isr);
+CY_ISR_PROTO(limit_sw_l_isr);
+CY_ISR_PROTO(limit_sw_r_isr);
 
 
 // API
@@ -65,16 +68,17 @@ void locomotion_setup(void);
 void stop(void);
 void turn_left(void);
 void turn_right(void);
-void move_forward_by(uint8 dist_cm);
-void move_backward_by(uint8 dist_cm);
+void move_forward_by(float dist_cm);
+void move_backward_by(float dist_cm);
 void move_forward_by_counts(uint32 counts);
+void reverse_to_align(void);
 
 // non-blocking versions
 void stop_nb(void);
 void turn_left_nb(void);
 void turn_right_nb(void);
-void move_forward_by_nb(uint8 dist_cm);
-void move_backward_by_nb(uint8 dist_cm);
+void move_forward_by_nb(float dist_cm);
+void move_backward_by_nb(float dist_cm);
 
 
 #endif  // LOCOMOTION_H
