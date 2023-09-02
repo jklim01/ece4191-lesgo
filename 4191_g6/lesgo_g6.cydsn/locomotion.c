@@ -13,8 +13,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "NavStack.h"
 #include "locomotion.h"
 #include "limit_sw.h"
+#include "base_sw.h"
 #include "motor_l_in1.h"
 #include "motor_l_in2.h"
 #include "motor_r_in1.h"
@@ -30,6 +32,10 @@
 
 // globals
 volatile LinearMovement current_linear_movement = STOP;
+volatile Movement latest_movement = { 0, 0 };
+volatile Heading heading = NORTH;
+volatile float pos_x = 0.0;
+volatile float pos_y = 0.0;
 
 
 // static globals
@@ -70,8 +76,8 @@ static const double K_D = 0.05;
 
 // internals
 typedef enum __attribute__ ((__packed__)) WheelDir {
-    FORWARD,
-    REVERSE
+    WHEEL_FORWARD,
+    WHEEL_REVERSE
 } WheelDir;
 
 bool controller_update(void);
@@ -81,6 +87,7 @@ void set_wheeldir_l(WheelDir dir);
 void set_wheeldir_r(WheelDir dir);
 void set_wheeldir(WheelDir dir_l, WheelDir dir_r);
 void wait_for_controller_period(void);
+void update_pos_heading(void);
 
 
 // ISRs
@@ -113,8 +120,13 @@ void locomotion_setup(void) {
     motor_l_quaddec_Start();
     motor_r_quaddec_Start();
     controller_timer_Start();
-
     controller_timer_WritePeriod(controller_period_ms * 1000);  // 1MHz locomotion_clk -> 1000 ticks per ms
+
+    navstack_init();
+    if (base_sw_Read() == 0)
+        pos_x = -2;
+    else
+        pos_y = 2;
 }
 
 void stop(void) {
@@ -122,58 +134,71 @@ void stop(void) {
     motor_r_pwm_WriteCompare(0);
     target_count = 0;
     current_linear_movement = STOP;
+
+    update_pos_heading();
+    navstack_push(latest_movement);
 }
 
 void turn_left(void) {
-    set_wheeldir(REVERSE, FORWARD);
+    set_wheeldir(WHEEL_REVERSE, WHEEL_FORWARD);
+    latest_movement.type = TURN_LEFT;
+
     setup_controller(TURN_COUNT);
-    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+    while (controller_update()) wait_for_controller_period();
 }
 
 void turn_right(void) {
-    set_wheeldir(FORWARD, REVERSE);
+    set_wheeldir(WHEEL_FORWARD, WHEEL_REVERSE);
+    latest_movement.type = TURN_RIGHT;
+
     setup_controller(TURN_COUNT);
-    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+    while (controller_update()) wait_for_controller_period();
 }
 
 void move_forward_by(float dist_cm) {
-    set_wheeldir(FORWARD, FORWARD);
+    set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
     current_linear_movement = FRONT;
+    latest_movement.type = GO_FORWARD;
+
     setup_controller((uint32)(dist_cm * COUNTS_PER_CM + 0.5));
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
 }
 
 void move_backward_by(float dist_cm) {
-    set_wheeldir(REVERSE, REVERSE);
+    set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
     current_linear_movement = BACK;
+    latest_movement.type = GO_BACKWARD;
+
     setup_controller((uint32)(dist_cm * COUNTS_PER_CM + 0.5));
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
 }
 
 void move_forward_by_counts(uint32 counts) {
-    set_wheeldir(FORWARD, FORWARD);
+    set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
     current_linear_movement = FRONT;
+    latest_movement.type = GO_FORWARD;
+
     setup_controller(counts);
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
 }
 
 void reverse_to_align(void) {
-    set_wheeldir(REVERSE, REVERSE);
+    set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
     current_linear_movement = BACK;
-    setup_controller(UINT32_MAX);
+    latest_movement.type = GO_BACKWARD;
 
+    setup_controller(UINT32_MAX);
     limit_sw_setup(&limit_sw_isr, &limit_sw_isr);
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
     limit_sw_pause();
 
-    current_linear_movement = BACK;
     if (limit_sw_l_is_on()) {
-        set_wheeldir(FORWARD, REVERSE);
+        set_wheeldir(WHEEL_FORWARD, WHEEL_REVERSE);
         motor_l_pwm_WriteCompare(2500);
         motor_r_pwm_WriteCompare(MASTER_BASE_SPEED);
     }
     else if (limit_sw_r_is_on()) {
-        set_wheeldir(REVERSE, FORWARD);
+        set_wheeldir(WHEEL_REVERSE, WHEEL_FORWARD);
         motor_l_pwm_WriteCompare(MASTER_BASE_SPEED);
         motor_r_pwm_WriteCompare(2500);
     }
@@ -187,28 +212,54 @@ void stop_nb(void) {
 }
 
 void turn_left_nb(void) {
-    set_wheeldir(REVERSE, FORWARD);
+    set_wheeldir(WHEEL_REVERSE, WHEEL_FORWARD);
+    latest_movement.type = TURN_LEFT;
+
     setup_controller(TURN_COUNT);
     controller_isr_StartEx(&controller_update_isr);
 }
 
 void turn_right_nb(void) {
-    set_wheeldir(FORWARD, REVERSE);
+    set_wheeldir(WHEEL_FORWARD, WHEEL_REVERSE);
+    latest_movement.type = TURN_RIGHT;
+
     setup_controller(TURN_COUNT);
     controller_isr_StartEx(&controller_update_isr);
 }
 
 void move_forward_by_nb(float dist_cm) {
-    set_wheeldir(FORWARD, FORWARD);
+    set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
     current_linear_movement = FRONT;
+    latest_movement.type = GO_FORWARD;
+
     setup_controller((uint32)(dist_cm * COUNTS_PER_CM));
     controller_isr_StartEx(&controller_update_isr);
 }
 
 void move_backward_by_nb(float dist_cm) {
-    set_wheeldir(REVERSE, REVERSE);
+    set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
     current_linear_movement = BACK;
+    latest_movement.type = GO_BACKWARD;
+
     setup_controller((uint32)(dist_cm * COUNTS_PER_CM));
+    controller_isr_StartEx(&controller_update_isr);
+}
+
+void move_forward_nb(void) {
+    set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
+    current_linear_movement = FRONT;
+    latest_movement.type = GO_FORWARD;
+
+    setup_controller(UINT32_MAX);
+    controller_isr_StartEx(&controller_update_isr);
+}
+
+void move_backward_nb(void) {
+    set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
+    current_linear_movement = BACK;
+    latest_movement.type = GO_BACKWARD;
+
+    setup_controller(UINT32_MAX);
     controller_isr_StartEx(&controller_update_isr);
 }
 
@@ -265,12 +316,12 @@ void setup_controller(uint32 target) {
 
 void set_wheeldir_l(WheelDir dir) {
     switch (dir) {
-        case FORWARD: {
+        case WHEEL_FORWARD: {
             motor_l_in1_Write(0);
             motor_l_in2_Write(1);
             break;
         }
-        case REVERSE: {
+        case WHEEL_REVERSE: {
             motor_l_in1_Write(1);
             motor_l_in2_Write(0);
             break;
@@ -280,12 +331,12 @@ void set_wheeldir_l(WheelDir dir) {
 
 void set_wheeldir_r(WheelDir dir) {
     switch (dir) {
-        case FORWARD: {
+        case WHEEL_FORWARD: {
             motor_r_in1_Write(0);
             motor_r_in2_Write(1);
             break;
         }
-        case REVERSE: {
+        case WHEEL_REVERSE: {
             motor_r_in1_Write(1);
             motor_r_in2_Write(0);
             break;
@@ -305,6 +356,51 @@ void wait_for_controller_period(void) {
     controller_isr_StartEx(&set_controller_flag_isr);
     controller_reset_Write(0);
     while (!controller_timer_flag);
+}
+
+void update_pos_heading(void) {
+    switch (latest_movement.type) {
+        case GO_FORWARD: {
+            latest_movement.counts = (motor_l_quaddec_GetCounter() + motor_r_quaddec_GetCounter()) / 2;
+            float dist = latest_movement.counts / COUNTS_PER_CM;
+            switch (heading) {
+                case NORTH: pos_y += dist; break;
+                case SOUTH: pos_y -= dist; break;
+                case EAST: pos_x += dist; break;
+                case WEST: pos_x -= dist; break;
+            }
+            break;
+        }
+        case GO_BACKWARD: {
+            latest_movement.counts = (motor_l_quaddec_GetCounter() + motor_r_quaddec_GetCounter()) / 2;
+            float dist = latest_movement.counts / COUNTS_PER_CM;
+            switch (heading) {
+                case NORTH: pos_y -= dist; break;
+                case SOUTH: pos_y += dist; break;
+                case EAST: pos_x -= dist; break;
+                case WEST: pos_x += dist; break;
+            }
+            break;
+        }
+        case TURN_LEFT: {
+            switch (heading) {
+                case NORTH: heading = WEST; break;
+                case SOUTH: heading = EAST; break;
+                case EAST: heading = SOUTH; break;
+                case WEST: heading = NORTH; break;
+            }
+            break;
+        }
+        case TURN_RIGHT: {
+            switch (heading) {
+                case NORTH: heading = EAST; break;
+                case SOUTH: heading = WEST; break;
+                case EAST: heading = NORTH; break;
+                case WEST: heading = SOUTH; break;
+            }
+            break;
+        }
+    }
 }
 
 

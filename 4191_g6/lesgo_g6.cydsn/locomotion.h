@@ -34,6 +34,7 @@
 
 
 #include "cytypes.h"
+#include "NavStack.h"
 
 
 #define P 0
@@ -50,9 +51,20 @@ typedef enum __attribute__ ((__packed__)) LinearMovement {
     BACK
 } LinearMovement;
 
+typedef enum __attribute__ ((__packed__)) Heading {
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST
+} Heading;
+
 
 // globals
 extern volatile LinearMovement current_linear_movement;
+extern volatile Movement latest_movement;
+extern volatile Heading heading;
+extern volatile float pos_x;
+extern volatile float pos_y;
 
 
 // ISRs
@@ -79,6 +91,8 @@ void turn_left_nb(void);
 void turn_right_nb(void);
 void move_forward_by_nb(float dist_cm);
 void move_backward_by_nb(float dist_cm);
+void move_forward_nb(void);
+void move_backward_nb(void);
 
 
 #endif  // LOCOMOTION_H
