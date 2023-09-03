@@ -14,9 +14,11 @@
 #define NAVSTACK_H
 
 
+#include <stdbool.h>
 #include "cytypes.h"
 
 #define INIT_CAPACITY 8
+#define NO_MOVEMENT 0
 #define GO_FORWARD 1
 #define GO_BACKWARD 2
 #define TURN_LEFT 3
@@ -29,26 +31,23 @@ typedef struct Movement {
     uint32 counts;
 } Movement;
 
-typedef struct NavStack {
-    Movement* ptr;
-    uint8 len;
-    uint8 capacity;
-} NavStack;
+typedef struct NavStack NavStack;   // opaque type to ensure only the singleton instance exists
 
 
 // globals
-extern NavStack nav_stack;
+extern NavStack ns;     // singleton
 
 
 // API
 void navstack_init(void);
 void navstack_reserve(uint8 additional);
+uint8 navstack_len(void);
 void navstack_push(Movement m);
 Movement navstack_pop(void);
-Movement navstack_peek(uint8 num);
+Movement navstack_peek(void);
 void navstack_clear(void);
-void navstack_is_empty(void);
-void navstack_simplify(void);
+bool navstack_is_empty(void);
+bool try_merge_movements(Movement* m, Movement other);
 
 #endif  // NAVSTACK_H
 
