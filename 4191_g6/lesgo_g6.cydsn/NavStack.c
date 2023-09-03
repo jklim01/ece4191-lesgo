@@ -99,7 +99,7 @@ bool try_merge_movements(Movement* m, Movement other) {
                 return true;
             }
 
-            return false;
+            break;
         }
         case GO_BACKWARD: {
             if (other.type == GO_BACKWARD) {
@@ -119,7 +119,7 @@ bool try_merge_movements(Movement* m, Movement other) {
                 return true;
             }
 
-            return false;
+            break;
         }
         case TURN_LEFT: {
             if (other.type == TURN_RIGHT) {
@@ -127,7 +127,7 @@ bool try_merge_movements(Movement* m, Movement other) {
                 return true;
             }
 
-            return false;
+            break;
         }
         case TURN_RIGHT: {
             if (other.type == TURN_LEFT) {
@@ -135,9 +135,11 @@ bool try_merge_movements(Movement* m, Movement other) {
                 return true;
             }
 
-            return false;
+            break;
         }
     }
+
+    return false;
 }
 
 

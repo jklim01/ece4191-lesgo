@@ -32,7 +32,7 @@
 
 // globals
 volatile LinearMovement current_linear_movement = STOP;
-volatile Movement latest_movement = { 0, 0 };
+volatile Movement latest_movement = { .type = NO_MOVEMENT, .counts = 0 };
 volatile Heading heading = NORTH;
 volatile float pos_x = 0.0;
 volatile float pos_y = 0.0;
@@ -41,6 +41,7 @@ volatile float pos_y = 0.0;
 // static globals
 static volatile uint32 target_count = 0;
 static volatile bool controller_timer_flag = false;
+static bool push_movement_to_ns = true;
 
 
 // constants
@@ -87,7 +88,7 @@ void set_wheeldir_l(WheelDir dir);
 void set_wheeldir_r(WheelDir dir);
 void set_wheeldir(WheelDir dir_l, WheelDir dir_r);
 void wait_for_controller_period(void);
-void update_pos_heading(void);
+void update_pos_heading(Movement m);
 
 
 // ISRs
@@ -135,8 +136,9 @@ void stop(void) {
     target_count = 0;
     current_linear_movement = STOP;
 
-    update_pos_heading();
-    navstack_push(latest_movement);
+    update_pos_heading(latest_movement);
+    if (push_movement_to_ns)
+        navstack_push(latest_movement);
 }
 
 void turn_left(void) {
@@ -157,7 +159,7 @@ void turn_right(void) {
 
 void move_forward_by(float dist_cm) {
     set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
-    current_linear_movement = FRONT;
+    current_linear_movement = FORWARD;
     latest_movement.type = GO_FORWARD;
 
     setup_controller((uint32)(dist_cm * COUNTS_PER_CM + 0.5));
@@ -166,7 +168,7 @@ void move_forward_by(float dist_cm) {
 
 void move_backward_by(float dist_cm) {
     set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
-    current_linear_movement = BACK;
+    current_linear_movement = REVERSE;
     latest_movement.type = GO_BACKWARD;
 
     setup_controller((uint32)(dist_cm * COUNTS_PER_CM + 0.5));
@@ -175,16 +177,43 @@ void move_backward_by(float dist_cm) {
 
 void move_forward_by_counts(uint32 counts) {
     set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
-    current_linear_movement = FRONT;
+    current_linear_movement = FORWARD;
     latest_movement.type = GO_FORWARD;
 
     setup_controller(counts);
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
 }
 
+void move_backward_by_counts(uint32 counts) {
+    set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
+    current_linear_movement = REVERSE;
+    latest_movement.type = GO_FORWARD;
+
+    setup_controller(counts);
+    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+}
+
+void move_forward(void) {
+    set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
+    current_linear_movement = FORWARD;
+    latest_movement.type = GO_FORWARD;
+
+    setup_controller(UINT32_MAX);
+    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+}
+
+void move_backward(void) {
+    set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
+    current_linear_movement = REVERSE;
+    latest_movement.type = GO_BACKWARD;
+
+    setup_controller(UINT32_MAX);
+    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+}
+
 void reverse_to_align(void) {
     set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
-    current_linear_movement = BACK;
+    current_linear_movement = REVERSE;
     latest_movement.type = GO_BACKWARD;
 
     setup_controller(UINT32_MAX);
@@ -204,6 +233,35 @@ void reverse_to_align(void) {
     }
     while (!limit_sw_l_is_on() || !limit_sw_r_is_on());
     stop();
+}
+
+void unwind_navstack_till(uint8 remaining) {
+    // don't push the following movements to the navigation stack
+    push_movement_to_ns = false;
+
+    while (navstack_len() > remaining) {
+        Movement m = navstack_pop();
+
+        // try to merge with the prior movements to save time
+        while (navstack_len() > remaining) {
+            if (!try_merge_movements(&m, navstack_peek()))
+                break;
+
+            navstack_pop();
+        }
+
+        // reverse the movement
+        switch (m.type) {
+            case NO_MOVEMENT: break;
+            case GO_FORWARD: move_backward_by_counts(m.counts); break;
+            case GO_BACKWARD: move_forward_by_counts(m.counts); break;
+            case TURN_LEFT: turn_right(); break;
+            case TURN_RIGHT: turn_left(); break;
+        }
+    }
+
+    // return to original value
+    push_movement_to_ns = true;
 }
 
 void stop_nb(void) {
@@ -229,7 +287,7 @@ void turn_right_nb(void) {
 
 void move_forward_by_nb(float dist_cm) {
     set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
-    current_linear_movement = FRONT;
+    current_linear_movement = FORWARD;
     latest_movement.type = GO_FORWARD;
 
     setup_controller((uint32)(dist_cm * COUNTS_PER_CM));
@@ -238,7 +296,7 @@ void move_forward_by_nb(float dist_cm) {
 
 void move_backward_by_nb(float dist_cm) {
     set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
-    current_linear_movement = BACK;
+    current_linear_movement = REVERSE;
     latest_movement.type = GO_BACKWARD;
 
     setup_controller((uint32)(dist_cm * COUNTS_PER_CM));
@@ -247,7 +305,7 @@ void move_backward_by_nb(float dist_cm) {
 
 void move_forward_nb(void) {
     set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
-    current_linear_movement = FRONT;
+    current_linear_movement = FORWARD;
     latest_movement.type = GO_FORWARD;
 
     setup_controller(UINT32_MAX);
@@ -256,7 +314,7 @@ void move_forward_nb(void) {
 
 void move_backward_nb(void) {
     set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
-    current_linear_movement = BACK;
+    current_linear_movement = REVERSE;
     latest_movement.type = GO_BACKWARD;
 
     setup_controller(UINT32_MAX);
@@ -358,11 +416,11 @@ void wait_for_controller_period(void) {
     while (!controller_timer_flag);
 }
 
-void update_pos_heading(void) {
-    switch (latest_movement.type) {
+void update_pos_heading(Movement m) {
+    switch (m.type) {
         case GO_FORWARD: {
-            latest_movement.counts = (motor_l_quaddec_GetCounter() + motor_r_quaddec_GetCounter()) / 2;
-            float dist = latest_movement.counts / COUNTS_PER_CM;
+            m.counts = (motor_l_quaddec_GetCounter() + motor_r_quaddec_GetCounter()) / 2;
+            float dist = m.counts / COUNTS_PER_CM;
             switch (heading) {
                 case NORTH: pos_y += dist; break;
                 case SOUTH: pos_y -= dist; break;
@@ -372,8 +430,8 @@ void update_pos_heading(void) {
             break;
         }
         case GO_BACKWARD: {
-            latest_movement.counts = (motor_l_quaddec_GetCounter() + motor_r_quaddec_GetCounter()) / 2;
-            float dist = latest_movement.counts / COUNTS_PER_CM;
+            m.counts = (motor_l_quaddec_GetCounter() + motor_r_quaddec_GetCounter()) / 2;
+            float dist = m.counts / COUNTS_PER_CM;
             switch (heading) {
                 case NORTH: pos_y -= dist; break;
                 case SOUTH: pos_y += dist; break;

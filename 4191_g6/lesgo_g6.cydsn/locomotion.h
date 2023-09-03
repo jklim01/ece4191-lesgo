@@ -47,8 +47,8 @@
 // typedefs
 typedef enum __attribute__ ((__packed__)) LinearMovement {
     STOP,
-    FRONT,
-    BACK
+    FORWARD,
+    REVERSE
 } LinearMovement;
 
 typedef enum __attribute__ ((__packed__)) Heading {
@@ -83,7 +83,11 @@ void turn_right(void);
 void move_forward_by(float dist_cm);
 void move_backward_by(float dist_cm);
 void move_forward_by_counts(uint32 counts);
+void move_backward_by_counts(uint32 counts);
+void move_forward(void);
+void move_backward(void);
 void reverse_to_align(void);
+void unwind_navstack_till(uint8 remaining);
 
 // non-blocking versions
 void stop_nb(void);

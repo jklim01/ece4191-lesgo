@@ -10,6 +10,7 @@
  * ========================================
 */
 
+#pragma once
 #ifndef UTILS_H
 #define UTILS_H
 
@@ -20,12 +21,13 @@
 // macros
 #define FSM(state) switch((state)) { while(1)
 #define END_FSM }
-#define STATE(x) case (x): {
+#define STATE(x) case ((x)): {
 #define END_STATE break; }
 
 
 // constants
-const uint8 CODE_NAV_STACK_ALLOC_ERROR = 1;
+#define END_SUCCESS ((uint8)0)
+#define CODE_NAV_STACK_ALLOC_ERROR ((uint8)1)
 
 
 // API
