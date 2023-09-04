@@ -21,128 +21,135 @@
 #include "ir_sensor.h"
 #include "ultrasonic.h"
 #include "limit_sw.h"
-// #include "UART_1.h"
+#include "UART_1.h"
 
 
-typedef enum __attribute__ ((__packed__)) State {
-    LEAVE_BASE,
-    FIND_SLIT,
-    FIND_PUCK,
-    DEPOSIT_PUCK,
-    RETURN_TO_BASE
-} State;
-
-
-CY_ISR(ir_handler) {
+static volatile bool moved = false;
+static volatile bool found_puck = false;
+CY_ISR(handler) {
     stop();
+    found_puck = true;
+}
+
+CY_ISR(sw_isr) {
+    static bool state = true;
+    state = !state;
+    led_Write(state);
+}
+CY_ISR(sw_l_isr) {
+    static bool state = true;
+    state = !state;
+    if (state)
+        // lifter_down();
+        flicker_up();
+    else
+        // lifter_up();
+        flicker_down();
+}
+CY_ISR(sw_r_isr) {
+    static bool state = true;
+    state = !state;
+    if (state)
+        gripper_open();
+    else
+        gripper_close();
 }
 
 
-int main(void)
+int main1(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-    locomotion_setup();
-    color_sensor_setup();
+    // locomotion_setup();
+    // color_sensor_setup();
     servo_setup();
-    ultrasonic_setup();
-    ir_sensor_setup(&ir_handler, NULL, NULL);
-    ir_sensor_pause();
+    // ultrasonic_setup();
+    // ir_sensor_setup(&handler, NULL, NULL);
+    limit_sw_setup(sw_l_isr, sw_r_isr);
+    // sw_isr_StartEx(sw_isr);
 
     // UART_1_Start();
     // UART_1_PutString("Im ready!\n");
     // char str[20];
-    State state = LEAVE_BASE;
-    FSM(state) {
-        STATE(LEAVE_BASE) {
-            const uint16 OBSTACLE_DIST_THRESH = 20;
-            const float OBSTACLE_Y_POS = 100;
+    // char* str_ptr = str;
+    // char c;
+    // while (1) {
+    //     if (UART_1_GetRxBufferSize() > 0) {
+    //         c = UART_1_GetChar();
 
-            // move forwrad till distance to obstacle is below threshold
-            move_forward_nb();
-            while (us_fl_get_dist() > OBSTACLE_DIST_THRESH && us_fr_get_dist() > OBSTACLE_DIST_THRESH);
-            stop_nb();
+    //         if (c == '!') {
+    //             *str_ptr = '\0';
+    //             break;
+    //         }
 
-            if (pos_y > OBSTACLE_Y_POS)
-                // if the robot has already entered the slit
-                state = FIND_PUCK;
-            else
-                state = FIND_SLIT;
-        } END_STATE
+    //         *str_ptr = c;
+    //         str_ptr++;
+    //     }
+    // }
+    // uint32 counts = strtoul(str, &str_ptr, 10);
+    // sprintf(str, "trying %lu\n", counts);
+    // UART_1_PutString(str);
+    // move_forward_by_counts(counts * 10);
 
-        STATE(FIND_SLIT) {
-            const uint16 WALL_DIST_THRESH = 8;
-            const uint16 SLIT_DIST_THRESH = 20;
-            const float us_sensor_offset = 12;
-            bool slit_found = false;
+    for(;;)
+    {
+        /* Place your application code here. */
+        // char str[60];
+        // sprintf(str, "L: %8li\t R: %8li\n", motor_l_quaddec_GetCounter(), motor_r_quaddec_GetCounter());
+        // UART_1_PutString(str);
+        // CyDelay(10);
 
-            // turn to face direction with larger distance and reverse
-            if (us_l_get_dist() > us_r_get_dist())
-                turn_left();
-            else
-                turn_right();
+        // char str[50];
+        // sprintf(str, "L %3u\t R %3u\t FL %3u\t FR %3u\n",
+        //     us_l_get_dist(), us_r_get_dist(), us_fl_get_dist(), us_fr_get_dist());
+        // UART_1_PutString(str);
+        // CyDelay(200);
 
-            // repeat algorithm until the slit is found
-            while (!slit_found) {
-                // move forward along the obstacle, stopping and setting the flag if the slit is found
-                move_forward_nb();
-                while (us_fl_get_dist() > WALL_DIST_THRESH && us_fr_get_dist() > WALL_DIST_THRESH) {
-                    if (us_r_get_dist() > SLIT_DIST_THRESH) {
-                        slit_found = true;
-                        break;
-                    }
-                }
-                stop_nb();
+        // led_Write(moved);
+        // if (moved) {
+        //     move_forward_by(10);
+            // reverse_to_align();
+            // CyDelay(700);
+            // move_forward_by(25);
+        //     moved = false;
+        // }
 
-                // reverse to wall to prepare for next try
-                reverse_to_align();
-            }
+        if (!moved) {
+            move_forward_by(30);
+            moved = true;
+        }
 
-            // move forward slightly to ensure the robot can pass through the slit
-            move_forward_by(us_sensor_offset);
-
-            // turn to face the slit
-            turn_right();
-
-            state = FIND_PUCK;
-        } END_STATE
-
-        STATE(FIND_PUCK) {
-            const float DETECTOR_TO_COLOR_SENSOR = 1.2;
-            const float COLOR_SENSOR_TO_GRIPPER = 17.8;
-
-            // move forward until puck detected
-            ir_sensor_resume();
-            move_forward();
-            while (current_linear_movement != STOP);
+        if (found_puck) {
             ir_sensor_pause();
+            show_code(0);
 
-            // align color sensor with puck and detect color
-            move_forward_by(DETECTOR_TO_COLOR_SENSOR);
+            move_forward_by(1.2);
             Color c = color_sense();
+            // switch (c) {
+            //     case RED: show_code(1); break;
+            //     case GREEN: show_code(2); break;
+            //     case BLUE: show_code(3); break;
+            // }
 
-            // align gripper with puck and pick up
-            move_backward_by(COLOR_SENSOR_TO_GRIPPER);
+            move_backward_by(17.8);
             gripper_open();
             lifter_down();
             gripper_close();
             lifter_up();
 
-            state = DEPOSIT_PUCK;
-        } END_STATE
+            move_forward_by(10);
+            lifter_down();
+            gripper_open();
+            lifter_up();
+            gripper_close();
 
-        STATE(DEPOSIT_PUCK) {
-
-
-        } END_STATE
-
-        STATE(RETURN_TO_BASE) {
-            unwind_navstack_till(0);
-            panic(END_SUCCESS);
-        } END_STATE
-
-    } END_FSM
+            found_puck = false;
+            moved = false;
+            move_backward_by(15);
+            ir_sensor_resume();
+        }
+    }
 }
 
 /* [] END OF FILE */

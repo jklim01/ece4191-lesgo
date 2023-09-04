@@ -51,6 +51,10 @@ void navstack_reserve(uint8 additional) {
     ns.capacity += INIT_CAPACITY;
 }
 
+uint8 navstack_len(void) {
+    return ns.len;
+}
+
 void navstack_push(Movement m) {
     if (ns.capacity == ns.len)
         navstack_reserve(INIT_CAPACITY);

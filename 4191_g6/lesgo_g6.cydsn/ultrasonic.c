@@ -93,6 +93,7 @@ void ultrasonic_setup(void) {
     us_r_isr_StartEx(us_r_isr);
     us_fl_isr_StartEx(us_fl_isr);
     us_fr_isr_StartEx(us_fr_isr);
+    CyDelay(600);
 }
 
 uint16 us_l_get_dist(void) {

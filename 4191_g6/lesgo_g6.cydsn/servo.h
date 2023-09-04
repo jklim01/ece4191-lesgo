@@ -20,6 +20,8 @@ void gripper_close(void);
 void gripper_open(void);
 void lifter_up(void);
 void lifter_down(void);
+void flicker_up(void);
+void flicker_down(void);
 void flicker_shoot(void);
 
 #endif

@@ -29,6 +29,11 @@
 #include "controller_timer.h"
 #include "controller_reset.h"
 
+#include "led_r.h"
+#include "led_g.h"
+#include "led_b.h"
+#include "led.h"
+
 
 // globals
 volatile LinearMovement current_linear_movement = STOP;
@@ -215,11 +220,17 @@ void reverse_to_align(void) {
     set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
     current_linear_movement = REVERSE;
     latest_movement.type = GO_BACKWARD;
+    led_r_Write(0);
+    led_g_Write(0);
+    led_b_Write(0);
 
     setup_controller(UINT32_MAX);
     limit_sw_setup(&limit_sw_isr, &limit_sw_isr);
-    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+    led_g_Write(1);
+    // while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+    while (controller_update()) wait_for_controller_period();
     limit_sw_pause();
+    led_r_Write(1);
 
     if (limit_sw_l_is_on()) {
         set_wheeldir(WHEEL_FORWARD, WHEEL_REVERSE);
@@ -233,6 +244,10 @@ void reverse_to_align(void) {
     }
     while (!limit_sw_l_is_on() || !limit_sw_r_is_on());
     stop();
+
+    led_r_Write(0);
+    led_g_Write(0);
+    led_b_Write(0);
 }
 
 void unwind_navstack_till(uint8 remaining) {

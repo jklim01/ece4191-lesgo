@@ -50,11 +50,10 @@ void write_servo(uint8 demux_select, uint16 cmp) {
 
 // API
 void servo_setup(void) {
-    // reset lifter position
+    // reset servo positions
     lifter_up();
-
-    // reset gripper position
     gripper_close();
+    flicker_up();
 }
 
 void gripper_close(void) {
@@ -75,6 +74,16 @@ void lifter_up(void) {
 void lifter_down(void) {
     const uint16 LIFTER_DOWN_CMP = 115;
     write_servo(LIFTER_SELECT, LIFTER_DOWN_CMP);
+}
+
+void flicker_up(void) {
+    const uint16 LIFTER_UP_CMP = 139;
+    write_servo(FLICKER_SELECT, LIFTER_UP_CMP);
+}
+
+void flicker_down(void) {
+    const uint16 LIFTER_DOWN_CMP = 235;
+    write_servo(FLICKER_SELECT, LIFTER_DOWN_CMP);
 }
 
 void flicker_shoot(void) {

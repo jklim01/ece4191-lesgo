@@ -19,9 +19,9 @@
 
 
 // macros
-#define FSM(state) switch((state)) { while(1)
+#define FSM(state) while(1) { switch((state))
 #define END_FSM }
-#define STATE(x) case ((x)): {
+#define STATE(x) case (x): {
 #define END_STATE break; }
 
 

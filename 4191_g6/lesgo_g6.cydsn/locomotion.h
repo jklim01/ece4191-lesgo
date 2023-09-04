@@ -76,7 +76,6 @@ CY_ISR_PROTO(limit_sw_r_isr);
 
 // API
 void locomotion_setup(void);
-
 void stop(void);
 void turn_left(void);
 void turn_right(void);
