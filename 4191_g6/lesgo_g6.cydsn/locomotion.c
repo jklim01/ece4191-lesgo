@@ -128,6 +128,8 @@ void locomotion_setup(void) {
     controller_timer_Start();
     controller_timer_WritePeriod(controller_period_ms * 1000);  // 1MHz locomotion_clk -> 1000 ticks per ms
 
+    limit_sw_setup(&limit_sw_isr, &limit_sw_isr);
+    limit_sw_pause();
     navstack_init();
     if (base_sw_Read() == 0)
         pos_x = -2;
@@ -225,10 +227,9 @@ void reverse_to_align(void) {
     led_b_Write(0);
 
     setup_controller(UINT32_MAX);
-    limit_sw_setup(&limit_sw_isr, &limit_sw_isr);
+    limit_sw_resume();
     led_g_Write(1);
-    // while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
-    while (controller_update()) wait_for_controller_period();
+    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
     limit_sw_pause();
     led_r_Write(1);
 

@@ -46,6 +46,8 @@ void limit_sw_pause(void) {
 }
 
 void limit_sw_resume(void) {
+    limit_sw_l_isr_ClearPending();
+    limit_sw_r_isr_ClearPending();
     limit_sw_setup(
         limit_sw_l_handler,
         limit_sw_r_handler

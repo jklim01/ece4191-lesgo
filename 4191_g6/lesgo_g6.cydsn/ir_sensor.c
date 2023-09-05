@@ -60,6 +60,9 @@ void ir_sensor_pause(void) {
 }
 
 void ir_sensor_resume(void) {
+    ir_mid_isr_ClearPending();
+    ir_l_isr_ClearPending();
+    ir_r_isr_ClearPending();
     ir_sensor_setup(
         ir_mid_handler,
         ir_l_handler,
