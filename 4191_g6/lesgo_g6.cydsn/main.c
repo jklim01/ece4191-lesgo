@@ -37,22 +37,26 @@ CY_ISR(sw_isr) {
     led_Write(state);
 }
 CY_ISR(sw_l_isr) {
-    static bool state = true;
-    state = !state;
-    if (state)
+    // static bool state = true;
+    // state = !state;
+    // if (state)
         // lifter_down();
-        flicker_up();
-    else
+        // flicker_up();
+    turn_left();
+    // else
         // lifter_up();
-        flicker_down();
+        // flicker_down();
+        // stop();
 }
 CY_ISR(sw_r_isr) {
-    static bool state = true;
-    state = !state;
-    if (state)
-        gripper_open();
-    else
-        gripper_close();
+    // static bool state = true;
+    // state = !state;
+    // if (state)
+    turn_right();
+        // gripper_open();
+    // else
+        // stop();
+        // gripper_close();
 }
 
 
@@ -61,9 +65,9 @@ int main1(void)
     CyGlobalIntEnable; /* Enable global interrupts. */
 
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-    // locomotion_setup();
+    locomotion_setup();
     // color_sensor_setup();
-    servo_setup();
+    // servo_setup();
     // ultrasonic_setup();
     // ir_sensor_setup(&handler, NULL, NULL);
     limit_sw_setup(sw_l_isr, sw_r_isr);
@@ -115,40 +119,40 @@ int main1(void)
         //     moved = false;
         // }
 
-        if (!moved) {
-            move_forward_by(30);
-            moved = true;
-        }
+    //     if (!moved) {
+    //         move_forward_by(30);
+    //         moved = true;
+    //     }
 
-        if (found_puck) {
-            ir_sensor_pause();
-            show_code(0);
+    //     if (found_puck) {
+    //         ir_sensor_pause();
+    //         show_code(0);
 
-            move_forward_by(1.2);
-            Color c = color_sense();
-            // switch (c) {
-            //     case RED: show_code(1); break;
-            //     case GREEN: show_code(2); break;
-            //     case BLUE: show_code(3); break;
-            // }
+    //         move_forward_by(1.2);
+    //         Color c = color_sense();
+    //         // switch (c) {
+    //         //     case RED: show_code(1); break;
+    //         //     case GREEN: show_code(2); break;
+    //         //     case BLUE: show_code(3); break;
+    //         // }
 
-            move_backward_by(17.8);
-            gripper_open();
-            lifter_down();
-            gripper_close();
-            lifter_up();
+    //         move_backward_by(17.8);
+    //         gripper_open();
+    //         lifter_down();
+    //         gripper_close();
+    //         lifter_up();
 
-            move_forward_by(10);
-            lifter_down();
-            gripper_open();
-            lifter_up();
-            gripper_close();
+    //         move_forward_by(10);
+    //         lifter_down();
+    //         gripper_open();
+    //         lifter_up();
+    //         gripper_close();
 
-            found_puck = false;
-            moved = false;
-            move_backward_by(15);
-            ir_sensor_resume();
-        }
+    //         found_puck = false;
+    //         moved = false;
+    //         move_backward_by(15);
+    //         ir_sensor_resume();
+    //     }
     }
 }
 
