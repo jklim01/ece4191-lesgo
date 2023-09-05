@@ -53,8 +53,9 @@ static bool push_movement_to_ns = true;
 #define COUNTS_PER_WHEEL_CYCLE (14600)
 #define WHEEL_GAP_CM (22.7)
 #define WHEEL_DIAMETER_CM (5.45)
+#define TURN_OFFSET (-100)
 static const uint32 COUNTS_PER_CM = (uint32)((COUNTS_PER_WHEEL_CYCLE / WHEEL_DIAMETER_CM / 3.14159265358979323846) + 0.5);
-static const uint32 TURN_COUNT = (uint32)((COUNTS_PER_WHEEL_CYCLE / 4 / WHEEL_DIAMETER_CM *  WHEEL_GAP_CM) + 0.5);
+static const uint32 TURN_COUNT = (uint32)((COUNTS_PER_WHEEL_CYCLE / 4 / WHEEL_DIAMETER_CM *  WHEEL_GAP_CM) + 0.5 + TURN_OFFSET);
 static const uint16 controller_period_ms = 50;
 
 
@@ -65,8 +66,8 @@ static const uint16 MASTER_BASE_SPEED = 12500;
 static const double K_P = 0.05;
 
 #elif CONTROLLER_TYPE == PI
-static const double K_P = 0.05;
-static const double K_I = 0.05;
+static const double K_P = 0.1;      // 0.5 very good (BETTER THAN 1.5) (0.5 > 0.1 > 1.5)
+static const double K_I = 0.01;     // 0.5 will shake, 0.1 will shake abit, 0.05 > 0.01
 
 #elif CONTROLLER_TYPE == PD
 static const double K_P = 0.05;
@@ -187,6 +188,10 @@ void move_forward_by_counts(uint32 counts) {
     current_linear_movement = FORWARD;
     latest_movement.type = GO_FORWARD;
 
+    // THIS WORKS
+    // Movement mvmt = {GO_FORWARD, counts};
+    // navstack_push(mvmt);
+
     setup_controller(counts);
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
 }
@@ -222,16 +227,16 @@ void reverse_to_align(void) {
     set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
     current_linear_movement = REVERSE;
     latest_movement.type = GO_BACKWARD;
-    led_r_Write(0);
-    led_g_Write(0);
-    led_b_Write(0);
+    // led_r_Write(0);      // FOR DEBUGGING
+    // led_g_Write(0);      // FOR DEBUGGING
+    // led_b_Write(0);      // FOR DEBUGGING
 
     setup_controller(UINT32_MAX);
     limit_sw_resume();
-    led_g_Write(1);
+    // led_g_Write(1);      // FOR DEBUGGING
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
     limit_sw_pause();
-    led_r_Write(1);
+    // led_r_Write(1);      // FOR DEBUGGING
 
     if (limit_sw_l_is_on()) {
         set_wheeldir(WHEEL_FORWARD, WHEEL_REVERSE);
@@ -246,30 +251,39 @@ void reverse_to_align(void) {
     while (!limit_sw_l_is_on() || !limit_sw_r_is_on());
     stop();
 
-    led_r_Write(0);
-    led_g_Write(0);
-    led_b_Write(0);
+    // led_r_Write(0);      // FOR DEBUGGING
+    // led_g_Write(0);      // FOR DEBUGGING
+    // led_b_Write(0);      // FOR DEBUGGING
 }
 
 void unwind_navstack_till(uint8 remaining) {
     // don't push the following movements to the navigation stack
     push_movement_to_ns = false;
+    led_r_Write(0);
+    led_g_Write(0);
+    led_b_Write(0);
 
     while (navstack_len() > remaining) {
         Movement m = navstack_pop();
 
-        // try to merge with the prior movements to save time
-        while (navstack_len() > remaining) {
-            if (!try_merge_movements(&m, navstack_peek()))
-                break;
+        // led_g_Write(1);
 
-            navstack_pop();
-        }
+        // try to merge with the prior movements to save time
+        // while (navstack_len() > remaining) {
+            
+        //     led_b_Write(1);
+
+        //     if (!try_merge_movements(&m, navstack_peek()))
+        //         break;
+
+        //     navstack_pop();
+        // }
 
         // reverse the movement
         switch (m.type) {
             case NO_MOVEMENT: break;
-            case GO_FORWARD: move_backward_by_counts(m.counts); break;
+            case GO_FORWARD: led_g_Write(1); if (m.counts == 0) {led_r_Write(1);} else {led_b_Write(1);}
+            move_backward_by_counts(m.counts); break;
             case GO_BACKWARD: move_forward_by_counts(m.counts); break;
             case TURN_LEFT: turn_right(); break;
             case TURN_RIGHT: turn_left(); break;
