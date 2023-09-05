@@ -273,7 +273,7 @@
       <Data key="3dc5dbf0-e129-42c9-8689-a386d42f4b12" value="ir_mid_out" />
       <Data key="4b077a6e-5bab-4607-a777-642e77324fc4" value="us_fl_echo" />
       <Data key="5ef2e0e5-1261-4953-8405-6928e03f286c" value="motor_l_in1" />
-      <Data key="7bcb0120-ecac-49a5-8c25-3cdbbb385761" value="ir_enable" />
+      <Data key="7bcb0120-ecac-49a5-8c25-3cdbbb385761" value="ir_disable" />
       <Data key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba" value="motor_l_phaseA" />
       <Data key="8e5f5bc5-51f4-46c3-b8ee-39b27d989e4f" value="led_r" />
       <Data key="8ed61270-8082-463b-a810-c9328e7a45c0" value="motor_r_in2" />
@@ -281,6 +281,7 @@
       <Data key="28da7efd-8480-44dd-b25c-df199d7df581" value="ir_r_out" />
       <Data key="38aa9e18-abff-4278-bb2a-a4b08d99609c" value="motor_r_phaseB" />
       <Data key="44b70976-4ffa-4fde-a186-072b5ffc9beb" value="motor_l_in2" />
+      <Data key="76fb395f-fef4-4468-925f-3100cfab6c97" value="base_sw" />
       <Data key="84afa804-37f3-475f-a88d-b5412a32c903" value="color_sensor_s3" />
       <Data key="89ce0435-faeb-4930-84e3-906995031d71" value="motor_r_en" />
       <Data key="90ebf862-24f9-4e24-8fde-40728217fff8" value="us_fr_echo" />
@@ -301,6 +302,8 @@
       <Data key="c9e1fdb2-05c0-4987-b415-1c7fa687b9a4" value="led_g" />
       <Data key="c18e60bc-f19d-4f21-bca3-a4df88b8ce49" value="color_sensor_out" />
       <Data key="c592e383-bed3-477b-9833-10db27d5efbc" value="us_trigger" />
+      <Data key="db4704ba-9b21-4be3-9e47-e719c46ec46d" value="Rx_2" />
+      <Data key="e4b913b0-5915-48f7-b594-1e148369917d" value="Tx_2" />
       <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="motor_l_en" />
       <Data key="ed092b9b-d398-4703-be89-cebf998501f6" value="Tx_1" />
       <Data key="f6e68f22-2950-431c-8af6-8d3b202ff28d" value="test" />
@@ -3597,6 +3600,9 @@
       </Group>
       <Group key="650fd9f0-d455-42c3-92dc-d3eff5147e82">
         <Data key="0" value="133378331944445571" />
+      </Group>
+      <Group key="db4704ba-9b21-4be3-9e47-e719c46ec46d">
+        <Data key="0" value="133383716782957605" />
       </Group>
     </Group>
     <Group key="Unlocked Pins" />

@@ -10,7 +10,6 @@
  * ========================================
 */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include "us_trigger.h"
 #include "us_trigger_pwm.h"

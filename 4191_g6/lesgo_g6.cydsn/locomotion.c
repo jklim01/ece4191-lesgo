@@ -143,6 +143,8 @@ void stop(void) {
     motor_r_pwm_WriteCompare(0);
     target_count = 0;
     current_linear_movement = STOP;
+    if (latest_movement.type == GO_FORWARD || latest_movement.type == GO_BACKWARD)
+        latest_movement.counts = labs(motor_l_quaddec_GetCounter()) + labs(motor_r_quaddec_GetCounter());
 
     update_pos_heading(latest_movement);
     if (push_movement_to_ns)
@@ -270,7 +272,7 @@ void unwind_navstack_till(uint8 remaining) {
 
         // try to merge with the prior movements to save time
         // while (navstack_len() > remaining) {
-            
+
         //     led_b_Write(1);
 
         //     if (!try_merge_movements(&m, navstack_peek()))
