@@ -65,21 +65,24 @@ int main(void)
     FSM(state) {
         STATE(LEAVE_BASE) {
             
-            reverse_to_align();
-            lifter_down();
-            gripper_open();
-            lifter_up();
-            gripper_close();
-            move_forward_by(12);
-            flicker_down();
-            flicker_up();
-            panic(END_SUCCESS);
+            // put down puck and flick
+            // lifter_down();
+            // gripper_open();
+            // lifter_up();
+            // gripper_close();
+            // move_forward_by(12);
+            // flicker_down();
+            // flicker_up();
             
             // move_forward_by(30);
-            // move_forward_by_counts(10000);
+            // turn_left();
+            // move_forward_by(20);
+            // reverse_to_align();
+            // print_navstsack();
             // unwind_navstack_till(0);
+            // panic(END_SUCCESS);
 
-            // turn_right();
+
             // ending procedure
             // reverse_to_align();
             // panic(END_SUCCESS);
@@ -94,12 +97,6 @@ int main(void)
             move_forward_nb();
             while (us_fl_get_dist() > OBSTACLE_DIST_THRESH && us_fr_get_dist() > OBSTACLE_DIST_THRESH);
             stop_nb();
-
-            // if (pos_y > OBSTACLE_Y_POS)
-            //     // if the robot has already entered the slit
-            //     state = FIND_PUCK;
-            // else
-            //     state = FIND_SLIT;
 
             state = FIND_SLIT;
         } END_STATE
@@ -158,18 +155,6 @@ int main(void)
             move_forward_by(DETECTOR_TO_COLOR_SENSOR);
             Color c = color_sense();
 
-            switch (c) {
-                case RED:
-                    led_r_Write(1);
-                    break;
-                case GREEN:
-                    led_g_Write(1);
-                    break;
-                case BLUE:
-                    led_b_Write(1);
-                    break;
-            }
-
             // align gripper with puck and pick up
             move_backward_by(COLOR_SENSOR_TO_GRIPPER);
             gripper_open();
@@ -186,16 +171,18 @@ int main(void)
         } END_STATE
 
         STATE(RETURN_TO_BASE) {
-            reverse_to_align();
+            unwind_navstack_till(0);
+            // reverse_to_align();
+            
+            // put down puck and flick
             lifter_down();
             gripper_open();
             lifter_up();
             gripper_close();
-            move_forward_by(5);
+            move_forward_by(12);
+            flicker_down();
+            flicker_up();
 
-
-
-            // unwind_navstack_till(0);
             panic(END_SUCCESS);
         } END_STATE
 

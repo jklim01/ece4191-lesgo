@@ -26,6 +26,10 @@ struct NavStack {
 };
 
 
+// internals
+void print_movement(Movement m);
+
+
 // globals
 NavStack ns = { NULL, 0, 0 };
 
@@ -146,5 +150,19 @@ bool try_merge_movements(Movement* m, Movement other) {
     return false;
 }
 
+void print_navstsack(void) {
+    for (uint8 i = navstack_len()-1; i >= 0; i--){
+        print_movement(ns.ptr[i]);
+    }
+}
+
+#include "UART_1.h"
+void print_movement(Movement m) {
+    static char str[100];
+    const char* (type_names[5]) = {"None", "FORWARD", "BACKWARD", "LEFT", "RIGHT"};
+
+    sprintf(str, "{ .type=%s, .counts=%lu}\n", type_names[m.type], m.counts);
+    UART_1_PutString(str);
+}
 
 /* [] END OF FILE */

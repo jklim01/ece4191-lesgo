@@ -48,6 +48,7 @@ Movement navstack_peek(void);
 void navstack_clear(void);
 bool navstack_is_empty(void);
 bool try_merge_movements(Movement* m, Movement other);
+void print_navstsack(void);
 
 #endif  // NAVSTACK_H
 

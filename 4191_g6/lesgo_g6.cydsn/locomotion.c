@@ -63,7 +63,7 @@ static const uint16 controller_period_ms = 50;
 static const uint16 MASTER_BASE_SPEED = 12500;
 
 #if CONTROLLER_TYPE == P
-static const double K_P = 0.05;
+static const double K_P = 0.5;
 
 #elif CONTROLLER_TYPE == PI
 static const double K_P = 0.1;      // 0.5 very good (BETTER THAN 1.5) (0.5 > 0.1 > 1.5)
@@ -144,7 +144,7 @@ void stop(void) {
     target_count = 0;
     current_linear_movement = STOP;
     if (latest_movement.type == GO_FORWARD || latest_movement.type == GO_BACKWARD)
-        latest_movement.counts = labs(motor_l_quaddec_GetCounter()) + labs(motor_r_quaddec_GetCounter());
+        latest_movement.counts = (labs(motor_l_quaddec_GetCounter()) + labs(motor_r_quaddec_GetCounter())) / 2;
 
     update_pos_heading(latest_movement);
     if (push_movement_to_ns)
@@ -189,10 +189,6 @@ void move_forward_by_counts(uint32 counts) {
     set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
     current_linear_movement = FORWARD;
     latest_movement.type = GO_FORWARD;
-
-    // THIS WORKS
-    // Movement mvmt = {GO_FORWARD, counts};
-    // navstack_push(mvmt);
 
     setup_controller(counts);
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
@@ -251,7 +247,8 @@ void reverse_to_align(void) {
         motor_r_pwm_WriteCompare(2500);
     }
     while (!limit_sw_l_is_on() || !limit_sw_r_is_on());
-    stop();
+        motor_l_pwm_WriteCompare(0);
+        motor_r_pwm_WriteCompare(0);
 
     // led_r_Write(0);      // FOR DEBUGGING
     // led_g_Write(0);      // FOR DEBUGGING
@@ -261,19 +258,13 @@ void reverse_to_align(void) {
 void unwind_navstack_till(uint8 remaining) {
     // don't push the following movements to the navigation stack
     push_movement_to_ns = false;
-    led_r_Write(0);
-    led_g_Write(0);
-    led_b_Write(0);
+    led_b_Write(1);
 
     while (navstack_len() > remaining) {
         Movement m = navstack_pop();
 
-        // led_g_Write(1);
-
         // try to merge with the prior movements to save time
-        // while (navstack_len() > remaining) {
-
-        //     led_b_Write(1);
+        // while (navstack_len() >= remaining) {
 
         //     if (!try_merge_movements(&m, navstack_peek()))
         //         break;
@@ -284,13 +275,13 @@ void unwind_navstack_till(uint8 remaining) {
         // reverse the movement
         switch (m.type) {
             case NO_MOVEMENT: break;
-            case GO_FORWARD: led_g_Write(1); if (m.counts == 0) {led_r_Write(1);} else {led_b_Write(1);}
-            move_backward_by_counts(m.counts); break;
-            case GO_BACKWARD: move_forward_by_counts(m.counts); break;
+            case GO_FORWARD: move_backward_by_counts(m.counts); break;
+            case GO_BACKWARD: move_forward_by_counts(m.counts); if (m.counts > 150000) {led_r_Write(1);} else {led_b_Write(1);} break;
             case TURN_LEFT: turn_right(); break;
             case TURN_RIGHT: turn_left(); break;
         }
     }
+    led_b_Write(0);
 
     // return to original value
     push_movement_to_ns = true;
