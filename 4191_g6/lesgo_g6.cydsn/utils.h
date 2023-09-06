@@ -36,11 +36,13 @@ typedef enum __attribute__ ((__packed__)) BasePos {
 #define CODE_NAV_STACK_ALLOC_ERROR ((uint8)1)
 
 
+// globals
+extern BasePos base;
+
+
 // API
 void panic(uint8 panic_code);
 void show_code(uint8 code);
-
-void lift_detected_puck(void);
 
 
 #endif  // UTILS_H

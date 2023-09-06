@@ -37,26 +37,24 @@ CY_ISR(sw_isr) {
     led_Write(state);
 }
 CY_ISR(sw_l_isr) {
-    // static bool state = true;
-    // state = !state;
-    // if (state)
-        // lifter_down();
+    static bool state = true;
+    state = !state;
+    if (state)
+        lifter_down();
         // flicker_up();
-    turn_left();
-    // else
-        // lifter_up();
+    else
+        lifter_up();
         // flicker_down();
-        // stop();
 }
 CY_ISR(sw_r_isr) {
-    // static bool state = true;
-    // state = !state;
-    // if (state)
-    turn_right();
-        // gripper_open();
-    // else
-        // stop();
-        // gripper_close();
+    static bool state = true;
+    state = !state;
+    if (state) {
+        gripper_open();
+    }
+    else {
+        gripper_close();
+    }
 }
 
 

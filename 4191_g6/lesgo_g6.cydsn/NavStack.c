@@ -91,6 +91,10 @@ bool try_merge_movements(Movement* m, Movement other) {
         return true;
 
     switch (m->type) {
+        case NO_MOVEMENT: {
+            *m = other;
+            return true;
+        }
         case GO_FORWARD: {
             if (other.type == GO_FORWARD) {
                 m->counts += other.counts;
@@ -99,12 +103,9 @@ bool try_merge_movements(Movement* m, Movement other) {
 
             if (other.type == GO_BACKWARD) {
                 int32 res_counts = (int32)(m->counts) - (int32)(other.counts);
-                if (res_counts > 0)
-                    m->counts = (uint32)res_counts;
-                else {
+                m->counts = (uint32)labs(res_counts);
+                if (res_counts < 0)
                     m->type = GO_BACKWARD;
-                    m->counts = (uint32)(-res_counts);
-                }
 
                 return true;
             }
@@ -119,12 +120,9 @@ bool try_merge_movements(Movement* m, Movement other) {
 
             if (other.type == GO_FORWARD) {
                 int32 res_counts = (int32)(m->counts) - (int32)(other.counts);
-                if (res_counts > 0)
-                    m->counts = (uint32)res_counts;
-                else {
+                m->counts = (uint32)labs(res_counts);
+                if (res_counts < 0)
                     m->type = GO_FORWARD;
-                    m->counts = (uint32)(-res_counts);
-                }
 
                 return true;
             }

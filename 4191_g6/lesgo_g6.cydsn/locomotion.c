@@ -13,7 +13,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include <stdio.h> // debugging
+#include "UART_1.h"
 
+#include "utils.h"
 #include "NavStack.h"
 #include "locomotion.h"
 #include "limit_sw.h"
@@ -30,11 +33,6 @@
 #include "controller_timer.h"
 #include "controller_reset.h"
 
-#include "led_r.h"
-#include "led_g.h"
-#include "led_b.h"
-#include "led.h"
-
 
 // globals
 volatile LinearMovement current_linear_movement = STOP;
@@ -48,13 +46,21 @@ volatile float pos_y = 0.0;
 static volatile uint32 target_count = 0;
 static volatile bool controller_timer_flag = false;
 static bool push_movement_to_ns = true;
+#if CONTROLLER_TYPE == PI
+    static int16 integral = 0;
+#elif CONTROLLER_TYPE == PD
+    static int16 prev_err = 0;
+#elif CONTROLLER_TYPE == PID
+    static int16 integral = 0;
+    static int16 prev_err = 0;
+#endif
 
 
 // constants
 #define COUNTS_PER_WHEEL_CYCLE (14600)
 #define WHEEL_GAP_CM (22.7)
 #define WHEEL_DIAMETER_CM (5.45)
-#define TURN_OFFSET (-100)
+#define TURN_OFFSET (-1000)
 static const uint32 COUNTS_PER_CM = (uint32)((COUNTS_PER_WHEEL_CYCLE / WHEEL_DIAMETER_CM / 3.14159265358979323846) + 0.5);
 static const uint32 TURN_COUNT = (uint32)((COUNTS_PER_WHEEL_CYCLE / 4 / WHEEL_DIAMETER_CM *  WHEEL_GAP_CM) + 0.5 + TURN_OFFSET);
 static const uint16 controller_period_ms = 50;
@@ -75,9 +81,9 @@ static const float K_P = 0.05;
 static const float K_D = 0.05;
 
 #elif CONTROLLER_TYPE == PID
-static const float K_P = 0.05;
-static const float K_I = 0.05;
-static const float K_D = 0.05;
+static const float K_P = 0.5;
+static const float K_I = 0.1;
+static const float K_D = 0.1;
 
 #endif
 
@@ -133,10 +139,12 @@ void locomotion_setup(void) {
     limit_sw_setup(&limit_sw_isr, &limit_sw_isr);
     limit_sw_pause();
     navstack_init();
-    if (base_sw_Read() == 0)
+    if (base_sw_Read() == 0) {
         pos_x = -2;
-    else
-        pos_y = 2;
+    }
+    else {
+        pos_x = 2;
+    }
 }
 
 void stop(void) {
@@ -226,16 +234,11 @@ void reverse_to_align(void) {
     set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
     current_linear_movement = REVERSE;
     latest_movement.type = GO_BACKWARD;
-    // led_r_Write(0);      // FOR DEBUGGING
-    // led_g_Write(0);      // FOR DEBUGGING
-    // led_b_Write(0);      // FOR DEBUGGING
 
     setup_controller(UINT32_MAX);
     limit_sw_resume();
-    // led_g_Write(1);      // FOR DEBUGGING
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
     limit_sw_pause();
-    // led_r_Write(1);      // FOR DEBUGGING
 
     if (limit_sw_l_is_on()) {
         set_wheeldir(WHEEL_FORWARD, WHEEL_REVERSE);
@@ -248,18 +251,18 @@ void reverse_to_align(void) {
         motor_r_pwm_WriteCompare(2500);
     }
     while (!limit_sw_l_is_on() || !limit_sw_r_is_on());
-        motor_l_pwm_WriteCompare(0);
-        motor_r_pwm_WriteCompare(0);
+    motor_l_pwm_WriteCompare(0);
+    motor_r_pwm_WriteCompare(0);
+}
 
-    // led_r_Write(0);      // FOR DEBUGGING
-    // led_g_Write(0);      // FOR DEBUGGING
-    // led_b_Write(0);      // FOR DEBUGGING
+void rotate_to_align(void) {
+    // TODO
+    float theta = atan2f(0, 0);
 }
 
 void unwind_navstack_till(uint8 remaining) {
     // don't push the following movements to the navigation stack
     push_movement_to_ns = false;
-    led_b_Write(1);
 
     while (navstack_len() > remaining) {
         Movement m = navstack_pop();
@@ -277,12 +280,11 @@ void unwind_navstack_till(uint8 remaining) {
         switch (m.type) {
             case NO_MOVEMENT: break;
             case GO_FORWARD: move_backward_by_counts(m.counts); break;
-            case GO_BACKWARD: move_forward_by_counts(m.counts); if (m.counts > 150000) {led_r_Write(1);} else {led_b_Write(1);} break;
+            case GO_BACKWARD: move_forward_by_counts(m.counts); break;
             case TURN_LEFT: turn_right(); break;
             case TURN_RIGHT: turn_left(); break;
         }
     }
-    led_b_Write(0);
 
     // return to original value
     push_movement_to_ns = true;
@@ -363,19 +365,15 @@ bool controller_update(void) {
     int16 u = (int16)round(K_P * error);
 
 #elif CONTROLLER_TYPE == PI
-    static int16 integral = 0;
     integral += error;
     int16 u = (int16)roundf(K_P * error + K_I * integral);
 
 #elif CONTROLLER_TYPE == PD
-    static int16 prev_err = 0;
     int16 derivative = error - prev_err;
     prev_err = error;
     int16 u = (int16)roundf(K_P * error + K_D * derivative);
 
 #elif CONTROLLER_TYPE == PID
-    static int16 integral = 0;
-    static int16 prev_err = 0;
     integral += error;
     int16 derivative = error - prev_err;
     prev_err = error;
@@ -383,6 +381,9 @@ bool controller_update(void) {
 
 #endif
     uint16 slave_new_speed = (uint16)((int16)MASTER_BASE_SPEED + u);
+    char str[35];
+    sprintf(str, "e=%d\t u=%d\tspeed=%u\n", error, u, slave_new_speed);
+    UART_1_PutString(str);
 
     motor_l_pwm_WriteCompare(slave_new_speed);
     motor_r_pwm_WriteCompare(MASTER_BASE_SPEED);
@@ -394,6 +395,15 @@ void setup_controller(uint32 target) {
     target_count = target;
     motor_l_quaddec_SetCounter(0);
     motor_r_quaddec_SetCounter(0);
+
+#if CONTROLLER_TYPE == PI
+    integral = 0;
+#elif CONTROLLER_TYPE == PD
+    prev_error = 0;
+#elif CONTROLLER_TYPE == PID
+    integral = 0;
+    prev_err = 0;
+#endif
 }
 
 void set_wheeldir_l(WheelDir dir) {

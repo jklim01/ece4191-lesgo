@@ -14,6 +14,11 @@
 #include "led.h"
 
 #include "utils.h"
+#include "servo.h"
+
+
+// globals
+BasePos base;
 
 
 void panic(uint8 panic_code) {

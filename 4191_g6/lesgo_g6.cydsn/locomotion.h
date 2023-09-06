@@ -41,7 +41,7 @@
 #define PI 1
 #define PD 2
 #define PID 3
-#define CONTROLLER_TYPE PD
+#define CONTROLLER_TYPE PID
 
 
 // typedefs
@@ -86,6 +86,7 @@ void move_backward_by_counts(uint32 counts);
 void move_forward(void);
 void move_backward(void);
 void reverse_to_align(void);
+void rotate_to_align(void);
 void unwind_navstack_till(uint8 remaining);
 
 // non-blocking versions

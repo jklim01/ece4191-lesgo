@@ -62,12 +62,12 @@ void gripper_close(void) {
 }
 
 void gripper_open(void) {
-    const uint16 GRIPPER_OPEN_CMP = 260;
+    const uint16 GRIPPER_OPEN_CMP = 248;
     write_servo(GRIPPER_SELECT, GRIPPER_OPEN_CMP);
 }
 
 void lifter_up(void) {
-    const uint16 LIFTER_UP_CMP = 210;
+    const uint16 LIFTER_UP_CMP = 198;
     write_servo(LIFTER_SELECT, LIFTER_UP_CMP);
 }
 
@@ -82,16 +82,14 @@ void flicker_up(void) {
 }
 
 void flicker_down(void) {
-    const uint16 LIFTER_DOWN_CMP = 235;
+    const uint16 LIFTER_DOWN_CMP = 240;
     write_servo(FLICKER_SELECT, LIFTER_DOWN_CMP);
 }
 
 void flicker_shoot(void) {
-    const uint16 FLICKER_INIT_CMP = 875;
-    const uint16 FLICKER_FINAL_CMP = 900;
-
-    write_servo(FLICKER_SELECT, FLICKER_FINAL_CMP);
-    write_servo(FLICKER_SELECT, FLICKER_INIT_CMP);
+    flicker_up();
+    flicker_down();
+    flicker_up();
 }
 
 
