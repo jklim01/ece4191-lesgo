@@ -64,11 +64,16 @@ int main(void)
     //     UART_1_PutString(str);
     //     CyDelay(200);
     // }
-
-    if (base_sw_Read() == 0)
+    led_r_Write(0);
+    led_g_Write(0);
+    if (base_sw_Read() == 0) {
+        led_r_Write(1);
         base = BASE_LEFT;
-    else
+    }
+    else {
         base = BASE_RIGHT;
+        led_g_Write(1);
+    }
 
     uint8 target_len = 0;
     State state = LEAVE_BASE;
@@ -196,9 +201,9 @@ int main(void)
             reverse_to_align();
             if (base == BASE_LEFT) {
                 // back at base now
-                move_forward_by(25);
-                turn_left();
                 move_forward_by(20);
+                turn_left();
+                move_forward_by(25);
             }
             else {
                 // parallel to obstacle with back facing wall now
@@ -208,7 +213,7 @@ int main(void)
                 while (us_fl_get_dist() > 10 && us_fr_get_dist() > 10);
                 stop_nb();
                 turn_right();
-                move_forward_by(10);
+                move_forward_by(5);
             }
 
             // drop puck
