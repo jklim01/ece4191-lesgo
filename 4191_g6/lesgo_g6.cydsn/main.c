@@ -69,7 +69,7 @@ int main1(void)
     // color_sensor_setup();
     // servo_setup();
     // ultrasonic_setup();
-    // ir_sensor_setup(&handler, NULL, NULL);
+    // ir_sensor_setup(&handler);
     limit_sw_setup(sw_l_isr, sw_r_isr);
     // sw_isr_StartEx(sw_isr);
 

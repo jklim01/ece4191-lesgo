@@ -25,6 +25,12 @@
 #define END_STATE break; }
 
 
+// typedefs
+typedef enum __attribute__ ((__packed__)) BasePos {
+    BASE_LEFT, BASE_RIGHT
+} BasePos;
+
+
 // constants
 #define END_SUCCESS ((uint8)0)
 #define CODE_NAV_STACK_ALLOC_ERROR ((uint8)1)

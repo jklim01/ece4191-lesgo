@@ -11,27 +11,29 @@
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include "cytypes.h"
 
 #include "NavStack.h"
 #include "utils.h"
+#include "UART_1.h"
 
 
 // typedef
-struct NavStack {
+typedef struct NavStack {
     Movement* ptr;
     uint8 len;
     uint8 capacity;
-};
+} NavStack;
+
+
+// static globals
+static NavStack ns = { .ptr=NULL, .len=0, .capacity=0 };   // singleton
 
 
 // internals
 void print_movement(Movement m);
-
-
-// globals
-NavStack ns = { NULL, 0, 0 };
 
 
 // API
@@ -150,18 +152,21 @@ bool try_merge_movements(Movement* m, Movement other) {
     return false;
 }
 
-void print_navstsack(void) {
-    for (uint8 i = navstack_len()-1; i >= 0; i--){
+void print_navstack(uint8 len) {
+    UART_1_PutString("[\n");
+    for (uint8 i = navstack_len()-1; i >= 0; i--) {
+        UART_1_PutString("\t");
         print_movement(ns.ptr[i]);
+        UART_1_PutString(",\n");
     }
+    UART_1_PutString("]");
 }
 
-#include "UART_1.h"
 void print_movement(Movement m) {
-    static char str[100];
-    const char* (type_names[5]) = {"None", "FORWARD", "BACKWARD", "LEFT", "RIGHT"};
+    static char str[45];
+    const char* const type_names[] = {"NONE", "FORWARD", "BACKWARD", "LEFT", "RIGHT"};
 
-    sprintf(str, "{ .type=%s, .counts=%lu}\n", type_names[m.type], m.counts);
+    sprintf(str, "{ .type=%8s, .counts=%lu }", type_names[m.type], m.counts);
     UART_1_PutString(str);
 }
 

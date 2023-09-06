@@ -37,6 +37,11 @@ CY_ISR(ir_handler) {
     stop();
 }
 
+volatile bool ready_to_print = false;
+CY_ISR(sw_handler) {
+    ready_to_print = true;
+}
+
 
 int main(void)
 {
@@ -47,7 +52,7 @@ int main(void)
     color_sensor_setup();
     servo_setup();
     ultrasonic_setup();
-    ir_sensor_setup(&ir_handler, NULL, NULL);
+    ir_sensor_setup(&ir_handler);
     ir_sensor_pause();
 
     UART_1_Start();
@@ -60,11 +65,16 @@ int main(void)
     //     CyDelay(200);
     // }
 
+    BasePos base;
+    if (base_sw_Read() == 0)
+        base = BASE_LEFT;
+    else
+        base = BASE_RIGHT;
 
     State state = LEAVE_BASE;
     FSM(state) {
         STATE(LEAVE_BASE) {
-            
+
             // put down puck and flick
             // lifter_down();
             // gripper_open();
@@ -73,12 +83,12 @@ int main(void)
             // move_forward_by(12);
             // flicker_down();
             // flicker_up();
-            
+
             // move_forward_by(30);
             // turn_left();
             // move_forward_by(20);
             // reverse_to_align();
-            // print_navstsack();
+            // print_navstack();
             // unwind_navstack_till(0);
             // panic(END_SUCCESS);
 
@@ -104,13 +114,21 @@ int main(void)
         STATE(FIND_SLIT) {
             const uint16 WALL_DIST_THRESH = 1;
             const uint16 SLIT_DIST_THRESH = 80;
-            const float us_sensor_offset = 20;
+            const float US_SENSOR_OFFSET = 20;
 
             // turn to face direction with larger distance and reverse
-            if (us_l_get_dist() > us_r_get_dist())
-                turn_left();
-            else
+            // bool turn_right_to_enter = true;
+            // if (us_l_get_dist() > us_r_get_dist())
+            //     turn_left();
+            // else {
+            //     turn_right();
+            //     turn_right_to_enter = false;
+            // }
+            if (base == BASE_LEFT)
                 turn_right();
+            else
+                turn_left();
+
 
             // repeat algorithm until the slit is found
             bool slit_found = false;
@@ -131,11 +149,15 @@ int main(void)
 
             // move forward slightly to ensure the robot can pass through the slit
             led_r_Write(1);
-            move_forward_by(us_sensor_offset);
+            move_forward_by(US_SENSOR_OFFSET);
             led_r_Write(0);
 
             // turn to face the slit
-            turn_right();
+            // if (turn_right_to_enter)
+            if (base == BASE_RIGHT)
+                turn_right();
+            else
+                turn_left();
 
             state = FIND_PUCK;
         } END_STATE
@@ -161,29 +183,48 @@ int main(void)
             lifter_down();
             gripper_close();
             lifter_up();
-            
+
             state = DEPOSIT_PUCK;
         } END_STATE
 
         STATE(DEPOSIT_PUCK) {
+            // move to puck landing zone
+            unwind_navstack_till(0);
+            reverse_to_align();
+            move_forward_by(10);
+            if (base == BASE_LEFT)
+                turn_left();
+            else
+                turn_right();
+            move_forward_by(15);
+
+            // deposit puck
+            lifter_down();
+            gripper_open();
+            lifter_up();
+            gripper_close();
+
+            // align puck with flicker
+            move_forward_by(12);
+            flicker_down();
+            flicker_up();
 
             state = RETURN_TO_BASE;
         } END_STATE
 
         STATE(RETURN_TO_BASE) {
+            uint8 len = navstack_len();
             unwind_navstack_till(0);
-            // reverse_to_align();
-            
-            // put down puck and flick
-            lifter_down();
-            gripper_open();
-            lifter_up();
-            gripper_close();
-            move_forward_by(12);
-            flicker_down();
-            flicker_up();
 
+            sw_isr_ClearPending();
+            sw_isr_StartEx(sw_handler);
+            led_Write(1);
+            while (!ready_to_print) {
+                UART_1_Start();
+                print_navstack(len);
+            }
             panic(END_SUCCESS);
+
         } END_STATE
 
     } END_FSM

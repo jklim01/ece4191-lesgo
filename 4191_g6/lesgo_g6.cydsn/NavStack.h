@@ -31,12 +31,6 @@ typedef struct Movement {
     uint32 counts;
 } Movement;
 
-typedef struct NavStack NavStack;   // opaque type to ensure only the singleton instance exists
-
-
-// globals
-extern NavStack ns;     // singleton
-
 
 // API
 void navstack_init(void);
@@ -48,7 +42,7 @@ Movement navstack_peek(void);
 void navstack_clear(void);
 bool navstack_is_empty(void);
 bool try_merge_movements(Movement* m, Movement other);
-void print_navstsack(void);
+void print_navstack(uint8 len);
 
 #endif  // NAVSTACK_H
 

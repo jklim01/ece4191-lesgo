@@ -12,6 +12,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include "NavStack.h"
 #include "locomotion.h"
@@ -63,20 +64,20 @@ static const uint16 controller_period_ms = 50;
 static const uint16 MASTER_BASE_SPEED = 12500;
 
 #if CONTROLLER_TYPE == P
-static const double K_P = 0.5;
+static const float K_P = 0.5;
 
 #elif CONTROLLER_TYPE == PI
-static const double K_P = 0.1;      // 0.5 very good (BETTER THAN 1.5) (0.5 > 0.1 > 1.5)
-static const double K_I = 0.01;     // 0.5 will shake, 0.1 will shake abit, 0.05 > 0.01
+static const float K_P = 0.1;      // 0.5 very good (BETTER THAN 1.5) (0.5 > 0.1 > 1.5)
+static const float K_I = 0.01;     // 0.5 will shake, 0.1 will shake abit, 0.05 > 0.01
 
 #elif CONTROLLER_TYPE == PD
-static const double K_P = 0.05;
-static const double K_D = 0.05;
+static const float K_P = 0.05;
+static const float K_D = 0.05;
 
 #elif CONTROLLER_TYPE == PID
-static const double K_P = 0.05;
-static const double K_I = 0.05;
-static const double K_D = 0.05;
+static const float K_P = 0.05;
+static const float K_I = 0.05;
+static const float K_D = 0.05;
 
 #endif
 
@@ -264,13 +265,13 @@ void unwind_navstack_till(uint8 remaining) {
         Movement m = navstack_pop();
 
         // try to merge with the prior movements to save time
-        // while (navstack_len() >= remaining) {
+        while (navstack_len() > remaining) {
 
-        //     if (!try_merge_movements(&m, navstack_peek()))
-        //         break;
+            if (!try_merge_movements(&m, navstack_peek()))
+                break;
 
-        //     navstack_pop();
-        // }
+            navstack_pop();
+        }
 
         // reverse the movement
         switch (m.type) {
@@ -359,26 +360,26 @@ bool controller_update(void) {
     // calculate slave control signal with controller
     int16 error = master_count - slave_count;
 #if CONTROLLER_TYPE == P
-    int16 u = (int16)(K_P * error);
+    int16 u = (int16)round(K_P * error);
 
 #elif CONTROLLER_TYPE == PI
-    static double integral = 0;
-    integral += controller_period_ms * error;
-    int16 u = (int16)(K_P * error + K_I * integral);
+    static int16 integral = 0;
+    integral += error;
+    int16 u = (int16)roundf(K_P * error + K_I * integral);
 
 #elif CONTROLLER_TYPE == PD
-    static double prev_err = 0;
-    double derivative = (error - prev_err) / controller_period_ms;
+    static int16 prev_err = 0;
+    int16 derivative = error - prev_err;
     prev_err = error;
-    int16 u = (int16)(K_P * error + K_D * derivative);
+    int16 u = (int16)roundf(K_P * error + K_D * derivative);
 
 #elif CONTROLLER_TYPE == PID
-    static double integral = 0;
-    static double prev_err = 0;
-    integral += controller_period_ms * error;
-    double derivative = (error - prev_err) / controller_period_ms;
+    static int16 integral = 0;
+    static int16 prev_err = 0;
+    integral += error;
+    int16 derivative = error - prev_err;
     prev_err = error;
-    int16 u = (int16)(K_P * error + K_I * integral + K_D * derivative);
+    int16 u = (int16)roundf(K_P * error + K_I * integral + K_D * derivative);
 
 #endif
     uint16 slave_new_speed = (uint16)((int16)MASTER_BASE_SPEED + u);
