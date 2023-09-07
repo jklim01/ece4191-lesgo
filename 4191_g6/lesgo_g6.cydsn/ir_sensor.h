@@ -18,11 +18,11 @@
 
 
 // API
-void ir_sensor_setup(void (*ir_mid_handler_)(void));
+void ir_sensor_setup(void (*ir_handler_)(void));
 
 void ir_sensor_pause(void);
 void ir_sensor_resume(void);
-bool ir_mid_is_detected(void);
+bool ir_is_detected(void);
 
 
 #endif  // IR_SENSOR_H

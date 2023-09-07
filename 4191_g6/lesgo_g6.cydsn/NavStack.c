@@ -94,6 +94,7 @@ bool try_merge_movements(Movement* m, Movement other) {
         case NO_MOVEMENT: {
             *m = other;
             return true;
+            break;
         }
         case GO_FORWARD: {
             if (other.type == GO_FORWARD) {

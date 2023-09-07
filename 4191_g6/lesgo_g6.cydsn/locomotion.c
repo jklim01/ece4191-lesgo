@@ -21,6 +21,7 @@
 #include "locomotion.h"
 #include "limit_sw.h"
 #include "base_sw.h"
+#include "ultrasonic.h"
 #include "motor_l_in1.h"
 #include "motor_l_in2.h"
 #include "motor_r_in1.h"
@@ -47,12 +48,12 @@ static volatile uint32 target_count = 0;
 static volatile bool controller_timer_flag = false;
 static bool push_movement_to_ns = true;
 #if CONTROLLER_TYPE == PI
-    static int16 integral = 0;
+static volatile int16 integral = 0;
 #elif CONTROLLER_TYPE == PD
-    static int16 prev_err = 0;
+static volatile int16 prev_err = 0;
 #elif CONTROLLER_TYPE == PID
-    static int16 integral = 0;
-    static int16 prev_err = 0;
+static volatile int16 integral = 0;
+static volatile int16 prev_err = 0;
 #endif
 
 
@@ -68,7 +69,6 @@ static const uint16 controller_period_ms = 50;
 
 // parameters (TODO: tune these values)
 static const uint16 MASTER_BASE_SPEED = 12500;
-
 #if CONTROLLER_TYPE == P
 static const float K_P = 0.5;
 
@@ -82,8 +82,8 @@ static const float K_D = 0.05;
 
 #elif CONTROLLER_TYPE == PID
 static const float K_P = 0.5;
-static const float K_I = 0.1;
-static const float K_D = 0.1;
+static const float K_I = 0.2;
+static const float K_D = 0.15;
 
 #endif
 
@@ -206,7 +206,7 @@ void move_forward_by_counts(uint32 counts) {
 void move_backward_by_counts(uint32 counts) {
     set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
     current_linear_movement = REVERSE;
-    latest_movement.type = GO_FORWARD;
+    latest_movement.type = GO_BACKWARD;
 
     setup_controller(counts);
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
@@ -244,20 +244,48 @@ void reverse_to_align(void) {
         set_wheeldir(WHEEL_FORWARD, WHEEL_REVERSE);
         motor_l_pwm_WriteCompare(2500);
         motor_r_pwm_WriteCompare(MASTER_BASE_SPEED);
+        while (!limit_sw_r_is_on());
     }
     else if (limit_sw_r_is_on()) {
         set_wheeldir(WHEEL_REVERSE, WHEEL_FORWARD);
-        motor_l_pwm_WriteCompare(MASTER_BASE_SPEED);
         motor_r_pwm_WriteCompare(2500);
+        motor_l_pwm_WriteCompare(MASTER_BASE_SPEED);
+        while (!limit_sw_l_is_on());
     }
-    while (!limit_sw_l_is_on() || !limit_sw_r_is_on());
+    // while (!limit_sw_l_is_on() || !limit_sw_r_is_on());
     motor_l_pwm_WriteCompare(0);
     motor_r_pwm_WriteCompare(0);
 }
 
 void rotate_to_align(void) {
-    // TODO
-    float theta = atan2f(0, 0);
+    const double FRONT_US_GAP_CM = 12.5;
+    float fl_dist = us_fl_get_dist();
+    float fr_dist = us_fr_get_dist();
+    uint8 iter = 0;
+
+
+    push_movement_to_ns = false;
+    while (fl_dist != fr_dist && iter < 8) {
+        float theta;
+        if (fr_dist > fl_dist) {
+            theta = atan2f(fr_dist-fl_dist, FRONT_US_GAP_CM);
+            set_wheeldir(WHEEL_REVERSE, WHEEL_FORWARD);
+        }
+        else {
+            theta = atan2f(fl_dist-fr_dist, FRONT_US_GAP_CM);
+            set_wheeldir(WHEEL_FORWARD, WHEEL_REVERSE);
+        }
+        float count_f = theta * ((float)TURN_COUNT / 3.14159265358979323846 * 2);
+        uint32 count = (uint32)roundf(count_f);
+        setup_controller(count);
+        while (controller_update()) wait_for_controller_period();
+
+        CyDelay(600);
+        fl_dist = us_fl_get_dist();
+        fr_dist = us_fr_get_dist();
+        iter++;
+    }
+    push_movement_to_ns = true;
 }
 
 void unwind_navstack_till(uint8 remaining) {

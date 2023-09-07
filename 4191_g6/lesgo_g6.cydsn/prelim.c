@@ -59,14 +59,14 @@ int main(void)
     UART_1_PutString("Im ready!\n");
     // while (1) {
     //     char str[50];
-    //     sprintf(str, "L %3u\t R %3u\t FL %3u\t FR %3u\n",
+    //     sprintf(str, "L %3f\t R %3f\t FL %3f\t FR %3f\n",
     //         us_l_get_dist(), us_r_get_dist(), us_fl_get_dist(), us_fr_get_dist());
     //     UART_1_PutString(str);
     //     CyDelay(200);
     // }
     led_r_Write(0);
     led_g_Write(0);
-    if (base_sw_Read() == 0) {
+    if (sw_Read() == 0) {
         led_r_Write(1);
         base = BASE_LEFT;
     }
@@ -75,40 +75,18 @@ int main(void)
         led_g_Write(1);
     }
 
+    // wait until button is released before starting
+    while (sw_Read() == 0);
+    CyDelay(1500);
+
     uint8 target_len = 0;
     State state = LEAVE_BASE;
     FSM(state) {
         STATE(LEAVE_BASE) {
-            // turn_left();
-            // panic(END_SUCCESS);
-
-            // put down puck and flick
-            // lifter_down();
-            // gripper_open();
-            // lifter_up();
-            // gripper_close();
-            // move_forward_by(12);
-            // flicker_down();
-            // flicker_up();
-
-            // move_forward_by(30);
-            // turn_left();
-            // move_forward_by(20);
-            // reverse_to_align();
-            // print_navstack();
-            // unwind_navstack_till(0);
-            // panic(END_SUCCESS);
-
-
-            // ending procedure
-            // reverse_to_align();
-            // panic(END_SUCCESS);
-
-
-            const uint16 OBSTACLE_DIST_THRESH = 10;
+            const float OBSTACLE_DIST_THRESH = 25;
             const float OBSTACLE_Y_POS = 100;
 
-            // move forwrad till distance to obstacle is below threshold
+            // move forward till distance to obstacle is below threshold
             reverse_to_align();
             move_forward_nb();
             while (us_fl_get_dist() > OBSTACLE_DIST_THRESH && us_fr_get_dist() > OBSTACLE_DIST_THRESH);
@@ -118,9 +96,9 @@ int main(void)
         } END_STATE
 
         STATE(FIND_SLIT) {
-            const uint16 WALL_DIST_THRESH = 20;
-            const uint16 SLIT_DIST_THRESH = 80;
-            const float US_SENSOR_OFFSET = 20;
+            const float WALL_DIST_THRESH = 20;
+            const float SLIT_DIST_THRESH = 80;
+            const float US_SENSOR_OFFSET = 21;
 
             // turn to be parallel with the obstacle
             if (base == BASE_LEFT)
@@ -133,9 +111,9 @@ int main(void)
             bool slit_found = false;
             while (!slit_found) {
                 // reverse to wall to prepare for next try
+                // if (base == BASE_RIGHT)
+                //     target_len = navstack_len();
                 reverse_to_align();
-                if (base == BASE_RIGHT)
-                    target_len = navstack_len();
 
                 // move forward along the obstacle, stopping and setting the flag if the slit is found
                 move_forward_nb();
@@ -160,6 +138,7 @@ int main(void)
             led_r_Write(0);
 
             // turn to face the slit
+            target_len = navstack_len();
             if (base == BASE_LEFT)
                 turn_left();
             else
@@ -197,23 +176,28 @@ int main(void)
 
         STATE(DEPOSIT_PUCK) {
             // move to puck landing zone
-            unwind_navstack_till(target_len-1);
-            reverse_to_align();
+            // unwind_navstack_till(target_len);
+            // reverse_to_align();
             if (base == BASE_LEFT) {
-                // back at base now
+                reverse_to_align();
                 move_forward_by(20);
                 turn_left();
-                move_forward_by(25);
+                move_forward_nb();
+                while ((us_fl_get_dist() + us_fr_get_dist())/2 > 50);
+                rotate_to_align();
+                stop_nb();
             }
             else {
                 // parallel to obstacle with back facing wall now
+                unwind_navstack_till(target_len);
+                reverse_to_align();
                 move_forward_by(15);
                 turn_left();
                 move_forward_nb();
-                while (us_fl_get_dist() > 10 && us_fr_get_dist() > 10);
+                while ((us_fl_get_dist() + us_fr_get_dist())/2 > 10);
+                rotate_to_align();
                 stop_nb();
                 turn_right();
-                move_forward_by(5);
             }
 
             // drop puck
@@ -223,16 +207,24 @@ int main(void)
             gripper_close();
 
             // align puck with flicker, then flick
-            move_forward_by(12.4);
+            move_forward_by(13);
             flicker_shoot();
 
             state = RETURN_TO_BASE;
         } END_STATE
 
         STATE(RETURN_TO_BASE) {
-            uint8 len = navstack_len();
-            unwind_navstack_till(0);
+            // unwind_navstack_till(0);
+            if (base == BASE_LEFT) {
+                move_backward_by(35);
+                turn_right();
+            }
+            else {
+                move_forward_by(55);
+                turn_right();
+            }
             reverse_to_align();
+
 
             // DEBUGGING
             // sw_isr_ClearPending();
