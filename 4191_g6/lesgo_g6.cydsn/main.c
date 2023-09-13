@@ -26,6 +26,7 @@
 
 static volatile bool moved = false;
 static volatile bool found_puck = false;
+static volatile bool flag = false;
 CY_ISR(handler) {
     stop();
     found_puck = true;
@@ -55,10 +56,12 @@ CY_ISR(sw_r_isr) {
     else {
         gripper_close();
     }
+    //flag = true;
+    //led_r_Write(1);
 }
 
 
-int main1(void)
+int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
@@ -66,13 +69,13 @@ int main1(void)
     locomotion_setup();
     // color_sensor_setup();
     // servo_setup();
-    // ultrasonic_setup();
+    ultrasonic_setup();
     // ir_sensor_setup(&handler);
     limit_sw_setup(sw_l_isr, sw_r_isr);
     // sw_isr_StartEx(sw_isr);
 
-    // UART_1_Start();
-    // UART_1_PutString("Im ready!\n");
+    UART_1_Start();
+    UART_1_PutString("Im ready!\n");
     // char str[20];
     // char* str_ptr = str;
     // char c;
@@ -101,12 +104,18 @@ int main1(void)
         // sprintf(str, "L: %8li\t R: %8li\n", motor_l_quaddec_GetCounter(), motor_r_quaddec_GetCounter());
         // UART_1_PutString(str);
         // CyDelay(10);
+        if (flag) {
+            rotate_to_align();
+            flag = false;
+            led_r_Write(0);
+        }
 
-        // char str[50];
-        // sprintf(str, "L %3u\t R %3u\t FL %3u\t FR %3u\n",
+        char str[50];
+        sprintf(str, "FL %3f \t FR %3f\n", us_fl_get_dist(), us_fr_get_dist());
+        // sprintf(str, "L %3f \t R %3f \t FL %3f \t FR %3f\n",
         //     us_l_get_dist(), us_r_get_dist(), us_fl_get_dist(), us_fr_get_dist());
-        // UART_1_PutString(str);
-        // CyDelay(200);
+        UART_1_PutString(str);
+        CyDelay(600);
 
         // led_Write(moved);
         // if (moved) {

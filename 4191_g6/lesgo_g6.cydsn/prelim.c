@@ -43,7 +43,7 @@ CY_ISR(sw_handler) {
 }
 
 
-int main(void)
+int main2(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
@@ -74,6 +74,9 @@ int main(void)
         base = BASE_RIGHT;
         led_g_Write(1);
     }
+
+    rotate_to_align();
+    panic(END_SUCCESS);
 
     // wait until button is released before starting
     while (sw_Read() == 0);
@@ -111,8 +114,8 @@ int main(void)
             bool slit_found = false;
             while (!slit_found) {
                 // reverse to wall to prepare for next try
-                // if (base == BASE_RIGHT)
-                //     target_len = navstack_len();
+                if (base == BASE_RIGHT)
+                    target_len = navstack_len();
                 reverse_to_align();
 
                 // move forward along the obstacle, stopping and setting the flag if the slit is found
@@ -176,7 +179,10 @@ int main(void)
 
         STATE(DEPOSIT_PUCK) {
             // move to puck landing zone
-            // unwind_navstack_till(target_len);
+            print_navstack();
+            print_unwind_result(target_len);
+            unwind_navstack_till(target_len);
+            panic(END_SUCCESS);
             // reverse_to_align();
             if (base == BASE_LEFT) {
                 reverse_to_align();

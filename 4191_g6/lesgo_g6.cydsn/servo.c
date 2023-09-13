@@ -10,7 +10,9 @@
  * ========================================
 */
 
+#include "cytypes.h"
 #include "CyLib.h"
+#include <stdlib.h>
 #include "servo.h"
 
 #include "shared_pwm.h"
@@ -47,6 +49,25 @@ void write_servo(uint8 demux_select, uint16 cmp) {
     shared_pwm_Stop();
 }
 
+void write_servo_smooth(uint8 demux_select, uint16 cmp_start, uint16 cmp_end) {
+    shared_pwm_Start();
+    shared_pwm_WritePeriod(SERVO_PERIOD);
+    shared_pwm_demux_select_Write(demux_select);
+    shared_pwm_reset_Write(0);
+
+    int16 inc = (cmp_end > cmp_start) ? 1 : -1;
+    for (uint16 cmp = cmp_start; cmp != cmp_end; cmp += inc) {
+        // shared_pwm_reset_Write(0);
+        shared_pwm_WriteCompare((uint16)cmp);
+        CyDelayUs(3500);
+        // shared_pwm_reset_Write(1);
+    }
+    shared_pwm_WriteCompare(cmp_end);
+
+    shared_pwm_reset_Write(1);
+    shared_pwm_Stop();
+}
+
 
 // API
 void servo_setup(void) {
@@ -57,7 +78,7 @@ void servo_setup(void) {
 }
 
 void gripper_close(void) {
-    const uint16 GRIPPER_CLOSE_CMP = 205;
+    const uint16 GRIPPER_CLOSE_CMP = 193;
     write_servo(GRIPPER_SELECT, GRIPPER_CLOSE_CMP);
 }
 
@@ -68,12 +89,15 @@ void gripper_open(void) {
 
 void lifter_up(void) {
     const uint16 LIFTER_UP_CMP = 198;
-    write_servo(LIFTER_SELECT, LIFTER_UP_CMP);
+    const uint16 LIFTER_DOWN_CMP = 115;
+    // write_servo(LIFTER_SELECT, LIFTER_UP_CMP);
+    write_servo_smooth(LIFTER_SELECT, LIFTER_DOWN_CMP, LIFTER_UP_CMP);
 }
 
 void lifter_down(void) {
     const uint16 LIFTER_DOWN_CMP = 115;
     write_servo(LIFTER_SELECT, LIFTER_DOWN_CMP);
+    // write_servo_smooth(LIFTER_SELECT, 198, 115);
 }
 
 void flicker_up(void) {

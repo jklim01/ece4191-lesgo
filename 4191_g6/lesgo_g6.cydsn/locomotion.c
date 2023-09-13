@@ -263,9 +263,15 @@ void rotate_to_align(void) {
     float fr_dist = us_fr_get_dist();
     uint8 iter = 0;
 
+    char str[60];
+    sprintf(str, "(%u) FL %.4f \t FR %.4f\n", iter, fl_dist, fr_dist);
+    UART_1_PutString(str);
 
     push_movement_to_ns = false;
-    while (fl_dist != fr_dist && iter < 8) {
+    while (fabs(fl_dist - fr_dist) > 0.3 && iter < 8) {
+        sprintf(str, "(%u) FL %.4f \t FR %.4f\n", iter, fl_dist, fr_dist);
+        UART_1_PutString(str);
+
         float theta;
         if (fr_dist > fl_dist) {
             theta = atan2f(fr_dist-fl_dist, FRONT_US_GAP_CM);
@@ -316,6 +322,31 @@ void unwind_navstack_till(uint8 remaining) {
 
     // return to original value
     push_movement_to_ns = true;
+}
+
+void print_unwind_result(uint8 remaining) {
+    uint8 num = 0;
+
+    UART_1_PutString("-- unwind result --\n");
+    while (navstack_len()-num > remaining) {
+        Movement m = navstack_peek_till(num);
+        num++;
+
+        // try to merge with the prior movements to save time
+        while (navstack_len()-num > remaining) {
+
+            if (!try_merge_movements(&m, navstack_peek_till(num)))
+                break;
+
+            navstack_pop();
+            num++;
+        }
+
+        // reverse the movement
+        print_movement(m);
+        UART_1_PutString("\n");
+    }
+    UART_1_PutString("-------------------\n");
 }
 
 void stop_nb(void) {
@@ -409,9 +440,9 @@ bool controller_update(void) {
 
 #endif
     uint16 slave_new_speed = (uint16)((int16)MASTER_BASE_SPEED + u);
-    char str[35];
-    sprintf(str, "e=%d\t u=%d\tspeed=%u\n", error, u, slave_new_speed);
-    UART_1_PutString(str);
+    // char str[35];
+    // sprintf(str, "e=%d\t u=%d\tspeed=%u\n", error, u, slave_new_speed);
+    // UART_1_PutString(str);
 
     motor_l_pwm_WriteCompare(slave_new_speed);
     motor_r_pwm_WriteCompare(MASTER_BASE_SPEED);

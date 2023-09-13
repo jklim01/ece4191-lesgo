@@ -32,10 +32,6 @@ typedef struct NavStack {
 static NavStack ns = { .ptr=NULL, .len=0, .capacity=0 };   // singleton
 
 
-// internals
-void print_movement(Movement m);
-
-
 // API
 void navstack_init(void) {
     ns = (NavStack) {
@@ -76,6 +72,10 @@ Movement navstack_pop(void) {
 
 Movement navstack_peek(void) {
     return (ns.ptr)[ns.len - 1];
+}
+
+Movement navstack_peek_till(uint8 num) {
+    return (ns.ptr)[ns.len - num - 1];
 }
 
 void navstack_clear(void){
@@ -151,7 +151,15 @@ bool try_merge_movements(Movement* m, Movement other) {
     return false;
 }
 
-void print_navstack(uint8 len) {
+void print_movement(Movement m) {
+    static char str[45];
+    const char* const type_names[] = {"NONE", "FORWARD", "BACKWARD", "LEFT", "RIGHT"};
+
+    sprintf(str, "{ .type=%8s, .counts=%lu }", type_names[m.type], m.counts);
+    UART_1_PutString(str);
+}
+
+void print_navstack() {
     UART_1_PutString("[\n");
     for (uint8 i = navstack_len()-1; i >= 0; i--) {
         UART_1_PutString("\t");
@@ -161,12 +169,5 @@ void print_navstack(uint8 len) {
     UART_1_PutString("]");
 }
 
-void print_movement(Movement m) {
-    static char str[45];
-    const char* const type_names[] = {"NONE", "FORWARD", "BACKWARD", "LEFT", "RIGHT"};
-
-    sprintf(str, "{ .type=%8s, .counts=%lu }", type_names[m.type], m.counts);
-    UART_1_PutString(str);
-}
 
 /* [] END OF FILE */

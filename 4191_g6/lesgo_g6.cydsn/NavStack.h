@@ -39,10 +39,12 @@ uint8 navstack_len(void);
 void navstack_push(Movement m);
 Movement navstack_pop(void);
 Movement navstack_peek(void);
+Movement navstack_peek_till(uint8 num);
 void navstack_clear(void);
 bool navstack_is_empty(void);
 bool try_merge_movements(Movement* m, Movement other);
-void print_navstack(uint8 len);
+void print_movement(Movement m);
+void print_navstack();
 
 #endif  // NAVSTACK_H
 

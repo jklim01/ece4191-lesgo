@@ -34,10 +34,10 @@ CY_ISR(uart_handler) {
 }
 
 
-int main2(void) {
+int main1(void) {
     CyGlobalIntEnable;
     UART_1_Start();
-    UART_1_PutString("I'm done!");
+    UART_1_PutString("I'm done!\n");
     isr_1_StartEx(uart_handler);
 
     for(;;) {
@@ -51,9 +51,9 @@ int main2(void) {
             UART_1_PutString(" \\0]\n");
 
             if (strcmp(str, "Are you ready?") == 0)
-                UART_1_PutString("Ready  ");
+                UART_1_PutString("Ready\n");
             else if (strcmp(str, "Start") == 0)
-                UART_1_PutString("OK  ");
+                UART_1_PutString("OK\n");
             else {
                 int num1;
                 int num2;
@@ -62,7 +62,7 @@ int main2(void) {
 
                 sprintf(str, "(%u) %s %u %u\n", num, color, num1, num2);
                 UART_1_PutString(str);
-                UART_1_PutString("Received");
+                UART_1_PutString("Received\n");
             }
 
             rx_finished = false;
