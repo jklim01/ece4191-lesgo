@@ -33,9 +33,11 @@ CY_ISR(handler) {
 }
 
 CY_ISR(sw_isr) {
-    static bool state = true;
-    state = !state;
-    led_Write(state);
+    // static bool state = true;
+    // state = !state;
+    // led_Write(state);
+    flag = true;
+    led_r_Write(1);
 }
 CY_ISR(sw_l_isr) {
     static bool state = true;
@@ -56,8 +58,6 @@ CY_ISR(sw_r_isr) {
     else {
         gripper_close();
     }
-    //flag = true;
-    //led_r_Write(1);
 }
 
 
@@ -111,9 +111,9 @@ int main(void)
         }
 
         char str[50];
-        sprintf(str, "FL %3f \t FR %3f\n", us_fl_get_dist(), us_fr_get_dist());
-        // sprintf(str, "L %3f \t R %3f \t FL %3f \t FR %3f\n",
-        //     us_l_get_dist(), us_r_get_dist(), us_fl_get_dist(), us_fr_get_dist());
+        //sprintf(str, "FL %3f \t FR %3f\n", us_fl_get_dist(), us_fr_get_dist());
+        sprintf(str, "L %7.4f \t R %7.4f \t FL %7.4f \t FR %7.4f\n",
+            us_l_get_dist(), us_r_get_dist(), us_fl_get_dist(), us_fr_get_dist());
         UART_1_PutString(str);
         CyDelay(600);
 

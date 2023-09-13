@@ -58,7 +58,7 @@ CY_ISR(us_l_isr) {
 CY_ISR(us_r_isr) {
     us_r_timer_ReadStatusRegister();       // clears the irq
 
-    uint16 count = UINT16_MAX - us_r_timer_ReadCounter();
+    float count = UINT16_MAX - us_r_timer_ReadCounter();
     /* uint16 dist = ROUNDING_DIV(count, 58); */
     float dist = count / 58;
     enqueue(&us_r_buf, dist);
