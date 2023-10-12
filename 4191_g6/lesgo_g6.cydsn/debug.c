@@ -48,12 +48,12 @@
 // - specify the command name inside `X(...)` (it's called an X macro)
 // - every X macro line except the last must end with "\"
 // - write the code for the control inside this: `CONTROL(front) {...} END_CONTROL`, it will auto print the current control
+// - you can optionally pass one number into the command which will saved into the variable `float arg2` (defaults to 0 if not specified)
 //      for example:
 //          if I send "front 20.3" from the phone
 //          20.3 will be saved inside `arg2`, and we will run the code inside `CONTROL(front) {...} END_CONTROL` and go back `idle` to wait for the next command
 //
 // - some distance constants are defined inside `utils.h`, and you can tune the values
-// - you can optionally pass one number into the command which will saved into the variable `float arg2` (defaults to 0 if not specified)
 // - can use `bt_printf` and `bt_print` for logging (always end the printed string with "\n" or "  " (2 spaces), otherwise it won't appear on the phone)
 // - can accept user input using `bt_scanf`
 // - can also use `bt_scanf` to check if the user sent some message, for example: `bt_scanf("lol") == 1` checks if the user sent "lol"
