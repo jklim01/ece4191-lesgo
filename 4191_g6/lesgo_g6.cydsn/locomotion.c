@@ -97,13 +97,12 @@ typedef enum __attribute__ ((__packed__)) WheelDir {
 } WheelDir;
 
 bool controller_update(void);
-bool alignment_controller_update(void);
 void setup_controller(uint32 target);
 void set_wheeldir_l(WheelDir dir);
 void set_wheeldir_r(WheelDir dir);
 void set_wheeldir(WheelDir dir_l, WheelDir dir_r);
 void wait_for_controller_period(void);
-void update_pos_heading(Movement m);
+void update_pos_heading(Movement m, volatile float* pos_x, volatile float* pos_y, volatile Heading* heading);
 
 
 // ISRs
@@ -147,6 +146,8 @@ void locomotion_setup(void) {
     limit_sw_setup(&limit_sw_isr, &limit_sw_isr);
     limit_sw_pause();
     navstack_init();
+    pos_x = 0;
+    pos_y = 0;
     // if (base_sw_Read() == 0) {
     //     pos_x = -2;
     // }
@@ -163,7 +164,7 @@ void stop(void) {
     if (latest_movement.type == GO_FORWARD || latest_movement.type == GO_BACKWARD)
         latest_movement.counts += (labs(motor_l_quaddec_GetCounter()) + labs(motor_r_quaddec_GetCounter())) / 2;
 
-    update_pos_heading(latest_movement);
+    update_pos_heading(latest_movement, &pos_x, &pos_y, &heading);
     if (push_movement_to_ns)
         navstack_push(latest_movement);
 
@@ -202,6 +203,13 @@ void move_backward_by(float dist_cm) {
 
     setup_controller((uint32)(dist_cm * COUNTS_PER_CM + 0.5));
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+}
+
+void move_linear_by(float dist_cm) {
+    if (dist_cm > 0)
+        move_forward_by(dist_cm);
+    else if (dist_cm < 0);
+        move_backward_by(-dist_cm);
 }
 
 void move_forward_by_counts(uint32 counts) {
@@ -279,7 +287,7 @@ void rotate_to_align(void) {
 #endif
 
     push_movement_to_ns = false;
-    while (fabs(fl_dist - fr_dist) > 0.3 && iter < 8) {
+    while (fabsf(fl_dist - fr_dist) > 0.3 && iter < 8) {
 #ifdef MY_DEBUG
         bt_printf("(%u) FL %.4f \t FR %.4f\n", iter, fl_dist, fr_dist);
 #endif
@@ -341,28 +349,71 @@ void unwind_shortcut_navstack_till(uint8 remaining) {
     // don't push the following movements to the navigation stack
     push_movement_to_ns = false;
 
+    // find the target position and heading
+    float target_pos_x = 0.0;
+    float target_pos_y = 0.0;
+    Heading target_heading = POS_Y;
+    for (uint8 i = 0; i < remaining; i++) {
+        Movement m = navstack_get(i);
+        update_pos_heading(m, &target_pos_x, &target_pos_y, &target_heading);
+    }
+    float diff_x = target_pos_x - pos_x;
+    float diff_y = target_pos_y - pos_y;
 
-    while (navstack_len() > remaining) {
-        Movement m = navstack_pop();
-
-        // try to merge with the prior movements to save time
-        while (navstack_len() > remaining) {
-
-            if (!try_merge_movements(&m, navstack_peek()))
-                break;
-
-            navstack_pop();
+    // move in x direction
+    // - if turning is needed, always turn such that we reverse into the position
+    switch (heading) {
+        case POS_X: move_linear_by(diff_x); break;
+        case NEG_X: move_linear_by(-diff_x); break;
+        case POS_Y: {
+            if (diff_x > 0) turn_left();
+            else turn_right();
+            move_backward_by(fabsf(diff_x));
+            break;
         }
-
-        // reverse the movement
-        switch (m.type) {
-            case NO_MOVEMENT: break;
-            case GO_FORWARD: move_backward_by_counts(m.counts); break;
-            case GO_BACKWARD: move_forward_by_counts(m.counts); break;
-            case TURN_LEFT: turn_right(); break;
-            case TURN_RIGHT: turn_left(); break;
+        case NEG_Y: {
+            if (diff_x > 0) turn_right();
+            else turn_left();
+            move_backward_by(fabsf(diff_x));
+            break;
         }
     }
+
+    // move in y direction:
+    // - before moving, the robot can only have +x or -x heading
+    // - if the target heading is +y or -y, turn the robot so that it has the same heading
+    // - otherwise, turn such that we reverse into the position
+    if (heading == POS_X) {
+        if (target_heading == POS_Y) turn_left();
+        else if (target_heading == NEG_Y) turn_right();
+        else {
+            if (diff_y > 0) turn_right();
+            else turn_left();
+        }
+    }
+    else  {
+        if (target_heading == POS_Y) turn_right();
+        else if (target_heading == NEG_Y) turn_left();
+        else {
+            if (diff_y > 0) turn_left();
+            else turn_right();
+        }
+    }
+    move_backward_by(fabsf(diff_y));
+
+    // final adjustment to heading if required
+    // - before moving, the robot can only have +y or -y heading
+    if (target_heading == POS_X) {
+        if (heading == POS_Y) turn_right();
+        else turn_left();
+    }
+    else  {
+        if (heading == POS_Y) turn_left();
+        else turn_right();
+    }
+
+    // clear movements on navstack that have been backtracked
+    while (navstack_len() > remaining) navstack_pop();
 
     // return to original value
     push_movement_to_ns = true;
@@ -564,43 +615,44 @@ void wait_for_controller_period(void) {
     while (!controller_timer_flag);
 }
 
-void update_pos_heading(Movement m) {
+void update_pos_heading(Movement m, volatile float* pos_x, volatile float* pos_y, volatile Heading* heading) {
     switch (m.type) {
+        case NO_MOVEMENT: break;
         case GO_FORWARD: {
             float dist = m.counts / COUNTS_PER_CM;
-            switch (heading) {
-                case POS_Y: pos_y += dist; break;
-                case NEG_Y: pos_y -= dist; break;
-                case POS_X: pos_x += dist; break;
-                case NEG_X: pos_x -= dist; break;
+            switch (*heading) {
+                case POS_Y: *pos_y += dist; break;
+                case NEG_Y: *pos_y -= dist; break;
+                case POS_X: *pos_x += dist; break;
+                case NEG_X: *pos_x -= dist; break;
             }
             break;
         }
         case GO_BACKWARD: {
             float dist = m.counts / COUNTS_PER_CM;
-            switch (heading) {
-                case POS_Y: pos_y -= dist; break;
-                case NEG_Y: pos_y += dist; break;
-                case POS_X: pos_x -= dist; break;
-                case NEG_X: pos_x += dist; break;
+            switch (*heading) {
+                case POS_Y: *pos_y -= dist; break;
+                case NEG_Y: *pos_y += dist; break;
+                case POS_X: *pos_x -= dist; break;
+                case NEG_X: *pos_x += dist; break;
             }
             break;
         }
         case TURN_LEFT: {
-            switch (heading) {
-                case POS_Y: heading = NEG_X; break;
-                case NEG_Y: heading = POS_X; break;
-                case POS_X: heading = POS_Y; break;
-                case NEG_X: heading = NEG_Y; break;
+            switch (*heading) {
+                case POS_Y: *heading = NEG_X; break;
+                case NEG_Y: *heading = POS_X; break;
+                case POS_X: *heading = POS_Y; break;
+                case NEG_X: *heading = NEG_Y; break;
             }
             break;
         }
         case TURN_RIGHT: {
-            switch (heading) {
-                case POS_Y: heading = POS_X; break;
-                case NEG_Y: heading = NEG_X; break;
-                case POS_X: heading = NEG_Y; break;
-                case NEG_X: heading = POS_Y; break;
+            switch (*heading) {
+                case POS_Y: *heading = POS_X; break;
+                case NEG_Y: *heading = NEG_X; break;
+                case POS_X: *heading = NEG_Y; break;
+                case NEG_X: *heading = POS_Y; break;
             }
             break;
         }

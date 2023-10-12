@@ -81,12 +81,15 @@ void turn_left(void);
 void turn_right(void);
 void move_forward_by(float dist_cm);
 void move_backward_by(float dist_cm);
+void move_linear_by(float dist_cm);
 void move_forward_by_counts(uint32 counts);
 void move_backward_by_counts(uint32 counts);
 void move_forward(void);
 void move_backward(void);
+
 void reverse_to_align(void);
 void rotate_to_align(void);
+
 void unwind_navstack_till(uint8 remaining);
 void unwind_shortcut_navstack_till(uint8 remaining);
 void print_unwind_result(uint8 remaining);

@@ -73,6 +73,10 @@ Movement navstack_peek(void) {
     return (ns.ptr)[ns.len - 1];
 }
 
+Movement navstack_get(uint8 idx) {
+    return (ns.ptr)[idx];
+}
+
 Movement navstack_peek_till(uint8 num) {
     return (ns.ptr)[ns.len - num - 1];
 }

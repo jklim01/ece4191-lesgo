@@ -47,11 +47,11 @@
 
 // - specify the command name inside `X(...)` (it's called an X macro)
 // - every X macro line except the last must end with "\"
-// - write the code for the control inside this: `CONTROL(front) {...} END_CONTROL`, it will auto print the current control
+// - write the code for the control inside this: `CONTROL(front) {...} END_CONTROL`, it will auto print the current control (compile error if not done properly)
 // - you can optionally pass one number into the command which will saved into the variable `float arg2` (defaults to 0 if not specified)
 //      for example:
 //          if I send "front 20.3" from the phone
-//          20.3 will be saved inside `arg2`, and we will run the code inside `CONTROL(front) {...} END_CONTROL` and go back `idle` to wait for the next command
+//          20.3 will be saved inside `arg2`, and we will run the code inside `CONTROL(front) {...} END_CONTROL` and go back  to `idle` to wait for the next command
 //
 // - some distance constants are defined inside `utils.h`, and you can tune the values
 // - can use `bt_printf` and `bt_print` for logging (always end the printed string with "\n" or "  " (2 spaces), otherwise it won't appear on the phone)
@@ -67,12 +67,13 @@
     X(right)            /* right!                                   */ \
     X(navstackLen)      /* navstackLen!                             : prints navstack len   */ \
     X(unwind)           /* unwind %d!                               : unwinds to target len */ \
+    X(unwindS)          /* unwindS %d!                              : unwinds to target len with shortcut */ \
     X(flickP)           /* flickP!                                  : puts down and flick puck  */ \
     X(searchP)          /* seachP [%d]!                             : move forward to find puck for specified distance (default 50cm if not specified), and grip puck if found  */ \
     X(revA)             /* revA!                                    : reversal-based align  */ \
     X(rotA)             /* rotA!                                    : rotation-based align  */ \
     X(usL)              /* getUsL!                                  : print all ultrasonic readings except right until any message is sent  */ \
-    X(usR)              /* getUsR!                                  : print all ultrasonic readings except left until any message is sen*/ \
+    X(usR)              /* getUsR!                                  : print all ultrasonic readings except left until any message is sent */ \
     X(detectB)          /* detectB!                                 : move forward 15 times or until bowling pin detected (must start with ultrasonic facing wall) */
 
 #define X(name) control_##name,
@@ -83,7 +84,7 @@ typedef enum Control {
 
 
 static bool puck_found = false;
-CY_ISR(ir_handler) {
+static CY_ISR(debug_ir_handler) {
     puck_found = true;
     stop();
 }
@@ -98,7 +99,7 @@ int main(void)
     color_sensor_setup();
     servo_setup();
     ultrasonic_setup();
-    ir_sensor_setup(&ir_handler);
+    ir_sensor_setup(&debug_ir_handler);
     bt_setup();
 
     // variables
@@ -152,6 +153,10 @@ LIST_OF_CONTROLS
             unwind_navstack_till((uint8)arg2);
         } END_CONTROL
 
+        CONTROL(unwindS) {
+            unwind_shortcut_navstack_till((uint8)arg2);
+        } END_CONTROL
+
         CONTROL(searchP) {
             if (arg2 == 0)
                 arg2 = 50;
@@ -193,7 +198,7 @@ LIST_OF_CONTROLS
                 lifter_up();
                 gripper_unactuate();
             }
-        }
+        } END_CONTROL
 
         CONTROL(flickP) {
             // place down puck

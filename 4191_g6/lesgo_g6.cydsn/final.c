@@ -36,11 +36,11 @@ typedef enum __attribute__ ((__packed__)) State {
 } State;
 
 
-CY_ISR(ir_handler) {
+static CY_ISR(ir_handler) {
     stop();
 }
 
-CY_ISR(sw_l_isr) {
+static CY_ISR(sw_l_isr) {
     static bool state = true;
     state = !state;
     if (state) {
@@ -51,7 +51,7 @@ CY_ISR(sw_l_isr) {
     }
 }
 
-CY_ISR(sw_r_isr) {
+static CY_ISR(sw_r_isr) {
     gripper_open();
     lifter_down();
     gripper_hold_closed();
@@ -60,7 +60,7 @@ CY_ISR(sw_r_isr) {
     gripper_unactuate();
 }
 
-int main(void)
+int main_f(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
@@ -246,7 +246,8 @@ int main(void)
         } END_STATE
 
         STATE(TO_PINDECK) {
-            unwind_shortcut_navstack_till(target_len);        // at the top right of pindeck with +y heading
+            // unwind_shortcut_navstack_till(target_len);        // at the top right of pindeck with +y heading
+            unwind_navstack_till(target_len);        // at the top right of pindeck with +y heading
             move_backward_by(8);
 
             if (base == BASE_LEFT) {
@@ -356,7 +357,8 @@ int main(void)
         } END_STATE
 
         STATE(RETURN_TO_BASE) {
-            unwind_shortcut_navstack_till(0);
+            // unwind_shortcut_navstack_till(0);
+            unwind_navstack_till(0);
             panic(END_SUCCESS);
 
             if (current_lvl == 4)

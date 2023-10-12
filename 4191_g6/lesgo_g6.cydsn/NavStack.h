@@ -39,6 +39,7 @@ uint8 navstack_len(void);
 void navstack_push(Movement m);
 Movement navstack_pop(void);
 Movement navstack_peek(void);
+Movement navstack_get(uint8 idx);
 Movement navstack_peek_till(uint8 num);
 void navstack_clear(void);
 bool navstack_is_empty(void);
