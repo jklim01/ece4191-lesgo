@@ -28,10 +28,18 @@
 #include "cytypes.h"
 #include "color_sensor.h"
 
+#ifdef MY_DEBUG
+#include "bluetooth.h"
+#endif
+
 
 // constants
 static const uint16 COLOR_SENSOR_PERIOD = 49999;
 static const uint16 COLOR_SENSOR_CMP = 25000;
+
+
+// globals
+const char* COLOR_NAMES[3] = { "RED", "GREEN", "BLUE" };
 
 
 // static globals
@@ -93,6 +101,11 @@ Color color_sense(void) {
     uint32 blue = single_sense(0, 1);
     // uint32 clear = single_sense(1, 0);
     uint32 green = single_sense(1, 1);
+
+#ifdef MY_DEBUG
+    bt_printf("R: %6lu, G: %6lu, B: %6lu\n", red, green, blue);
+#endif
+
 
     // switch color sensor back to standy mode
     color_sensor_s0_Write(0);

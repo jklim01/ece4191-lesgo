@@ -13,15 +13,14 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
-#include <stdio.h> // debugging
-#include "UART_1.h"
 
 #include "utils.h"
 #include "NavStack.h"
 #include "locomotion.h"
 #include "limit_sw.h"
-#include "base_sw.h"
 #include "ultrasonic.h"
+#include "bluetooth.h"
+#include "base_sw.h"
 #include "motor_l_in1.h"
 #include "motor_l_in2.h"
 #include "motor_r_in1.h"
@@ -38,7 +37,7 @@
 // globals
 volatile LinearMovement current_linear_movement = STOP;
 volatile Movement latest_movement = { .type = NO_MOVEMENT, .counts = 0 };
-volatile Heading heading = NORTH;
+volatile Heading heading = POS_Y;
 volatile float pos_x = 0.0;
 volatile float pos_y = 0.0;
 
@@ -47,6 +46,7 @@ volatile float pos_y = 0.0;
 static volatile uint32 target_count = 0;
 static volatile bool controller_timer_flag = false;
 static bool push_movement_to_ns = true;
+static bool limit_sw_triggered = false;
 #if CONTROLLER_TYPE == PI
 static volatile int16 integral = 0;
 #elif CONTROLLER_TYPE == PD
@@ -64,7 +64,6 @@ static volatile int16 prev_err = 0;
 #define TURN_OFFSET (-1000)
 static const uint32 COUNTS_PER_CM = (uint32)((COUNTS_PER_WHEEL_CYCLE / WHEEL_DIAMETER_CM / 3.14159265358979323846) + 0.5);
 static const uint32 TURN_COUNT = (uint32)((COUNTS_PER_WHEEL_CYCLE / 4 / WHEEL_DIAMETER_CM *  WHEEL_GAP_CM) + 0.5 + TURN_OFFSET);
-static const uint16 controller_period_ms = 50;
 
 
 // parameters (TODO: tune these values)
@@ -81,6 +80,9 @@ static const float K_P = 0.05;
 static const float K_D = 0.05;
 
 #elif CONTROLLER_TYPE == PID
+// static const float K_P = 0;
+// static const float K_I = 0;
+// static const float K_D = 0;
 static const float K_P = 0.5;
 static const float K_I = 0.2;
 static const float K_D = 0.15;
@@ -123,6 +125,13 @@ CY_ISR(set_controller_flag_isr) {
 }
 
 CY_ISR(limit_sw_isr) {
+    limit_sw_pause();   // extra precaution to prevent double stop()
+
+    // prevent this ISR being called twice if both limit switches are pressed very close to each other (ISR called before limit_sw_pause())
+    // this will cause stop() to be called twice, and two backwards movements to be pushed onto the navstack
+    // if (limit_sw_triggered) return;
+    // limit_sw_triggered = true;
+
     stop();
 }
 
@@ -134,17 +143,16 @@ void locomotion_setup(void) {
     motor_l_quaddec_Start();
     motor_r_quaddec_Start();
     controller_timer_Start();
-    controller_timer_WritePeriod(controller_period_ms * 1000);  // 1MHz locomotion_clk -> 1000 ticks per ms
 
     limit_sw_setup(&limit_sw_isr, &limit_sw_isr);
     limit_sw_pause();
     navstack_init();
-    if (base_sw_Read() == 0) {
-        pos_x = -2;
-    }
-    else {
-        pos_x = 2;
-    }
+    // if (base_sw_Read() == 0) {
+    //     pos_x = -2;
+    // }
+    // else {
+    //     pos_x = 2;
+    // }
 }
 
 void stop(void) {
@@ -153,11 +161,13 @@ void stop(void) {
     target_count = 0;
     current_linear_movement = STOP;
     if (latest_movement.type == GO_FORWARD || latest_movement.type == GO_BACKWARD)
-        latest_movement.counts = (labs(motor_l_quaddec_GetCounter()) + labs(motor_r_quaddec_GetCounter())) / 2;
+        latest_movement.counts += (labs(motor_l_quaddec_GetCounter()) + labs(motor_r_quaddec_GetCounter())) / 2;
 
     update_pos_heading(latest_movement);
     if (push_movement_to_ns)
         navstack_push(latest_movement);
+
+    latest_movement = (Movement){ .type=NO_MOVEMENT, .counts=0 };
 }
 
 void turn_left(void) {
@@ -236,6 +246,7 @@ void reverse_to_align(void) {
     latest_movement.type = GO_BACKWARD;
 
     setup_controller(UINT32_MAX);
+    limit_sw_triggered = false;
     limit_sw_resume();
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
     limit_sw_pause();
@@ -263,14 +274,15 @@ void rotate_to_align(void) {
     float fr_dist = us_fr_get_dist();
     uint8 iter = 0;
 
-    char str[60];
-    sprintf(str, "(%u) FL %.4f \t FR %.4f\n", iter, fl_dist, fr_dist);
-    UART_1_PutString(str);
+#ifdef MY_DEBUG
+    bt_printf("(%u) FL %.4f \t FR %.4f\n", iter, fl_dist, fr_dist);
+#endif
 
     push_movement_to_ns = false;
     while (fabs(fl_dist - fr_dist) > 0.3 && iter < 8) {
-        sprintf(str, "(%u) FL %.4f \t FR %.4f\n", iter, fl_dist, fr_dist);
-        UART_1_PutString(str);
+#ifdef MY_DEBUG
+        bt_printf("(%u) FL %.4f \t FR %.4f\n", iter, fl_dist, fr_dist);
+#endif
 
         float theta;
         if (fr_dist > fl_dist) {
@@ -286,7 +298,7 @@ void rotate_to_align(void) {
         setup_controller(count);
         while (controller_update()) wait_for_controller_period();
 
-        CyDelay(600);
+        CyDelay(us_refresh());
         fl_dist = us_fl_get_dist();
         fr_dist = us_fr_get_dist();
         iter++;
@@ -297,6 +309,38 @@ void rotate_to_align(void) {
 void unwind_navstack_till(uint8 remaining) {
     // don't push the following movements to the navigation stack
     push_movement_to_ns = false;
+
+
+    while (navstack_len() > remaining) {
+        Movement m = navstack_pop();
+
+        // try to merge with the prior movements to save time
+        while (navstack_len() > remaining) {
+
+            if (!try_merge_movements(&m, navstack_peek()))
+                break;
+
+            navstack_pop();
+        }
+
+        // reverse the movement
+        switch (m.type) {
+            case NO_MOVEMENT: break;
+            case GO_FORWARD: move_backward_by_counts(m.counts); break;
+            case GO_BACKWARD: move_forward_by_counts(m.counts); break;
+            case TURN_LEFT: turn_right(); break;
+            case TURN_RIGHT: turn_left(); break;
+        }
+    }
+
+    // return to original value
+    push_movement_to_ns = true;
+}
+
+void unwind_shortcut_navstack_till(uint8 remaining) {
+    // don't push the following movements to the navigation stack
+    push_movement_to_ns = false;
+
 
     while (navstack_len() > remaining) {
         Movement m = navstack_pop();
@@ -327,7 +371,7 @@ void unwind_navstack_till(uint8 remaining) {
 void print_unwind_result(uint8 remaining) {
     uint8 num = 0;
 
-    UART_1_PutString("-- unwind result --\n");
+    bt_printf("-- unwind result (%2u) --\n", num);
     while (navstack_len()-num > remaining) {
         Movement m = navstack_peek_till(num);
         num++;
@@ -338,15 +382,14 @@ void print_unwind_result(uint8 remaining) {
             if (!try_merge_movements(&m, navstack_peek_till(num)))
                 break;
 
-            navstack_pop();
             num++;
         }
 
         // reverse the movement
         print_movement(m);
-        UART_1_PutString("\n");
+        bt_print("\n");
     }
-    UART_1_PutString("-------------------\n");
+    bt_print("------------------------\n");
 }
 
 void stop_nb(void) {
@@ -406,14 +449,25 @@ void move_backward_nb(void) {
     controller_isr_StartEx(&controller_update_isr);
 }
 
+float get_latest_movement_dist(void) {
+    return latest_movement.counts / COUNTS_PER_CM;
+}
+
 
 // internals
 bool controller_update(void) {
     int32 slave_count = labs(motor_l_quaddec_GetCounter());
     int32 master_count = labs(motor_r_quaddec_GetCounter());
+    motor_l_quaddec_SetCounter(0);
+    motor_r_quaddec_SetCounter(0);
+
+    int32 avg_count = (slave_count + master_count) / 2;
+    latest_movement.counts += avg_count;
 
     // stop if achieved target
-    if (master_count >= target_count) {
+    // if (master_count >= target_count) {
+    // if (slave_count >= target_count) {
+    if (latest_movement.counts >= target_count) {
         stop();
         return false;
     }
@@ -440,9 +494,10 @@ bool controller_update(void) {
 
 #endif
     uint16 slave_new_speed = (uint16)((int16)MASTER_BASE_SPEED + u);
-    // char str[35];
-    // sprintf(str, "e=%d\t u=%d\tspeed=%u\n", error, u, slave_new_speed);
-    // UART_1_PutString(str);
+
+#ifdef DEBUG_CONTROLLER
+    bt_printf(str, "e=%d\t u=%d\tspeed=%u\n", error, u, slave_new_speed);
+#endif
 
     motor_l_pwm_WriteCompare(slave_new_speed);
     motor_r_pwm_WriteCompare(MASTER_BASE_SPEED);
@@ -512,42 +567,40 @@ void wait_for_controller_period(void) {
 void update_pos_heading(Movement m) {
     switch (m.type) {
         case GO_FORWARD: {
-            m.counts = (motor_l_quaddec_GetCounter() + motor_r_quaddec_GetCounter()) / 2;
             float dist = m.counts / COUNTS_PER_CM;
             switch (heading) {
-                case NORTH: pos_y += dist; break;
-                case SOUTH: pos_y -= dist; break;
-                case EAST: pos_x += dist; break;
-                case WEST: pos_x -= dist; break;
+                case POS_Y: pos_y += dist; break;
+                case NEG_Y: pos_y -= dist; break;
+                case POS_X: pos_x += dist; break;
+                case NEG_X: pos_x -= dist; break;
             }
             break;
         }
         case GO_BACKWARD: {
-            m.counts = (motor_l_quaddec_GetCounter() + motor_r_quaddec_GetCounter()) / 2;
             float dist = m.counts / COUNTS_PER_CM;
             switch (heading) {
-                case NORTH: pos_y -= dist; break;
-                case SOUTH: pos_y += dist; break;
-                case EAST: pos_x -= dist; break;
-                case WEST: pos_x += dist; break;
+                case POS_Y: pos_y -= dist; break;
+                case NEG_Y: pos_y += dist; break;
+                case POS_X: pos_x -= dist; break;
+                case NEG_X: pos_x += dist; break;
             }
             break;
         }
         case TURN_LEFT: {
             switch (heading) {
-                case NORTH: heading = WEST; break;
-                case SOUTH: heading = EAST; break;
-                case EAST: heading = SOUTH; break;
-                case WEST: heading = NORTH; break;
+                case POS_Y: heading = NEG_X; break;
+                case NEG_Y: heading = POS_X; break;
+                case POS_X: heading = POS_Y; break;
+                case NEG_X: heading = NEG_Y; break;
             }
             break;
         }
         case TURN_RIGHT: {
             switch (heading) {
-                case NORTH: heading = EAST; break;
-                case SOUTH: heading = WEST; break;
-                case EAST: heading = NORTH; break;
-                case WEST: heading = SOUTH; break;
+                case POS_Y: heading = POS_X; break;
+                case NEG_Y: heading = NEG_X; break;
+                case POS_X: heading = NEG_Y; break;
+                case NEG_X: heading = POS_Y; break;
             }
             break;
         }

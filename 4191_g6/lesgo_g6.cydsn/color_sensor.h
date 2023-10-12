@@ -24,6 +24,10 @@ typedef enum __attribute__ ((__packed__)) Color {
 } Color;
 
 
+// globals
+extern const char* COLOR_NAMES[3];
+
+
 // ISRs
 CY_ISR_PROTO(color_sensor_ready_isr);
 

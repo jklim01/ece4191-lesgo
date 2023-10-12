@@ -52,10 +52,10 @@ typedef enum __attribute__ ((__packed__)) LinearMovement {
 } LinearMovement;
 
 typedef enum __attribute__ ((__packed__)) Heading {
-    NORTH,
-    SOUTH,
-    EAST,
-    WEST
+    POS_Y,
+    NEG_Y,
+    POS_X,
+    NEG_X
 } Heading;
 
 
@@ -88,7 +88,9 @@ void move_backward(void);
 void reverse_to_align(void);
 void rotate_to_align(void);
 void unwind_navstack_till(uint8 remaining);
+void unwind_shortcut_navstack_till(uint8 remaining);
 void print_unwind_result(uint8 remaining);
+float get_latest_movement_dist(void);
 
 // non-blocking versions
 void stop_nb(void);

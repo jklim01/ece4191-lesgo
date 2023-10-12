@@ -11,13 +11,12 @@
 */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <stdbool.h>
 #include "cytypes.h"
 
 #include "NavStack.h"
 #include "utils.h"
-#include "UART_1.h"
+#include "bluetooth.h"
 
 
 // typedef
@@ -152,21 +151,19 @@ bool try_merge_movements(Movement* m, Movement other) {
 }
 
 void print_movement(Movement m) {
-    static char str[45];
     const char* const type_names[] = {"NONE", "FORWARD", "BACKWARD", "LEFT", "RIGHT"};
 
-    sprintf(str, "{ .type=%8s, .counts=%lu }", type_names[m.type], m.counts);
-    UART_1_PutString(str);
+    bt_printf("{ .type=%8s, .counts=%lu }", type_names[m.type], m.counts);
 }
 
 void print_navstack() {
-    UART_1_PutString("[\n");
-    for (uint8 i = navstack_len()-1; i >= 0; i--) {
-        UART_1_PutString("\t");
-        print_movement(ns.ptr[i]);
-        UART_1_PutString(",\n");
+    bt_print("[\n");
+    for (uint8 i = 0; i < ns.len; i++) {
+        bt_print("\t");
+        print_movement(ns.ptr[ns.len - 1 - i]);
+        bt_print(",\n");
     }
-    UART_1_PutString("]");
+    bt_print("]\n");
 }
 
 

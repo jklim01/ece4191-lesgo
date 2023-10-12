@@ -27,19 +27,18 @@ void ir_sensor_setup(void (*ir_handler_)(void)) {
     if (ir_handler_ != NULL) {
         ir_handler = ir_handler_;
         ir_isr_ClearPending();
-        ir_isr_StartEx(ir_handler);
     }
-
-    ir_disable_Write(0);
 }
 
 void ir_sensor_pause(void) {
-    ir_disable_Write(1);
     ir_isr_Stop();
+    ir_disable_Write(1);
 }
 
 void ir_sensor_resume(void) {
-    ir_sensor_setup(ir_handler);
+    ir_disable_Write(0);
+    ir_isr_StartEx(ir_handler);
+    // ir_isr_Start();
 }
 
 bool ir_is_detected(void) {

@@ -15,9 +15,12 @@
 
 #include "utils.h"
 #include "servo.h"
+#include "color_sensor.h"
 
 
 // globals
+const Color ZONE_TO_COLOR[6] = { RED, GREEN, BLUE, RED, GREEN, BLUE };
+const uint8 COLOR_TO_ZONES[3][2] = { {1, 4}, {2, 5}, {3, 6} };
 BasePos base;
 
 

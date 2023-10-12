@@ -56,6 +56,8 @@ CY_ISR(color_sensor_ready_isr) {
     color_sensor_counter_ReadStatusRegister();
     color_sensor_ready_isr_Stop();
     ready = true;
+    
+    UART_1_PutString("Ready!");
 }
 
 

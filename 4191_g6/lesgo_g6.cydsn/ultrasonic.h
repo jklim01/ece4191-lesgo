@@ -17,18 +17,28 @@
 
 
 // ISRs
-CY_ISR_PROTO(usr_l_isr);
-CY_ISR_PROTO(usr_r_isr);
-CY_ISR_PROTO(usr_fl_isr);
-CY_ISR_PROTO(usr_fr_isr);
+CY_ISR_PROTO(us_lr_isr);
+CY_ISR_PROTO(us_fl_isr);
+CY_ISR_PROTO(us_fr_isr);
+CY_ISR_PROTO(us_b_isr);
 
 
 // API
 void ultrasonic_setup(void);
+uint32 us_refresh(void);
+
 float us_l_get_dist(void);
 float us_r_get_dist(void);
 float us_fl_get_dist(void);
 float us_fr_get_dist(void);
+float us_b_get_dist(void);
+
+float us_get_front_dist(void);
+float us_l_get_avg_dist(void);
+float us_r_get_avg_dist(void);
+float us_fl_get_avg_dist(void);
+float us_fr_get_avg_dist(void);
+float us_b_get_avg_dist(void);
 
 
 
