@@ -42,7 +42,7 @@
 #include "color_sensor.h"
 
 #define CONTROL(x) case (control_##x): { bt_printf("\n----- %-15s -----", #x); bt_clear_rx_finished();
-#define END_CONTROL control = control_idle; }
+#define END_CONTROL control = control_idle; break; }
 
 
 // - specify the command name inside `X(...)` (it's called an X macro)
