@@ -345,6 +345,37 @@ void unwind_navstack_till(uint8 remaining) {
     push_movement_to_ns = true;
 }
 
+void print_unwind(uint8 remaining) {
+    uint8 num = 0;
+
+    bt_printf("-- unwind result (%2u) --\n", num);
+    while (navstack_len()-num > remaining) {
+        Movement m = navstack_peek_till(num);
+        num++;
+
+        // try to merge with the prior movements to save time
+        while (navstack_len()-num > remaining) {
+
+            if (!try_merge_movements(&m, navstack_peek_till(num)))
+                break;
+
+            num++;
+        }
+
+        // reverse the movement
+        switch (m.type) {
+            case NO_MOVEMENT: break;
+            case GO_FORWARD: m.type = GO_BACKWARD; break;
+            case GO_BACKWARD: m.type = GO_FORWARD; break;
+            case TURN_LEFT: m.type = TURN_RIGHT; break;
+            case TURN_RIGHT: m.type = TURN_LEFT; break;
+        }
+        print_movement(m);
+        bt_print("\n");
+    }
+    bt_print("------------------------\n");
+}
+
 void unwind_shortcut_navstack_till(uint8 remaining) {
     // don't push the following movements to the navigation stack
     push_movement_to_ns = false;
@@ -419,28 +450,76 @@ void unwind_shortcut_navstack_till(uint8 remaining) {
     push_movement_to_ns = true;
 }
 
-void print_unwind_result(uint8 remaining) {
-    uint8 num = 0;
-
-    bt_printf("-- unwind result (%2u) --\n", num);
-    while (navstack_len()-num > remaining) {
-        Movement m = navstack_peek_till(num);
-        num++;
-
-        // try to merge with the prior movements to save time
-        while (navstack_len()-num > remaining) {
-
-            if (!try_merge_movements(&m, navstack_peek_till(num)))
-                break;
-
-            num++;
-        }
-
-        // reverse the movement
-        print_movement(m);
-        bt_print("\n");
+void print_unwind_shortcut(uint8 remaining) {
+    // find the target position and heading
+    float target_pos_x = 0.0;
+    float target_pos_y = 0.0;
+    Heading target_heading = POS_Y;         // initialize with initial heading at base
+    Heading current_heading = heading;
+    for (uint8 i = 0; i < remaining; i++) {
+        Movement m = navstack_get(i);
+        update_pos_heading(m, &target_pos_x, &target_pos_y, &target_heading);
     }
-    bt_print("------------------------\n");
+    float diff_x = target_pos_x - pos_x;
+    float diff_y = target_pos_y - pos_y;
+
+    // move in x direction
+    // - if turning is needed, always turn such that we reverse into the position
+    switch (current_heading) {
+        case POS_X: bt_printf("linear by %.2f\n", diff_x); break;
+        case NEG_X: bt_printf("linear by %.2f\n", -diff_x);; break;
+        case POS_Y: {
+            if (diff_x > 0) { bt_print("turn left\n"); current_heading = NEG_X; }
+            else { bt_print("turn right\n"); current_heading = POS_X; }
+            bt_printf("backwards by %.2f\n", fabsf(diff_x));
+            break;
+        }
+        case NEG_Y: {
+            if (diff_x > 0) { bt_print("turn right\n"); current_heading = NEG_X; }
+            else { bt_print("turn left\n"); current_heading = POS_X; }
+            bt_printf("backwards by %.2f\n", fabsf(diff_x));
+            break;
+        }
+    }
+
+    // move in y direction:
+    // - before moving, the robot can only have +x or -x heading
+    // - if the target heading is +y or -y, turn the robot so that it has the same heading
+    // - otherwise, turn such that we reverse into the position
+    if (current_heading == POS_X) {
+        if (target_heading == POS_Y) { bt_print("turn left\n"); current_heading = target_heading; }
+        else if (target_heading == NEG_Y) { bt_print("turn right\n"); current_heading = target_heading; }
+        else {
+            if (diff_y > 0) { bt_print("turn right\n"); current_heading = NEG_Y; }
+            else { bt_print("turn left\n"); current_heading = POS_Y; }
+        }
+    }
+    else  {
+        if (target_heading == POS_Y) { bt_print("turn right\n"); current_heading = target_heading; }
+        else if (target_heading == NEG_Y) { bt_print("turn left\n"); current_heading = target_heading; }
+        else {
+            if (diff_y > 0) { bt_print("turn left\n"); current_heading = NEG_Y; }
+            else { bt_print("turn right\n"); current_heading = NEG_Y; }
+        }
+    }
+    move_backward_by(fabsf(diff_y));
+
+    // final adjustment to heading if required
+    // - before moving, the robot can only have +y or -y heading
+    if (target_heading == POS_X) {
+        if (current_heading == POS_Y) bt_print("turn right\n");
+        else bt_print("turn left\n");
+    }
+    else  {
+        if (current_heading == POS_Y) bt_print("turn left\n");
+        else bt_print("turn right\n");
+    }
+
+    // clear movements on navstack that have been backtracked
+    while (navstack_len() > remaining) navstack_pop();
+
+    // return to original value
+    push_movement_to_ns = true;
 }
 
 void stop_nb(void) {

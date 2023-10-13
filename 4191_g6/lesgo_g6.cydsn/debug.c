@@ -65,16 +65,19 @@
     X(back)             /* back %f!                                 */ \
     X(left)             /* left!                                    */ \
     X(right)            /* right!                                   */ \
-    X(navstackLen)      /* navstackLen!                             : prints navstack len   */ \
-    X(unwind)           /* unwind %d!                               : unwinds to target len */ \
-    X(unwindS)          /* unwindS %d!                              : unwinds to target len with shortcut */ \
+    X(lenN)             /* lenN!                                    : prints navstack len   */ \
+    X(printN)           /* printN!                                  : prints navstack   */ \
+    X(unwind)           /* unwind %d!                               : unwinds to the target */ \
+    X(printU)           /* printU %d!                               : prints how navstack will be unwinded to the target len    */ \
+    X(unwindS)          /* unwindS %d!                              : unwinds to the target len with shortcut */ \
+    X(printUS)          /* printUS %d!                              : prints how navstack will be unwinded to the target len with shortcut */ \
     X(flickP)           /* flickP!                                  : puts down and flick puck  */ \
-    X(searchP)          /* seachP [%d]!                             : move forward to find puck for specified distance (default 50cm if not specified), and grip puck if found  */ \
+    X(searchP)          /* searchP [%d]!                            : move forward to find puck for specified distance (default 50cm if not specified), and grip puck if found  */ \
     X(revA)             /* revA!                                    : reversal-based align  */ \
     X(rotA)             /* rotA!                                    : rotation-based align  */ \
     X(usL)              /* getUsL!                                  : print all ultrasonic readings except right until any message is sent  */ \
-    X(usR)              /* getUsR!                                  : print all ultrasonic readings except left until any message is sent */ \
-    X(detectB)          /* detectB!                                 : move forward 15 times or until bowling pin detected (must start with ultrasonic facing wall) */
+    X(usR)              /* getUsR!                                  : print all ultrasonic readings except left until any message is sent   */ \
+    X(detectB)          /* detectB!                                 : move forward 15 times or until bowling pin detected (must start with ultrasonic facing wall)  */
 
 #define X(name) control_##name,
 typedef enum Control {
@@ -115,6 +118,9 @@ int main(void)
             arg2 = 0;
             arg_num = bt_scanf("%49s %49s", arg1, arg2_str);
 
+            if (arg_num == 0)
+                continue;
+
             if (arg_num == 2)
                 arg2 = atof(arg2_str);
 
@@ -145,16 +151,28 @@ LIST_OF_CONTROLS
             turn_right();
         } END_CONTROL
 
-        CONTROL(navstackLen) {
-            bt_printf("target_len = %u\n", navstack_len);
+        CONTROL(lenN) {
+            bt_printf("navstack_len() = %u\n", navstack_len());
+        } END_CONTROL
+
+        CONTROL(printN) {
+            print_navstack();
         } END_CONTROL
 
         CONTROL(unwind) {
             unwind_navstack_till((uint8)arg2);
         } END_CONTROL
 
+        CONTROL(printU) {
+            print_unwind((uint8)arg2);
+        } END_CONTROL
+
         CONTROL(unwindS) {
             unwind_shortcut_navstack_till((uint8)arg2);
+        } END_CONTROL
+
+        CONTROL(printUS) {
+            print_unwind_shortcut((uint8)arg2);
         } END_CONTROL
 
         CONTROL(searchP) {

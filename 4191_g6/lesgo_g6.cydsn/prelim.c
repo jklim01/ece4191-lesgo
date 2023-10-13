@@ -180,7 +180,7 @@ int main_p(void)
         STATE(DEPOSIT_PUCK) {
             // move to puck landing zone
             print_navstack();
-            print_unwind_result(target_len);
+            print_unwind(target_len);
             unwind_navstack_till(target_len);
             panic(END_SUCCESS);
             // reverse_to_align();

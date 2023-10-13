@@ -92,7 +92,8 @@ void rotate_to_align(void);
 
 void unwind_navstack_till(uint8 remaining);
 void unwind_shortcut_navstack_till(uint8 remaining);
-void print_unwind_result(uint8 remaining);
+void print_unwind(uint8 remaining);
+void print_unwind_shortcut(uint8 remaining);
 float get_latest_movement_dist(void);
 
 // non-blocking versions
