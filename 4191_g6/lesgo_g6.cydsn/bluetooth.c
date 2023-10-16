@@ -16,10 +16,12 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "utils.h"
 #include "bluetooth.h"
 #include "UART_1.h"
 #include "color_sensor.h"
 #include "isr_1.h"
+
 // #define MY_DEBUG
 
 
@@ -29,12 +31,14 @@ char rx_str[120];
 
 // static globals
 static volatile bool rx_finished;
+static char buf[350];
 
 
 // ISRs
 CY_ISR(uart_handler) {
     static char* str_ptr = rx_str;
 
+    if (rx_finished) return;
     while (UART_1_GetRxBufferSize() > 0) {
         char c = UART_1_GetChar();
         if (c != '!') {
@@ -65,7 +69,7 @@ void bt_setup(void) {
     UART_1_Start();
     isr_1_StartEx(uart_handler);
 #ifdef MY_DEBUG
-    bt_setup("Bluetooth setup!\n");
+    bt_print("Bluetooth setup!\n");
 #endif
 }
 
@@ -75,8 +79,6 @@ void bt_print(const char* str) {
 }
 
 int bt_printf(const char* fmt, ...) {
-    static char buf[250];
-
     va_list va;
     va_start(va, fmt);
     int res = vsprintf(buf, fmt, va);
@@ -88,23 +90,29 @@ int bt_printf(const char* fmt, ...) {
 
 int bt_scanf(const char* fmt, ...) {
     while (!rx_finished);
-    rx_finished = false;
 
     va_list va;
     va_start(va, fmt);
     int res = vsscanf(rx_str, fmt, va);
     va_end(va);
 
+    rx_finished = false;
     return res;
 }
 
-void bt_block_on(const char* match_str) {
+int bt_block_on(const char* match, const char* fmt, ...) {
+    va_list va;
+    va_start(va, fmt);
+    int res = vsprintf(buf, fmt, va);
+    va_end(va);
+    UART_1_PutString(buf);
+
     while (1) {
         if (rx_finished) {
-            rx_finished = false;
-            if (strcmp(rx_str, match_str) == 0) {
-                return;
+            if (strcmp(rx_str, match) == 0) {
+                return res;
             }
+            rx_finished = false;
         }
     }
 }
@@ -112,13 +120,14 @@ void bt_block_on(const char* match_str) {
 BtResponse bt_init(void) {
     BtResponse res;
 
-    bt_block_on("Are you ready?");
+    bt_block_on("Are you ready?", "");
     bt_print("Ready\n");
 
     while (1) {
         char color[10];
         if (bt_scanf("%hu %9s %hu", &res.lvl_1_zone, color, &res.current_lvl) != 3)
             continue;
+
         if (!(1 <= res.lvl_1_zone && res.lvl_1_zone <= 6))
             continue;
         if (!(1 <= res.current_lvl && res.current_lvl <= 4))
@@ -137,7 +146,8 @@ BtResponse bt_init(void) {
         break;
     }
 
-    bt_block_on("Start");
+    bt_block_on("Start", "");
+    bt_print("ok!\n");
 
     return res;
 }
@@ -157,4 +167,5 @@ void bt_block_till_rx(void) {
 }
 
 
+#undef MY_DEBUG
 /* [] END OF FILE */

@@ -34,6 +34,7 @@ float us_fr_get_dist(void);
 float us_b_get_dist(void);
 
 float us_get_front_dist(void);
+float us_get_front_avg_dist(void);
 float us_l_get_avg_dist(void);
 float us_r_get_avg_dist(void);
 float us_fl_get_avg_dist(void);

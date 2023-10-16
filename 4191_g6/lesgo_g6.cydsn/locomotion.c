@@ -33,6 +33,9 @@
 #include "controller_timer.h"
 #include "controller_reset.h"
 
+#define MY_DEBUG
+// #define DEBUG_CONTROLLER
+
 
 // globals
 volatile LinearMovement current_linear_movement = STOP;
@@ -43,18 +46,18 @@ volatile float pos_y = 0.0;
 
 
 // static globals
-static volatile uint32 target_count = 0;
+static volatile uint32 target_val = 0;
 static volatile bool controller_timer_flag = false;
+static uint16 current_master_speed = 12500;
 static bool push_movement_to_ns = true;
-static bool limit_sw_triggered = false;
-#if CONTROLLER_TYPE == PI
-static volatile int16 integral = 0;
-#elif CONTROLLER_TYPE == PD
-static volatile int16 prev_err = 0;
-#elif CONTROLLER_TYPE == PID
+
+static uint32 prev_slave_val = 0;
+static uint32 prev_master_val = 0;
 static volatile int16 integral = 0;
 static volatile int16 prev_err = 0;
-#endif
+static float k_p = 0.0;
+static float k_i = 0.0;
+static float k_d = 0.0;
 
 
 // constants
@@ -64,30 +67,21 @@ static volatile int16 prev_err = 0;
 #define TURN_OFFSET (-1000)
 static const uint32 COUNTS_PER_CM = (uint32)((COUNTS_PER_WHEEL_CYCLE / WHEEL_DIAMETER_CM / 3.14159265358979323846) + 0.5);
 static const uint32 TURN_COUNT = (uint32)((COUNTS_PER_WHEEL_CYCLE / 4 / WHEEL_DIAMETER_CM *  WHEEL_GAP_CM) + 0.5 + TURN_OFFSET);
+const char* HEADING_NAMES[4] = { "POS_Y", "NEG_Y", "POS_X", "NEG_X" };
 
 
 // parameters (TODO: tune these values)
-static const uint16 MASTER_BASE_SPEED = 12500;
-#if CONTROLLER_TYPE == P
-static const float K_P = 0.5;
-
-#elif CONTROLLER_TYPE == PI
-static const float K_P = 0.1;      // 0.5 very good (BETTER THAN 1.5) (0.5 > 0.1 > 1.5)
-static const float K_I = 0.01;     // 0.5 will shake, 0.1 will shake abit, 0.05 > 0.01
-
-#elif CONTROLLER_TYPE == PD
-static const float K_P = 0.05;
-static const float K_D = 0.05;
-
-#elif CONTROLLER_TYPE == PID
-// static const float K_P = 0;
-// static const float K_I = 0;
-// static const float K_D = 0;
-static const float K_P = 0.5;
-static const float K_I = 0.2;
-static const float K_D = 0.15;
-
-#endif
+static const uint16 MASTER_SLOW_SPEED = 12500;
+static const uint16 MASTER_BASE_SPEED = 18000;
+// static const float K_P = 0.5;
+// static const float K_I = 0.3;
+// static const float K_D = 0.2;
+float K_P = 1.0;
+float K_I = 0.8;
+float K_D = 0.4;
+float K_P_slow = 1.0;
+float K_I_slow = 0.8;
+float K_D_slow = 0.4;
 
 
 // internals
@@ -98,11 +92,12 @@ typedef enum __attribute__ ((__packed__)) WheelDir {
 
 bool controller_update(void);
 void setup_controller(uint32 target);
+void setup_controller_slow(uint32 target);
 void set_wheeldir_l(WheelDir dir);
 void set_wheeldir_r(WheelDir dir);
 void set_wheeldir(WheelDir dir_l, WheelDir dir_r);
 void wait_for_controller_period(void);
-void update_pos_heading(Movement m, volatile float* pos_x, volatile float* pos_y, volatile Heading* heading);
+void update_pos_heading(Movement m, float* pos_x, float* pos_y, Heading* heading);
 
 
 // ISRs
@@ -124,13 +119,7 @@ CY_ISR(set_controller_flag_isr) {
 }
 
 CY_ISR(limit_sw_isr) {
-    limit_sw_pause();   // extra precaution to prevent double stop()
-
-    // prevent this ISR being called twice if both limit switches are pressed very close to each other (ISR called before limit_sw_pause())
-    // this will cause stop() to be called twice, and two backwards movements to be pushed onto the navstack
-    // if (limit_sw_triggered) return;
-    // limit_sw_triggered = true;
-
+    limit_sw_pause();   // prevent double stop()
     stop();
 }
 
@@ -146,23 +135,22 @@ void locomotion_setup(void) {
     limit_sw_setup(&limit_sw_isr, &limit_sw_isr);
     limit_sw_pause();
     navstack_init();
+
     pos_x = 0;
     pos_y = 0;
-    // if (base_sw_Read() == 0) {
-    //     pos_x = -2;
-    // }
-    // else {
-    //     pos_x = 2;
-    // }
+    // HEADING_NAMES[POS_Y] = "POS_Y";
+    // HEADING_NAMES[NEG_Y] = "NEG_Y";
+    // HEADING_NAMES[POS_X] = "POS_X";
+    // HEADING_NAMES[NEG_X] = "NEG_X";
 }
 
 void stop(void) {
     motor_l_pwm_WriteCompare(0);
     motor_r_pwm_WriteCompare(0);
-    target_count = 0;
+    target_val = 0;
     current_linear_movement = STOP;
     if (latest_movement.type == GO_FORWARD || latest_movement.type == GO_BACKWARD)
-        latest_movement.counts += (labs(motor_l_quaddec_GetCounter()) + labs(motor_r_quaddec_GetCounter())) / 2;
+        latest_movement.counts = (labs(motor_l_quaddec_GetCounter()) + labs(motor_r_quaddec_GetCounter())) / 2;
 
     update_pos_heading(latest_movement, &pos_x, &pos_y, &heading);
     if (push_movement_to_ns)
@@ -248,38 +236,80 @@ void move_backward(void) {
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
 }
 
-void reverse_to_align(void) {
+void move_forward_slow(void) {
+    set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
+    current_linear_movement = FORWARD;
+    latest_movement.type = GO_FORWARD;
+
+    setup_controller_slow(UINT32_MAX);
+    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+}
+
+void move_backward_slow(void) {
     set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
     current_linear_movement = REVERSE;
     latest_movement.type = GO_BACKWARD;
 
-    setup_controller(UINT32_MAX);
-    limit_sw_triggered = false;
-    limit_sw_resume();
+    setup_controller_slow(UINT32_MAX);
     while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
-    limit_sw_pause();
+}
 
+void move_forward_slow_by(float dist_cm) {
+    set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
+    current_linear_movement = FORWARD;
+    latest_movement.type = GO_FORWARD;
+
+    setup_controller_slow((uint32)(dist_cm * COUNTS_PER_CM + 0.5));
+    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+}
+
+void move_backward_slow_by(float dist_cm) {
+    set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
+    current_linear_movement = REVERSE;
+    latest_movement.type = GO_BACKWARD;
+
+    setup_controller_slow((uint32)(dist_cm * COUNTS_PER_CM + 0.5));
+    while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+}
+
+void reverse_to_align(void) {
+    set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
+    current_linear_movement = REVERSE;
+    latest_movement.type = GO_BACKWARD;
+    setup_controller(UINT32_MAX);
+
+    // reverse full speed if none of the limit switches are pressed
+    if (!(limit_sw_l_is_on() || limit_sw_r_is_on())) {
+        limit_sw_resume();
+        while (current_linear_movement != STOP && controller_update()) wait_for_controller_period();
+        limit_sw_pause();
+        // while (!(limit_sw_l_is_on() || limit_sw_r_is_on())) wait_for_controller_period();
+        stop();
+    }
+
+    // turn till both limit switches are pressed
     if (limit_sw_l_is_on()) {
         set_wheeldir(WHEEL_FORWARD, WHEEL_REVERSE);
         motor_l_pwm_WriteCompare(2500);
-        motor_r_pwm_WriteCompare(MASTER_BASE_SPEED);
+        motor_r_pwm_WriteCompare(MASTER_SLOW_SPEED);
         while (!limit_sw_r_is_on());
     }
     else if (limit_sw_r_is_on()) {
         set_wheeldir(WHEEL_REVERSE, WHEEL_FORWARD);
+        motor_l_pwm_WriteCompare(MASTER_SLOW_SPEED);
         motor_r_pwm_WriteCompare(2500);
-        motor_l_pwm_WriteCompare(MASTER_BASE_SPEED);
         while (!limit_sw_l_is_on());
     }
-    // while (!limit_sw_l_is_on() || !limit_sw_r_is_on());
     motor_l_pwm_WriteCompare(0);
     motor_r_pwm_WriteCompare(0);
 }
 
 void rotate_to_align(void) {
-    const double FRONT_US_GAP_CM = 12.5;
-    float fl_dist = us_fl_get_dist();
-    float fr_dist = us_fr_get_dist();
+    const double FRONT_US_GAP_CM = 11.5;
+
+    CyDelay(us_refresh());
+    float fl_dist = us_fl_get_avg_dist();
+    float fr_dist = us_fr_get_avg_dist();
     uint8 iter = 0;
 
 #ifdef MY_DEBUG
@@ -287,11 +317,11 @@ void rotate_to_align(void) {
 #endif
 
     push_movement_to_ns = false;
-    while (fabsf(fl_dist - fr_dist) > 0.3 && iter < 8) {
+    while (fabsf(fl_dist - fr_dist) > 1 && iter < 8) {
+
 #ifdef MY_DEBUG
         bt_printf("(%u) FL %.4f \t FR %.4f\n", iter, fl_dist, fr_dist);
 #endif
-
         float theta;
         if (fr_dist > fl_dist) {
             theta = atan2f(fr_dist-fl_dist, FRONT_US_GAP_CM);
@@ -303,15 +333,46 @@ void rotate_to_align(void) {
         }
         float count_f = theta * ((float)TURN_COUNT / 3.14159265358979323846 * 2);
         uint32 count = (uint32)roundf(count_f);
-        setup_controller(count);
+        setup_controller_slow(count);
         while (controller_update()) wait_for_controller_period();
 
-        CyDelay(us_refresh());
-        fl_dist = us_fl_get_dist();
-        fr_dist = us_fr_get_dist();
+        fl_dist = us_fl_get_avg_dist();
+        fr_dist = us_fr_get_avg_dist();
         iter++;
     }
     push_movement_to_ns = true;
+}
+
+void rotate_to_align_l(void) {
+    // turn left slightly before aligning
+    const float theta_deg = 15;
+    float count_f = (theta_deg / 90) * TURN_COUNT;
+    uint32 count = (uint32)roundf(count_f);
+
+    set_wheeldir(WHEEL_REVERSE, WHEEL_FORWARD);
+    setup_controller(count);
+    while (controller_update()) wait_for_controller_period();
+
+    // fine tune
+    rotate_to_align();
+}
+
+void rotate_to_align_r(void) {
+    // turn right slightly before aligning
+    const float theta_deg = 15;
+    float count_f = (theta_deg / 90) * TURN_COUNT;
+    uint32 count = (uint32)roundf(count_f);
+
+    set_wheeldir(WHEEL_FORWARD, WHEEL_REVERSE);
+    setup_controller(count);
+    while (controller_update()) wait_for_controller_period();
+
+    // fine tune
+    rotate_to_align();
+}
+
+void clear_navstack(void) {
+    navstack_clear();
 }
 
 void unwind_navstack_till(uint8 remaining) {
@@ -387,7 +448,11 @@ void unwind_shortcut_navstack_till(uint8 remaining) {
     for (uint8 i = 0; i < remaining; i++) {
         Movement m = navstack_get(i);
         update_pos_heading(m, &target_pos_x, &target_pos_y, &target_heading);
+        print_movement(m);
+        // bt_block_on("go", "-> target (%.2f, %.2f) %s\n", target_pos_x, target_pos_y, HEADING_NAMES[target_heading]);
     }
+    // bt_printf("CURRENT: (%.2f, %.2f) %s\n", pos_x, pox_y, HEADING_NAMES[heading]);
+    // bt_printf("TARGET : (%.2f, %.2f) %s\n", target_pos_x, target_pox_y, HEADING_NAMES[target_heading]);
     float diff_x = target_pos_x - pos_x;
     float diff_y = target_pos_y - pos_y;
 
@@ -409,6 +474,7 @@ void unwind_shortcut_navstack_till(uint8 remaining) {
             break;
         }
     }
+    // bt_block_on("go", "completed x movement");
 
     // move in y direction:
     // - before moving, the robot can only have +x or -x heading
@@ -431,88 +497,18 @@ void unwind_shortcut_navstack_till(uint8 remaining) {
         }
     }
     move_backward_by(fabsf(diff_y));
+    // bt_block_on("go", "completed y movement");
 
     // final adjustment to heading if required
     // - before moving, the robot can only have +y or -y heading
+    // bt_block_on("go", "%s -> %s", HEADING_NAMES[heading], HEADING_NAMES[target_heading]);
     if (target_heading == POS_X) {
         if (heading == POS_Y) turn_right();
         else turn_left();
     }
-    else  {
+    else if (target_heading == NEG_X)  {
         if (heading == POS_Y) turn_left();
         else turn_right();
-    }
-
-    // clear movements on navstack that have been backtracked
-    while (navstack_len() > remaining) navstack_pop();
-
-    // return to original value
-    push_movement_to_ns = true;
-}
-
-void print_unwind_shortcut(uint8 remaining) {
-    // find the target position and heading
-    float target_pos_x = 0.0;
-    float target_pos_y = 0.0;
-    Heading target_heading = POS_Y;         // initialize with initial heading at base
-    Heading current_heading = heading;
-    for (uint8 i = 0; i < remaining; i++) {
-        Movement m = navstack_get(i);
-        update_pos_heading(m, &target_pos_x, &target_pos_y, &target_heading);
-    }
-    float diff_x = target_pos_x - pos_x;
-    float diff_y = target_pos_y - pos_y;
-
-    // move in x direction
-    // - if turning is needed, always turn such that we reverse into the position
-    switch (current_heading) {
-        case POS_X: bt_printf("linear by %.2f\n", diff_x); break;
-        case NEG_X: bt_printf("linear by %.2f\n", -diff_x);; break;
-        case POS_Y: {
-            if (diff_x > 0) { bt_print("turn left\n"); current_heading = NEG_X; }
-            else { bt_print("turn right\n"); current_heading = POS_X; }
-            bt_printf("backwards by %.2f\n", fabsf(diff_x));
-            break;
-        }
-        case NEG_Y: {
-            if (diff_x > 0) { bt_print("turn right\n"); current_heading = NEG_X; }
-            else { bt_print("turn left\n"); current_heading = POS_X; }
-            bt_printf("backwards by %.2f\n", fabsf(diff_x));
-            break;
-        }
-    }
-
-    // move in y direction:
-    // - before moving, the robot can only have +x or -x heading
-    // - if the target heading is +y or -y, turn the robot so that it has the same heading
-    // - otherwise, turn such that we reverse into the position
-    if (current_heading == POS_X) {
-        if (target_heading == POS_Y) { bt_print("turn left\n"); current_heading = target_heading; }
-        else if (target_heading == NEG_Y) { bt_print("turn right\n"); current_heading = target_heading; }
-        else {
-            if (diff_y > 0) { bt_print("turn right\n"); current_heading = NEG_Y; }
-            else { bt_print("turn left\n"); current_heading = POS_Y; }
-        }
-    }
-    else  {
-        if (target_heading == POS_Y) { bt_print("turn right\n"); current_heading = target_heading; }
-        else if (target_heading == NEG_Y) { bt_print("turn left\n"); current_heading = target_heading; }
-        else {
-            if (diff_y > 0) { bt_print("turn left\n"); current_heading = NEG_Y; }
-            else { bt_print("turn right\n"); current_heading = NEG_Y; }
-        }
-    }
-    move_backward_by(fabsf(diff_y));
-
-    // final adjustment to heading if required
-    // - before moving, the robot can only have +y or -y heading
-    if (target_heading == POS_X) {
-        if (current_heading == POS_Y) bt_print("turn right\n");
-        else bt_print("turn left\n");
-    }
-    else  {
-        if (current_heading == POS_Y) bt_print("turn left\n");
-        else bt_print("turn right\n");
     }
 
     // clear movements on navstack that have been backtracked
@@ -579,6 +575,26 @@ void move_backward_nb(void) {
     controller_isr_StartEx(&controller_update_isr);
 }
 
+void move_forward_slow_nb(void) {
+    set_wheeldir(WHEEL_FORWARD, WHEEL_FORWARD);
+    current_linear_movement = FORWARD;
+    latest_movement.type = GO_FORWARD;
+
+    setup_controller_slow(UINT32_MAX);
+    controller_isr_StartEx(&controller_update_isr);
+
+}
+
+void move_backward_slow_nb(void) {
+    set_wheeldir(WHEEL_REVERSE, WHEEL_REVERSE);
+    current_linear_movement = REVERSE;
+    latest_movement.type = GO_BACKWARD;
+
+    setup_controller_slow(UINT32_MAX);
+    controller_isr_StartEx(&controller_update_isr);
+
+}
+
 float get_latest_movement_dist(void) {
     return latest_movement.counts / COUNTS_PER_CM;
 }
@@ -586,68 +602,65 @@ float get_latest_movement_dist(void) {
 
 // internals
 bool controller_update(void) {
-    int32 slave_count = labs(motor_l_quaddec_GetCounter());
-    int32 master_count = labs(motor_r_quaddec_GetCounter());
-    motor_l_quaddec_SetCounter(0);
-    motor_r_quaddec_SetCounter(0);
+    int32 slave_val = labs(motor_l_quaddec_GetCounter());
+    int32 master_val = labs(motor_r_quaddec_GetCounter());
+    int32 slave_count = slave_val - prev_slave_val;
+    int32 master_count = master_val - prev_master_val;
 
-    int32 avg_count = (slave_count + master_count) / 2;
-    latest_movement.counts += avg_count;
 
     // stop if achieved target
-    // if (master_count >= target_count) {
-    // if (slave_count >= target_count) {
-    if (latest_movement.counts >= target_count) {
+    if ((slave_val + master_val) >= 2 * target_val) {
         stop();
         return false;
     }
 
     // calculate slave control signal with controller
     int16 error = master_count - slave_count;
-#if CONTROLLER_TYPE == P
-    int16 u = (int16)round(K_P * error);
-
-#elif CONTROLLER_TYPE == PI
-    integral += error;
-    int16 u = (int16)roundf(K_P * error + K_I * integral);
-
-#elif CONTROLLER_TYPE == PD
     int16 derivative = error - prev_err;
-    prev_err = error;
-    int16 u = (int16)roundf(K_P * error + K_D * derivative);
-
-#elif CONTROLLER_TYPE == PID
     integral += error;
-    int16 derivative = error - prev_err;
     prev_err = error;
-    int16 u = (int16)roundf(K_P * error + K_I * integral + K_D * derivative);
-
-#endif
-    uint16 slave_new_speed = (uint16)((int16)MASTER_BASE_SPEED + u);
+    int16 u = (int16)roundf(k_p * error + k_i * integral + k_d * derivative);
+    uint16 slave_new_speed = (uint16)((int16)current_master_speed + u);
 
 #ifdef DEBUG_CONTROLLER
-    bt_printf(str, "e=%d\t u=%d\tspeed=%u\n", error, u, slave_new_speed);
+    bt_printf("e=%d\t u=%d\tspeed=%u (master %u)\n", error, u, slave_new_speed, current_master_speed);
 #endif
 
     motor_l_pwm_WriteCompare(slave_new_speed);
-    motor_r_pwm_WriteCompare(MASTER_BASE_SPEED);
+    motor_r_pwm_WriteCompare(current_master_speed);
+    prev_slave_val = slave_val;
+    prev_master_val = master_val;
     return true;
 }
 
 void setup_controller(uint32 target) {
     // set target count value and initial wheel speeds
-    target_count = target;
+    target_val = target;
+    current_master_speed = MASTER_BASE_SPEED;
     motor_l_quaddec_SetCounter(0);
     motor_r_quaddec_SetCounter(0);
 
-#if CONTROLLER_TYPE == PI
-    integral = 0;
-#elif CONTROLLER_TYPE == PD
-    prev_error = 0;
-#elif CONTROLLER_TYPE == PID
+    prev_slave_val = 0;
+    prev_master_val = 0;
     integral = 0;
     prev_err = 0;
-#endif
+
+    k_p = K_P, k_i = K_I, k_d = K_D;
+}
+
+void setup_controller_slow(uint32 target) {
+    // set target count value and initial wheel speeds
+    target_val = target;
+    current_master_speed = MASTER_SLOW_SPEED;
+    motor_l_quaddec_SetCounter(0);
+    motor_r_quaddec_SetCounter(0);
+
+    prev_slave_val = 0;
+    prev_master_val = 0;
+    integral = 0;
+    prev_err = 0;
+
+    k_p = K_P_slow, k_i = K_I_slow, k_d = K_D_slow;
 }
 
 void set_wheeldir_l(WheelDir dir) {
@@ -694,11 +707,11 @@ void wait_for_controller_period(void) {
     while (!controller_timer_flag);
 }
 
-void update_pos_heading(Movement m, volatile float* pos_x, volatile float* pos_y, volatile Heading* heading) {
+void update_pos_heading(Movement m, float* pos_x, float* pos_y, Heading* heading) {
     switch (m.type) {
         case NO_MOVEMENT: break;
         case GO_FORWARD: {
-            float dist = m.counts / COUNTS_PER_CM;
+            float dist = m.counts / (float)COUNTS_PER_CM;
             switch (*heading) {
                 case POS_Y: *pos_y += dist; break;
                 case NEG_Y: *pos_y -= dist; break;
@@ -708,7 +721,7 @@ void update_pos_heading(Movement m, volatile float* pos_x, volatile float* pos_y
             break;
         }
         case GO_BACKWARD: {
-            float dist = m.counts / COUNTS_PER_CM;
+            float dist = m.counts / (float)COUNTS_PER_CM;
             switch (*heading) {
                 case POS_Y: *pos_y -= dist; break;
                 case NEG_Y: *pos_y += dist; break;
@@ -742,4 +755,6 @@ void update_pos_heading(Movement m, volatile float* pos_x, volatile float* pos_y
 #undef COUNTS_PER_WHEEL_CYCLE
 #undef WHEEL_GAP_CM
 #undef WHEEL_DIAMETER_CM
+#undef MY_DEBUG
+#undef DEBUG_CONTROLLER
 /* [] END OF FILE */

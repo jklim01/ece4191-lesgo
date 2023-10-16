@@ -10,38 +10,24 @@
  * ========================================
 */
 
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
-*/
-
-#include "project.h"
+#include "bt_debug.h"
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
+#include "cytypes.h"
+#include "CyLib.h"
 
 #include "utils.h"
 #include "servo.h"
 #include "ir_sensor.h"
 #include "ultrasonic.h"
-#include "limit_sw.h"
-
-#define SPECIAL_DEBUG
 #include "bluetooth.h"
-
-#define MY_DEBUG
 #include "locomotion.h"
 #include "color_sensor.h"
 
-#define CONTROL(x) case (control_##x): { bt_printf("\n----- %-15s -----", #x); bt_clear_rx_finished();
+
+#define CONTROL(x) case (control_##x): { bt_printf("\n\n- - - - - - - - - - %-15s - - - - - - - - - -\n", #x); bt_clear_rx_finished();
 #define END_CONTROL control = control_idle; break; }
 
 
@@ -65,19 +51,25 @@
     X(back)             /* back %f!                                 */ \
     X(left)             /* left!                                    */ \
     X(right)            /* right!                                   */ \
+    X(brk)              /* brk!                                     : break out of debug mode   */ \
     X(lenN)             /* lenN!                                    : prints navstack len   */ \
     X(printN)           /* printN!                                  : prints navstack   */ \
     X(unwind)           /* unwind %d!                               : unwinds to the target */ \
     X(printU)           /* printU %d!                               : prints how navstack will be unwinded to the target len    */ \
     X(unwindS)          /* unwindS %d!                              : unwinds to the target len with shortcut */ \
-    X(printUS)          /* printUS %d!                              : prints how navstack will be unwinded to the target len with shortcut */ \
     X(flickP)           /* flickP!                                  : puts down and flick puck  */ \
     X(searchP)          /* searchP [%d]!                            : move forward to find puck for specified distance (default 50cm if not specified), and grip puck if found  */ \
     X(revA)             /* revA!                                    : reversal-based align  */ \
     X(rotA)             /* rotA!                                    : rotation-based align  */ \
     X(usL)              /* getUsL!                                  : print all ultrasonic readings except right until any message is sent  */ \
     X(usR)              /* getUsR!                                  : print all ultrasonic readings except left until any message is sent   */ \
-    X(detectB)          /* detectB!                                 : move forward 15 times or until bowling pin detected (must start with ultrasonic facing wall)  */
+    X(detectB)          /* detectB!                                 : move forward 15 times or until bowling pin detected (must start with ultrasonic facing wall)  */  \
+    X(gripperC)         /* gripperC!                                : gripper close */  \
+    X(gripperO)         /* gripperO!                                : gripper open  */  \
+    X(lifterU)          /* lifterU!                                 : lifter up */  \
+    X(lifterD)          /* lifterD!                                 : lifter down   */  \
+    X(flickerU)         /* flickerU!                                : flicker up    */  \
+    X(flickerD)         /* flickerD!                                : flicker down   */
 
 #define X(name) control_##name,
 typedef enum Control {
@@ -86,30 +78,23 @@ typedef enum Control {
 #undef X
 
 
-static bool puck_found = false;
-static CY_ISR(debug_ir_handler) {
-    puck_found = true;
+// globals
+bool bt_dbg_puck_found = false;
+
+
+// ISRs
+CY_ISR(bt_dbg_ir_handler) {
+    bt_dbg_puck_found = true;
     stop();
 }
 
 
-int main(void)
-{
-    CyGlobalIntEnable; /* Enable global interrupts. */
-
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-    locomotion_setup();
-    color_sensor_setup();
-    servo_setup();
-    ultrasonic_setup();
-    ir_sensor_setup(&debug_ir_handler);
-    bt_setup();
-
-    // variables
+int bt_dbg(void) {
     int arg_num = 0;
     char arg1[50];
     char arg2_str[50];
     float arg2;
+
     Control control = control_idle;
     FSM(control) {
         CONTROL(idle) {
@@ -120,9 +105,12 @@ int main(void)
 
             if (arg_num == 0)
                 continue;
-
-            if (arg_num == 2)
+            // if (arg_num == 1)
+            //     bt_printf("%s", arg1);
+            if (arg_num == 2) {
                 arg2 = atof(arg2_str);
+                // bt_printf("%s %.2f", arg1, arg2);
+            }
 
             // change to chosen control
 #define X(name) \
@@ -151,6 +139,10 @@ LIST_OF_CONTROLS
             turn_right();
         } END_CONTROL
 
+        CONTROL(brk) {
+            return 0;
+        } END_CONTROL
+
         CONTROL(lenN) {
             bt_printf("navstack_len() = %u\n", navstack_len());
         } END_CONTROL
@@ -171,17 +163,13 @@ LIST_OF_CONTROLS
             unwind_shortcut_navstack_till((uint8)arg2);
         } END_CONTROL
 
-        CONTROL(printUS) {
-            print_unwind_shortcut((uint8)arg2);
-        } END_CONTROL
-
         CONTROL(searchP) {
             if (arg2 == 0)
                 arg2 = 50;
 
             ir_sensor_resume();
             move_forward_nb();
-            while (!puck_found) {
+            while (!bt_dbg_puck_found) {
                 if (get_latest_movement_dist() >= arg2) {
                     stop_nb();
                     break;
@@ -189,25 +177,31 @@ LIST_OF_CONTROLS
             }
             ir_sensor_pause();
 
-            if (puck_found) {
+            if (bt_dbg_puck_found) {
+                bt_dbg_puck_found = false;
+
                 // always flick to clear nearby puck just in case even though might not be there (easier to always flick)
                 float input;
-                bt_printf("\nmove_backward_by (flick nearby puck, default %.2f)?  ", COLOR_SENSOR_TO_SLIT + PUCK_DIAMETER);
+                bt_printf("\nmove_backward_by (flick nearby puck, default %.2f)?  ", 11 - DETECTOR_TO_COLOR_SENSOR + PUCK_DIAMETER);
                 if (bt_scanf("%f", &input) == 0)
                     // if nothing was successfully scanned (i.e. "!" was sent), use default value
-                    move_backward_by(COLOR_SENSOR_TO_SLIT + PUCK_DIAMETER);
-                else
+                    move_backward_by(COLOR_SENSOR_TO_FLICKER + PUCK_DIAMETER);
+                else {
+                    bt_printf("moving by %.2f...\n", input);
                     move_backward_by(input);
+                }
 
                 flicker_shoot();
 
 
                 // take puck
-                bt_printf("\nmove_backward_by (take puck, default %.2f)?  ", COLOR_SENSOR_TO_GRIPPER - (COLOR_SENSOR_TO_SLIT + PUCK_DIAMETER));
+                bt_printf("\nmove_backward_by (take puck, default %.2f)?  ", COLOR_SENSOR_TO_GRIPPER - (COLOR_SENSOR_TO_FLICKER + PUCK_DIAMETER));
                 if (bt_scanf("%f", &input) == 0)
-                    move_backward_by(COLOR_SENSOR_TO_GRIPPER - (COLOR_SENSOR_TO_SLIT + PUCK_DIAMETER));
-                else
+                    move_backward_by(COLOR_SENSOR_TO_GRIPPER - (COLOR_SENSOR_TO_FLICKER + PUCK_DIAMETER));
+                else {
+                    bt_printf("moving by %.2f...\n", input);
                     move_backward_by(input);
+                }
 
                 gripper_open();
                 lifter_down();
@@ -234,7 +228,11 @@ LIST_OF_CONTROLS
             gripper_close();
 
             // align puck with flicker and flick
-            move_forward_by(GRIPPER_TO_FLICKER + 3);
+            bt_printf("\nmove_forward_by (align puck, default %.2f)?  ", GRIPPER_TO_FLICKER + 3);
+            if (bt_scanf("%f", &input) == 0)
+                move_forward_by(GRIPPER_TO_FLICKER + 3);
+            else
+                move_forward_by(input);
             flicker_shoot();
 
         } END_CONTROL
@@ -251,6 +249,7 @@ LIST_OF_CONTROLS
             while (!bt_rx_finished()) {
                 bt_printf("L %5.2f \t B %5.2f \t FL %5.2f \t FR %5.2f\n",
                     us_l_get_dist(), us_b_get_dist(), us_fl_get_dist(), us_fr_get_dist());
+                CyDelay(us_refresh());
             }
         } END_CONTROL
 
@@ -258,6 +257,7 @@ LIST_OF_CONTROLS
             while (!bt_rx_finished()) {
                 bt_printf("R %5.2f \t B %5.2f \t FL %5.2f \t FR %5.2f\n",
                     us_r_get_dist(), us_b_get_dist(), us_fl_get_dist(), us_fr_get_dist());
+                CyDelay(us_refresh());
             }
         } END_CONTROL
 
@@ -279,14 +279,38 @@ LIST_OF_CONTROLS
             }
         } END_CONTROL
 
+        CONTROL(gripperC) {
+            gripper_close();
+        } END_CONTROL
+
+        CONTROL(gripperO) {
+            gripper_open();
+        } END_CONTROL
+
+        CONTROL(lifterU) {
+            lifter_up();
+        } END_CONTROL
+
+        CONTROL(lifterD) {
+            lifter_down();
+        } END_CONTROL
+
+        CONTROL(flickerU) {
+            flicker_up();
+        } END_CONTROL
+
+        CONTROL(flickerD) {
+            flicker_down();
+        } END_CONTROL
 
     } END_FSM
 
     return 0;
 }
 
-/* [] END OF FILE */
 
-
+#undef CONTROL
+#undef END_CONTROL
+#undef LIST_OF_CONTROL
 
 /* [] END OF FILE */

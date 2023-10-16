@@ -34,14 +34,6 @@
 
 
 #include "cytypes.h"
-#include "NavStack.h"
-
-
-#define P 0
-#define PI 1
-#define PD 2
-#define PID 3
-#define CONTROLLER_TYPE PID
 
 
 // typedefs
@@ -52,19 +44,28 @@ typedef enum __attribute__ ((__packed__)) LinearMovement {
 } LinearMovement;
 
 typedef enum __attribute__ ((__packed__)) Heading {
-    POS_Y,
-    NEG_Y,
-    POS_X,
-    NEG_X
+    POS_Y=0,
+    NEG_Y=1,
+    POS_X=2,
+    NEG_X=3
 } Heading;
 
 
 // globals
 extern volatile LinearMovement current_linear_movement;
-extern volatile Movement latest_movement;
 extern volatile Heading heading;
 extern volatile float pos_x;
 extern volatile float pos_y;
+
+
+// constants
+extern float K_P;
+extern float K_I;
+extern float K_D;
+extern float K_P_slow;
+extern float K_I_slow;
+extern float K_D_slow;
+extern const char* HEADING_NAMES[4];
 
 
 // ISRs
@@ -84,16 +85,23 @@ void move_backward_by(float dist_cm);
 void move_linear_by(float dist_cm);
 void move_forward_by_counts(uint32 counts);
 void move_backward_by_counts(uint32 counts);
+
 void move_forward(void);
 void move_backward(void);
+void move_forward_slow(void);
+void move_backward_slow(void);
+void move_forward_slow_by(float dist_cm);
+void move_backward_slow_by(float dist_cm);
 
 void reverse_to_align(void);
 void rotate_to_align(void);
+void rotate_to_align_l(void);
+void rotate_to_align_r(void);
 
+void clear_navstack(void);
 void unwind_navstack_till(uint8 remaining);
-void unwind_shortcut_navstack_till(uint8 remaining);
 void print_unwind(uint8 remaining);
-void print_unwind_shortcut(uint8 remaining);
+void unwind_shortcut_navstack_till(uint8 remaining);
 float get_latest_movement_dist(void);
 
 // non-blocking versions
@@ -104,6 +112,8 @@ void move_forward_by_nb(float dist_cm);
 void move_backward_by_nb(float dist_cm);
 void move_forward_nb(void);
 void move_backward_nb(void);
+void move_forward_slow_nb(void);
+void move_backward_slow_nb(void);
 
 
 #endif  // LOCOMOTION_H

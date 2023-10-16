@@ -24,10 +24,8 @@ static void (*ir_handler)(void) = NULL;
 
 // API
 void ir_sensor_setup(void (*ir_handler_)(void)) {
-    if (ir_handler_ != NULL) {
+    if (ir_handler_ != NULL)
         ir_handler = ir_handler_;
-        ir_isr_ClearPending();
-    }
 }
 
 void ir_sensor_pause(void) {
@@ -37,12 +35,13 @@ void ir_sensor_pause(void) {
 
 void ir_sensor_resume(void) {
     ir_disable_Write(0);
+    ir_isr_ClearPending();
     ir_isr_StartEx(ir_handler);
     // ir_isr_Start();
 }
 
 bool ir_is_detected(void) {
-    return ir_sreg_Read();
+    return ir_sreg_Read() == 0;
 }
 
 

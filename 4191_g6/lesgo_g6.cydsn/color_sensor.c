@@ -28,6 +28,8 @@
 #include "cytypes.h"
 #include "color_sensor.h"
 
+#define MY_DEBUG
+
 #ifdef MY_DEBUG
 #include "bluetooth.h"
 #endif
@@ -130,4 +132,5 @@ Color color_sense(void) {
 
 
 #undef COLOR_SENSOR_CMP_TYPE
+#undef MY_DEBUG
 /* [] END OF FILE */

@@ -10,33 +10,25 @@
  * ========================================
 */
 
-#ifndef COLOR_SENSOR_H
-#define COLOR_SENSOR_H
+#ifndef BT_DEBUG_H
+#define BT_DEBUG_H
 
-
+#include <stdbool.h>
 #include "cytypes.h"
-
-// typedefs
-typedef enum __attribute__ ((__packed__)) Color {
-    RED=0,
-    GREEN=1,
-    BLUE=2
-} Color;
 
 
 // globals
-extern const char* COLOR_NAMES[3];
+extern bool bt_dbg_puck_found;
 
 
 // ISRs
-CY_ISR_PROTO(color_sensor_ready_isr);
+CY_ISR_PROTO(bt_dbg_ir_handler);
 
 
 // API
-void color_sensor_setup(void);
-Color color_sense(void);
+int bt_dbg(void);
 
 
-#endif  // COLOR_SENSOR_H
+#endif
 
 /* [] END OF FILE */

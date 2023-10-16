@@ -107,8 +107,6 @@ void ultrasonic_setup(void) {
     us_b_isr_StartEx(us_b_isr);
 
     us_refresh_period = ROUNDING_DIV(CIRCULARQ_LEN * (us_trigger_pwm_ReadPeriod() + 1) * 1000, US_CLK_FREQ);
-    if (us_refresh_period != 459)
-        panic(5);
     CyDelay(us_refresh_period);
 }
 
@@ -150,6 +148,16 @@ float us_get_front_dist(void) {
     return (us_fl_get_dist() + us_fr_get_dist()) / 2;
 }
 
+float us_get_front_avg_dist(void) {
+    float dist = 0;
+    CyDelay(us_refresh_period / 2);
+    for (uint8 i = 0;  i < 4; i++) {
+        CyDelay(us_refresh_period / 2);
+        dist += us_get_front_dist();
+    }
+    return dist;
+}
+
 float us_l_get_avg_dist(void) {
     if (us_lr_mux_sel_Read() == US_R_SEL) {
         us_lr_mux_sel_Write(US_L_SEL);
@@ -157,6 +165,7 @@ float us_l_get_avg_dist(void) {
     }
 
     float dist = 0;
+    CyDelay(us_refresh_period / 2);
     for (uint8 i = 0;  i < 4; i++) {
         CyDelay(us_refresh_period / 2);
         dist += filter_buf(&us_lr_buf);
@@ -172,6 +181,7 @@ float us_r_get_avg_dist(void) {
     }
 
     float dist = 0;
+    CyDelay(us_refresh_period / 2);
     for (uint8 i = 0;  i < 4; i++) {
         CyDelay(us_refresh_period / 2);
         dist += filter_buf(&us_lr_buf);
@@ -182,6 +192,7 @@ float us_r_get_avg_dist(void) {
 
 float us_fl_get_avg_dist(void) {
     float dist = 0;
+    CyDelay(us_refresh_period / 2);
     for (uint8 i = 0;  i < 4; i++) {
         CyDelay(us_refresh_period / 2);
         dist += us_fl_get_dist();
@@ -192,6 +203,7 @@ float us_fl_get_avg_dist(void) {
 
 float us_fr_get_avg_dist(void) {
     float dist = 0;
+    CyDelay(us_refresh_period / 2);
     for (uint8 i = 0;  i < 4; i++) {
         CyDelay(us_refresh_period / 2);
         dist += us_fr_get_dist();
@@ -202,6 +214,7 @@ float us_fr_get_avg_dist(void) {
 
 float us_b_get_avg_dist(void) {
     float dist = 0;
+    CyDelay(us_refresh_period / 2);
     for (uint8 i = 0;  i < 4; i++) {
         CyDelay(us_refresh_period / 2);
         dist += us_b_get_dist();

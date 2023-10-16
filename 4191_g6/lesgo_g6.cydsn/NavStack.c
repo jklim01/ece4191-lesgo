@@ -155,7 +155,7 @@ bool try_merge_movements(Movement* m, Movement other) {
 }
 
 void print_movement(Movement m) {
-    const char* const type_names[] = {"NONE", "FORWARD", "BACKWARD", "LEFT", "RIGHT"};
+    const char* type_names[] = {"NONE", "FORWARD", "BACKWARD", "LEFT", "RIGHT"};
 
     bt_printf("{ .type=%8s, .counts=%lu }", type_names[m.type], m.counts);
 }

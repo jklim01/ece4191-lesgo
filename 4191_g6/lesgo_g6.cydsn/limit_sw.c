@@ -29,17 +29,9 @@ void limit_sw_setup(
     void (*limit_sw_l_handler_)(void),
     void (*limit_sw_r_handler_)(void)
 ) {
-    if (limit_sw_l_handler_ != NULL) {
-        limit_sw_l_handler = limit_sw_l_handler_;
-        limit_sw_l_isr_ClearPending();
-        limit_sw_l_isr_StartEx(limit_sw_l_handler);
-    }
 
-    if (limit_sw_r_handler_ != NULL) {
-        limit_sw_r_handler = limit_sw_r_handler_;
-        limit_sw_r_isr_ClearPending();
-        limit_sw_r_isr_StartEx(limit_sw_r_handler);
-    }
+    limit_sw_l_handler = limit_sw_l_handler_;
+    limit_sw_r_handler = limit_sw_r_handler_;
 }
 
 void limit_sw_pause(void) {
@@ -48,12 +40,14 @@ void limit_sw_pause(void) {
 }
 
 void limit_sw_resume(void) {
-    limit_sw_l_isr_ClearPending();
-    limit_sw_r_isr_ClearPending();
-    limit_sw_setup(
-        limit_sw_l_handler,
-        limit_sw_r_handler
-    );
+    if (limit_sw_l_handler != NULL) {
+        limit_sw_l_isr_ClearPending();
+        limit_sw_l_isr_StartEx(limit_sw_l_handler);
+    }
+    if (limit_sw_r_handler != NULL) {
+        limit_sw_r_isr_ClearPending();
+        limit_sw_r_isr_StartEx(limit_sw_r_handler);
+    }
 }
 
 bool limit_sw_l_is_on(void) {

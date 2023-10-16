@@ -39,7 +39,7 @@ void bt_setup(void);
 void bt_print(const char* str);
 int bt_printf(const char* fmt, ...);
 int bt_scanf(const char* fmt, ...);
-void bt_block_on(const char* match_str);
+int bt_block_on(const char* match, const char* fmt, ...);
 bool bt_rx_finished(void);
 void bt_clear_rx_finished(void);
 void bt_block_till_rx(void);

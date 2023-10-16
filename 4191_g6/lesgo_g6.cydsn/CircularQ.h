@@ -12,7 +12,7 @@
 
 #ifndef CIRCULARQ_H
 #define CIRCULARQ_H
-#define CIRCULARQ_LEN 7
+#define CIRCULARQ_LEN 5
 #define CIRCULARQ_IDX_INC(expr) (expr) = ((expr) == CIRCULARQ_LEN-1) ? 0 : ((expr) + 1)
 
 

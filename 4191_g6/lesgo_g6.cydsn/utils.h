@@ -23,7 +23,8 @@
 #define ROUNDING_DIV(a, b) (((a) + (b)/2) / (b))
 #define FSM(state) while(1) { switch((state))
 #define END_FSM }
-#define STATE(x) case (x): {
+// #define STATE(x) case (x): { bt_printf("\n\n- - - - - - - - - - %-15s - - - - - - - - - -\n", #x); bt_clear_rx_finished();
+#define STATE(x) case (x): { bt_printf("\n\n- - - - - - - - - - %-15s - - - - - - - - - -\n", #x);
 #define END_STATE break; }
 
 
@@ -38,16 +39,16 @@ typedef enum __attribute__ ((__packed__)) BasePos {
 #define CODE_NAV_STACK_ALLOC_ERROR ((uint8)1)
 
 #define DETECTOR_TO_COLOR_SENSOR 1.2f
-#define COLOR_SENSOR_TO_SLIT 8.0f
-#define COLOR_SENSOR_TO_GRIPPER 17.9f
+#define COLOR_SENSOR_TO_FLICKER 4.0f
+#define COLOR_SENSOR_TO_GRIPPER 17.9f /*14.5f 17.9f */
 #define ROW_GAP 12.0f
 #define ROW_LEN 70.0f
 #define PUCK_DIAMETER 4.0f
 
-#define GRIPPER_TO_FLICKER 18
+#define GRIPPER_TO_FLICKER 12.0f /* 18.0f */
 #define PIN_DIST_TOL 7.0f
 #define ROBOT_FRONT_TO_US_OFFSET 17.0f
-#define US_TO_GRIPPER 18.0f
+#define US_TO_GRIPPER 20.5f
 
 
 // globals

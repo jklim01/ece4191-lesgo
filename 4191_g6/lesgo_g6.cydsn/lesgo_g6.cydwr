@@ -270,6 +270,7 @@
     <Group key="Pin">
       <Data key="01d4b27d-7e3e-4ced-9029-5dec218d7008" value="flicker_pwm_out" />
       <Data key="1e5226a6-c5e1-4cdc-bb69-d9dce2e033f6" value="led" />
+      <Data key="2cf8d838-f86e-425f-8773-ec0b7c863511" value="us_b_echo" />
       <Data key="3c3bbdcf-6844-439d-95a8-ba331b02fa8e" value="ir_l_out" />
       <Data key="3dc5dbf0-e129-42c9-8689-a386d42f4b12" value="ir_out" />
       <Data key="4b077a6e-5bab-4607-a777-642e77324fc4" value="us_fl_echo" />
@@ -291,6 +292,8 @@
       <Data key="493ab9e5-c43d-45f3-b779-ce13ba60151c" value="color_sensor_s0" />
       <Data key="650fd9f0-d455-42c3-92dc-d3eff5147e82" value="temp" />
       <Data key="979d9229-80ba-48a8-b8ed-d75feec26d2a" value="us_l_echo" />
+      <Data key="7913b123-650d-4635-b15a-9ef8f2bdbfa8" value="led_g_1" />
+      <Data key="90494fc4-31e2-4333-a79a-602d9415ee7d" value="led_r_1" />
       <Data key="777726e3-4bf2-469f-aebd-f3bff1943e67" value="limit_sw_l" />
       <Data key="1425177d-0d0e-4468-8bcc-e638e5509a9b" value="Rx_1" />
       <Data key="15272328-8b58-4615-957b-b7300f3e2be2" value="motor_l_phaseB" />
@@ -3471,6 +3474,11 @@
         <Data key="Port Format" value="2,1" />
       </Group>
     </Group>
+    <Group key="2cf8d838-f86e-425f-8773-ec0b7c863511">
+      <Group key="0">
+        <Data key="Port Format" value="15,0" />
+      </Group>
+    </Group>
     <Group key="3dc5dbf0-e129-42c9-8689-a386d42f4b12">
       <Group key="0">
         <Data key="Port Format" value="12,3" />
@@ -3588,7 +3596,7 @@
     </Group>
     <Group key="ac931421-c24d-45be-80b3-13c61010909c">
       <Group key="0">
-        <Data key="Port Format" value="15,0" />
+        <Data key="Port Format" value="3,4" />
       </Group>
     </Group>
     <Group key="bd14d1b3-e29c-475b-876d-9fc61ebc4b5f">
@@ -3656,6 +3664,12 @@
       <Group key="650fd9f0-d455-42c3-92dc-d3eff5147e82">
         <Data key="0" value="133378331944445571" />
       </Group>
+      <Group key="7913b123-650d-4635-b15a-9ef8f2bdbfa8">
+        <Data key="0" value="133419414338987275" />
+      </Group>
+      <Group key="90494fc4-31e2-4333-a79a-602d9415ee7d">
+        <Data key="0" value="133419414388361985" />
+      </Group>
       <Group key="db4704ba-9b21-4be3-9e47-e719c46ec46d">
         <Data key="0" value="133383716782957605" />
       </Group>
@@ -3673,10 +3687,10 @@
     <Data key="CYDEV_DEBUGGING_DPS" value="Disable" />
     <Data key="CYDEV_DEBUGGING_XRES" value="False" />
     <Data key="CYDEV_ECC_ENABLE" value="False" />
-    <Data key="CYDEV_HEAP_SIZE" value="0x1000" />
+    <Data key="CYDEV_HEAP_SIZE" value="0x2000" />
     <Data key="CYDEV_INSTRUCT_CACHE_ENABLED" value="True" />
     <Data key="CYDEV_PROTECTION_ENABLE" value="False" />
-    <Data key="CYDEV_STACK_SIZE" value="0x1000" />
+    <Data key="CYDEV_STACK_SIZE" value="0x2000" />
     <Data key="CYDEV_TEMPERATURE" value="-40C - 85/125C" />
     <Data key="CYDEV_TRACE_ENABLED" value="False" />
     <Data key="CYDEV_USE_BUNDLED_CMSIS" value="True" />
