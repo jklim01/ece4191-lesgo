@@ -123,9 +123,9 @@ void lifter_down(void) {
 void flicker_up(void) {
     const uint16 FLICKER_UP_CMP = 145;
     const uint16 FLICKER_DOWN_CMP = 235;
-    // write_servo_shared(FLICKER_SELECT, FLICKER_UP_CMP);
-    CyDelay(400);
-    write_servo_smooth_shared(FLICKER_SELECT, FLICKER_DOWN_CMP, FLICKER_UP_CMP);
+    write_servo_shared(FLICKER_SELECT, FLICKER_UP_CMP);
+    // CyDelay(400);
+    // write_servo_smooth_shared(FLICKER_SELECT, FLICKER_DOWN_CMP, FLICKER_UP_CMP);
 }
 
 void flicker_down(void) {

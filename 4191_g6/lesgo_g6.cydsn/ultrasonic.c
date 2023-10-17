@@ -155,7 +155,7 @@ float us_get_front_avg_dist(void) {
         CyDelay(us_refresh_period / 2);
         dist += us_get_front_dist();
     }
-    return dist;
+    return dist / 4;
 }
 
 float us_l_get_avg_dist(void) {
@@ -198,7 +198,7 @@ float us_fl_get_avg_dist(void) {
         dist += us_fl_get_dist();
     }
 
-    return dist;
+    return dist / 4;
 }
 
 float us_fr_get_avg_dist(void) {
@@ -209,7 +209,7 @@ float us_fr_get_avg_dist(void) {
         dist += us_fr_get_dist();
     }
 
-    return dist;
+    return dist / 4;
 }
 
 float us_b_get_avg_dist(void) {

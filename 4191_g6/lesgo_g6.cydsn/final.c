@@ -225,14 +225,17 @@ int main(void)
             if (dist_to_wall > PIN_DIST_TOL) {                              // only proceed if not too close to the back wall, otherwise retry
                 while (us_get_front_dist() > 15) {
                     move_forward_slow_by(2.5);
-                    rotate_to_align();
+                    if (base == BASE_LEFT)
+                        rotate_to_align();
+
                     float dist = dist_measurer();
                     pin_found = dist < dist_to_wall - PIN_DIST_TOL;
-                    bt_block_on("go", "%5.2f %c (dist_to_wall=%5.2f) - %3.1f  %c\n", dist, pin_found ? '<' : '>',
-                        dist_to_wall, PIN_DIST_TOL, pin_found ? "!" : "X");
+                    // bt_block_on("go", "%5.2f %c (dist_to_wall=%5.2f) - %3.1f  %c\n", dist, pin_found ? '<' : '>',
+                        // dist_to_wall, PIN_DIST_TOL, pin_found ? "!" : "X");
 
                     // account for the robot moving further or close to the pin deck
                     dist_to_wall = dist_measurer();
+                    if (pin_found) break;
                 }
             }
 
@@ -456,6 +459,7 @@ int main(void)
                 while (us_b_get_dist() > DIST_TO_BACK_WALL);
                 stop_nb();
                 turn_left();
+                reverse_to_align();
 
                 move_forward_by(19);
             }
