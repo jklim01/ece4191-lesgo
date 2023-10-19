@@ -41,7 +41,7 @@ static const uint16 COLOR_SENSOR_CMP = 25000;
 
 
 // globals
-const char* COLOR_NAMES[3] = { "RED", "GREEN", "BLUE" };
+const char* COLOR_NAMES[4] = { "RED", "GREEN", "BLUE", "INVALID" };
 
 
 // static globals
@@ -105,7 +105,7 @@ Color color_sense(void) {
     uint32 green = single_sense(1, 1);
 
 #ifdef MY_DEBUG
-    bt_printf("R: %6lu, G: %6lu, B: %6lu\n", red, green, blue);
+    bt_printf("R: %6lu, G: %6lu, B: %6lu  ", red, green, blue);
 #endif
 
 
@@ -118,16 +118,31 @@ Color color_sense(void) {
     color_sensor_counter_Stop();
 
     // set appropriate indicator led and return detected color
-    if ((blue >= red) && (blue >= green)) {
+    if ((blue >= red) && (blue >= green) && (blue > 9500)) {
         led_b_Write(1);
+#ifdef MY_DEBUG
+        bt_printf("(%s)\n", COLOR_NAMES[BLUE]);
+#endif
         return BLUE;
     }
-    if (green >= red) {
+    if ((green >= red) && (green > 9500)) {
         led_g_Write(1);
+#ifdef MY_DEBUG
+        bt_printf("(%s)\n", COLOR_NAMES[GREEN]);
+#endif
         return GREEN;
     }
-    led_r_Write(1);
-    return RED;
+    if (red > 9000) {
+        led_r_Write(1);
+#ifdef MY_DEBUG
+        bt_printf("(%s)\n", COLOR_NAMES[RED]);
+#endif
+        return RED;
+    }
+#ifdef MY_DEBUG
+        bt_printf("(%s)\n", COLOR_NAMES[INVALID]);
+#endif
+    return INVALID;
 }
 
 

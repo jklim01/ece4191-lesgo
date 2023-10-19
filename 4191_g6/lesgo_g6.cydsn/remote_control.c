@@ -47,7 +47,7 @@ int main_rc(void) {
     color_sensor_setup();
     servo_setup();
     ultrasonic_setup();
-    ir_sensor_setup(&bt_dbg_ir_handler);
+    ir_sensor_setup(NULL, &bt_dbg_ir_handler);
     bt_setup();
 
     panic(bt_dbg());

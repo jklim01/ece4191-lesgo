@@ -25,6 +25,7 @@
 #include "bluetooth.h"
 #include "locomotion.h"
 #include "color_sensor.h"
+#include "NavStack.h"
 
 
 #define CONTROL(x) case (control_##x): { bt_printf("\n\n- - - - - - - - - - %-15s - - - - - - - - - -\n", #x); bt_clear_rx_finished();
@@ -90,6 +91,8 @@ CY_ISR(bt_dbg_ir_handler) {
 
 
 int bt_dbg(void) {
+    ir_sensor_setup(NULL, &bt_dbg_ir_handler);
+
     int arg_num = 0;
     char arg1[50];
     char arg2_str[50];
@@ -167,7 +170,7 @@ LIST_OF_CONTROLS
             if (arg2 == 0)
                 arg2 = 50;
 
-            ir_sensor_resume();
+            ir_b_resume();
             move_forward_nb();
             while (!bt_dbg_puck_found) {
                 if (get_latest_movement_dist() >= arg2) {
@@ -175,7 +178,7 @@ LIST_OF_CONTROLS
                     break;
                 }
             }
-            ir_sensor_pause();
+            ir_b_pause();
 
             if (bt_dbg_puck_found) {
                 bt_dbg_puck_found = false;

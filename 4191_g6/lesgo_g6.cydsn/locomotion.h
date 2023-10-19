@@ -38,9 +38,9 @@
 
 // typedefs
 typedef enum __attribute__ ((__packed__)) LinearMovement {
-    STOP,
-    FORWARD,
-    REVERSE
+    STOP=0,
+    FORWARD=1,
+    REVERSE=2
 } LinearMovement;
 
 typedef enum __attribute__ ((__packed__)) Heading {
@@ -56,9 +56,19 @@ extern volatile LinearMovement current_linear_movement;
 extern volatile Heading heading;
 extern volatile float pos_x;
 extern volatile float pos_y;
+extern bool track_linear_run;
+extern volatile float linear_run;
 
 
 // constants
+extern int16 FORWARD_SLAVE_OFFSET;
+extern int16 BACKWARD_SLAVE_OFFSET;
+extern int16 FORWARD_SLAVE_OFFSET_SLOW;
+extern int16 BACKWARD_SLAVE_OFFSET_SLOW;
+extern int16 FORWARD_SLAVE_OFFSET_DAMN_SLOW;
+extern int16 BACKWARD_SLAVE_OFFSET_DAMN_SLOW;
+extern int16 TURN_FORWARD_SLAVE_OFFSET;
+extern int16 TURN_BACKWARD_SLAVE_OFFSET;
 extern float K_P;
 extern float K_I;
 extern float K_D;
@@ -92,6 +102,8 @@ void move_forward_slow(void);
 void move_backward_slow(void);
 void move_forward_slow_by(float dist_cm);
 void move_backward_slow_by(float dist_cm);
+void move_forward_damn_slow(void);
+void move_forward_damn_slow_by(float dist_cm);
 
 void reverse_to_align(void);
 void rotate_to_align(void);
@@ -108,12 +120,19 @@ float get_latest_movement_dist(void);
 void stop_nb(void);
 void turn_left_nb(void);
 void turn_right_nb(void);
+
 void move_forward_by_nb(float dist_cm);
 void move_backward_by_nb(float dist_cm);
 void move_forward_nb(void);
 void move_backward_nb(void);
+
 void move_forward_slow_nb(void);
+void move_forward_slow_by_nb(float dist_cm);
 void move_backward_slow_nb(void);
+void move_forward_damn_slow_nb(void);
+void move_forward_damn_slow_by_nb(float dist_cm);
+void move_forward_special_nb(void);
+void move_forward_special_by_nb(float dist_cm);
 
 
 #endif  // LOCOMOTION_H

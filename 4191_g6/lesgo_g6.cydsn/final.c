@@ -54,9 +54,15 @@ typedef enum State {
 
 
 static bool puck_found = false;
-static CY_ISR(ir_handler) {
+static CY_ISR(ir_b_handler) {
     stop_nb();
     puck_found = true;
+}
+
+static CY_ISR(ir_f_handler) {
+    stop_nb();
+    puck_found = true;
+    led_r_Write(1);
 }
 
 static CY_ISR(sw_l_isr) {
@@ -83,6 +89,7 @@ void unwind_shortcut_back_to_base(void) {
     unwind_shortcut_navstack_till(1);
     reverse_to_align();
     clear_navstack();
+    bt_printf("pos_y: %.2f -> %.2f", pos_y, 0.0);
     pos_y = 0.0;
 }
 
@@ -96,7 +103,8 @@ int main(void)
     color_sensor_setup();
     servo_setup();
     ultrasonic_setup();
-    ir_sensor_setup(&ir_handler);
+    // ir_sensor_setup(&ir_f_handler, &ir_b_handler);
+    ir_sensor_setup(NULL, &ir_b_handler);
     // limit_sw_setup(sw_l_isr, sw_r_isr);
 
     led_r_Write(0);
@@ -119,7 +127,6 @@ int main(void)
     // lifter_up();
     // gripper_unactuate();
 
-
     // wait until button is released before starting
     while (sw_sreg_Read() == 0);
     CyDelay(1500);
@@ -134,8 +141,8 @@ int main(void)
 
 
     // receive info from bluetooth
-    BtResponse res = bt_init();
     // BtResponse res;
+    BtResponse res = bt_init();
     uint8 current_lvl = res.current_lvl;
     Color lvl_1_color = ZONE_TO_COLOR[res.lvl_1_zone - 1];
     uint8 lvl_1_zone = res.lvl_1_zone;
@@ -146,7 +153,7 @@ int main(void)
     // bt_print("remote control? [y/n]  ");
     // bt_scanf("%2s", res_str);
     // if (strcmp(res_str, "y") == 0)
-    //     enter_dbg = true;
+    //     enter_dbg = true;.
 
 
     // main loop
@@ -156,29 +163,76 @@ int main(void)
     bool flick_at_pindeck = false;
     uint8 puck_row = 1;
     State state = enter_dbg ? BT_DBG : INIT;
+    // state = TEST;
+
     FSM(state) {
         STATE(BT_DBG) {
             panic(bt_dbg());
         } END_STATE
 
         STATE(TEST) {
-            int res = 0;
-            float kp, ki, kd;
-            while (res != 3) {
-                bt_printf("%3.2f %3.2f %3.2f -> ", K_P, K_I, K_D);
-                res = bt_scanf("%f %f %f", &kp, &ki, &kd);
-            }
-            K_P = kp; K_I = ki; K_P = kp;
+            while (!puck_found) {
+                ir_f_resume();
+                CyDelay(200);
+                move_forward_by_nb(20);
+                while (!puck_found && current_linear_movement != STOP);
+                stop_nb();
+                ir_f_pause();
 
-            move_forward_by(150);
-            bt_block_on("go", "");
-            move_backward_by(150);
+                if (!puck_found)
+                    move_backward_by(20);
+            }
+            puck_found = false;
+            CyDelay(1500);
+            move_backward_by(1.0);
+            flicker_shoot();
+            panic(0);
+
+            // int res = 0;
+            // float kp, ki, kd;
+            // int16 offset = 0;
+            // while (res != 3) {
+            //     bt_printf("%3.2f %3.2f %3.2f -> ", K_P, K_I, K_D);
+            //     res = bt_scanf("%f %f %f", &kp, &ki, &kd);
+            // }
+            // K_P = kp; K_I = ki; K_D = kd;
+            // K_P_slow = kp; K_I_slow = ki; K_D_slow = kd;
+
+            // res = 0;
+            // while (res != 1) {
+            //     bt_print("FWD_SLAVE_OFFSET?  ");
+            //     res = bt_scanf("%d", &offset);
+            // }
+            // FORWARD_SLAVE_OFFSET_DAMN_SLOW = offset;
+
+            // move_forward_damn_slow_by(100);
+            // // turn_right();
+            // bt_printf("FWD %.2f %.2f %.2f offset %d", kp, ki, kd, FORWARD_SLAVE_OFFSET_DAMN_SLOW);
+            // // bt_printf("RIGHT %.2f %.2f %.2f offset %d", kp, ki, kd, TURN_FORWARD_SLAVE_OFFSET);
+
+            // // res = 0;
+            // // while (res != 1) {
+            // //     bt_print("BWD_SLAVE_OFFSET?  ");
+            // //     res = bt_scanf("%d", &offset);
+            // // }
+            // // BACKWARD_SLAVE_OFFSET_DAMN_SLOW = offset;
+
+            // // move_backward_damn_slow_by(100);
+            // // turn_left();
+            // // bt_printf("BWD %.2f %.2f %.2f offset %d", kp, ki, kd, BACKWARD_SLAVE_OFFSET_DAMN_SLOW);
+            // // bt_printf("LEFT %.2f %.2f %.2f offset %d", kp, ki, kd, TURN_BACKWARD_SLAVE_OFFSET);
+
+            // reverse_to_align();
         } END_STATE
 
         STATE(INIT) {
             target_len = 0;
             puck_row = 0;
 
+            reverse_to_align();
+            clear_navstack();
+            bt_printf("pos_y: %.2f -> %.2f", pos_y, 0.0);
+            pos_y = 0.0;
             if (current_lvl == 1) {
                 zone_number = lvl_1_zone;
                 puck_color = lvl_1_color;
@@ -200,49 +254,65 @@ int main(void)
         STATE(BASE_TO_PINDECK) {
             const float DIST_TO_SIDE_WALL = 60;
 
-            move_forward_by(30);
+            if (flick_at_pindeck)
+                move_forward_by(22);
+                // move_forward_by(25);
+            else
+                move_forward_by(25);
+
             if (base == BASE_LEFT)
                 turn_left();
             else
                 turn_right();
 
+            // rotate_to_align();
             move_forward_slow_nb();
             while (us_get_front_dist() > DIST_TO_SIDE_WALL);
             stop_nb();
-            rotate_to_align();
+            // rotate_to_align();
 
-            state = PINDECK_TO_PUCK_ZONE;
+            state = FIND_PIN;
         } END_STATE
 
         STATE(FIND_PIN) {
             const float DEVIATION_TOL = 4;
-            float (*dist_measurer)(void) = (base == BASE_LEFT) ? &us_l_get_avg_dist : &us_r_get_avg_dist;
+            // float (*dist_measurer)(void) = (base == BASE_RIGHT && !flick_at_pindeck) ? &us_r_get_avg_dist : &us_l_get_avg_dist;
+            float (*dist_measurer)(void) = (base == BASE_RIGHT && !flick_at_pindeck) ? &us_r_get_dist : &us_l_get_dist;
 
             // algorithm to find pin
             bool pin_found = false;
             float init_dist_to_wall = dist_measurer();
             float dist_to_wall = init_dist_to_wall;
+            // const float dist_to_wall = 20.0;
+            bt_printf("dist_to_wall = %.2f\n", init_dist_to_wall);
             if (dist_to_wall > PIN_DIST_TOL) {                              // only proceed if not too close to the back wall, otherwise retry
-                while (us_get_front_dist() > 15) {
-                    move_forward_slow_by(2.5);
-                    if (base == BASE_LEFT)
-                        rotate_to_align();
-
-                    float dist = dist_measurer();
-                    pin_found = dist < dist_to_wall - PIN_DIST_TOL;
-                    // bt_block_on("go", "%5.2f %c (dist_to_wall=%5.2f) - %3.1f  %c\n", dist, pin_found ? '<' : '>',
-                        // dist_to_wall, PIN_DIST_TOL, pin_found ? "!" : "X");
-
-                    // account for the robot moving further or close to the pin deck
-                    dist_to_wall = dist_measurer();
-                    if (pin_found) break;
+                if (base == BASE_LEFT) {
+                    move_forward_special_nb();
+                    while (us_get_front_dist() > 15 && !(pin_found = (dist_measurer() < dist_to_wall - PIN_DIST_TOL)));
                 }
+                else if (!flick_at_pindeck) {
+                    move_forward_damn_slow_by_nb(55);
+                    while (us_get_front_dist() > 15 && !(pin_found = (dist_measurer() < dist_to_wall - PIN_DIST_TOL)));
+                }
+                else {
+                    move_forward_special_by_nb(55);
+                    while (!(pin_found = (dist_measurer() < dist_to_wall - PIN_DIST_TOL)) && current_linear_movement != STOP);
+                }
+                stop_nb();
+                bt_printf("distance %.2f, found puck!\n", dist_measurer());
             }
+
 
             // retry from begining if still not found
             if (!pin_found) {
-                unwind_shortcut_back_to_base();
-                state = BASE_TO_PINDECK;
+                if (base == BASE_LEFT || !flick_at_pindeck) {
+                    unwind_shortcut_back_to_base();
+                    state = BASE_TO_PINDECK;
+                }
+                else {
+                    reverse_to_align();
+                    pos_x = MAX_X_2;
+                }
                 continue;
             }
 
@@ -252,47 +322,78 @@ int main(void)
                 flick_at_pindeck = true;            // will be flicking the next time we come back to the pin deck
                 state = PINDECK_TO_PUCK_ZONE;
 
-                // if the robot gets too close to the pin deck, realign and return to the base
-                if (dist_to_wall < init_dist_to_wall - DEVIATION_TOL) {
-                    bt_block_on("go", "%5.2f < (init=%5.2f) - %3.1f, left alignment...\n", dist_to_wall, init_dist_to_wall, PIN_DIST_TOL);
-                    move_backward_by(7);
-                    rotate_to_align_l();
-                    unwind_shortcut_back_to_base();
-                    state = BASE_TO_PUCK_ZONE;
+                float front_dist = us_get_front_avg_dist();
+                if (front_dist < 20.9) {
+                    zone_number = 1;
+                    puck_color = RED;
+                    bt_printf("front_dist = %.2f < 20.9 => zone %u\n", front_dist, zone_number);
                 }
-                else if (dist_to_wall > init_dist_to_wall - DEVIATION_TOL) {
-                    bt_block_on("go", "%5.2f > (init=%5.2f) - %3.1f, right alignment...\n", dist_to_wall, init_dist_to_wall, PIN_DIST_TOL);
-                    move_backward_by(7);
-                    rotate_to_align_r();
-                    unwind_shortcut_back_to_base();
-                    state = BASE_TO_PUCK_ZONE;
+                else if (front_dist < 25.7) {
+                    zone_number = 2;
+                    puck_color = GREEN;
+                    bt_printf("front_dist = %.2f < 25.7 => zone %u\n", front_dist, zone_number);
+                }
+                else if (front_dist < 31.5) {
+                    zone_number = 3;
+                    puck_color = BLUE;
+                    bt_printf("front_dist = %.2f < 31.5 => zone %u\n", front_dist, zone_number);
+                }
+                else if (front_dist < 36) {
+                    zone_number = 4;
+                    puck_color = RED;
+                    bt_printf("front_dist = %.2f < 36.0 => zone %u\n", front_dist, zone_number);
+                }
+                else if (front_dist < 42) {       // 40
+                    zone_number = 5;
+                    puck_color = GREEN;
+                    bt_printf("front_dist = %.2f < 42.0 => zone %u\n", front_dist, zone_number);
                 }
                 else {
-
+                    zone_number = 6;
+                    puck_color = BLUE;
+                    bt_printf("front_dist = %.2f > 42.0 => zone %u\n", front_dist, zone_number);
                 }
+
+                // if the robot gets too close to the pin deck, realign and return to the base
+                // if (dist_to_wall < init_dist_to_wall - DEVIATION_TOL) {
+                //     bt_block_on("go", "%5.2f < (init=%5.2f) - %3.1f, left alignment...\n", dist_to_wall, init_dist_to_wall, PIN_DIST_TOL);
+                //     move_backward_by(7);
+                //     rotate_to_align_r();
+                //     unwind_shortcut_back_to_base();
+                //     state = BASE_TO_PUCK_ZONE;
+                // }
+                // else if (dist_to_wall > init_dist_to_wall - DEVIATION_TOL) {
+                //     bt_block_on("go", "%5.2f > (init=%5.2f) - %3.1f, right alignment...\n", dist_to_wall, init_dist_to_wall, PIN_DIST_TOL);
+                //     move_backward_by(7);
+                //     rotate_to_align_l();
+                //     unwind_shortcut_back_to_base();
+                //     state = BASE_TO_PUCK_ZONE;
+                // }
             }
         } END_STATE
 
         STATE(PINDECK_TO_PUCK_ZONE) {
-            move_forward_slow_nb();
-            while (us_get_front_dist() > 25);
-            stop_nb();
-            rotate_to_align();
+            // move_backward_slow_nb();
+            // while (us_get_front_dist() < 30);
+            // stop_nb();
+            // rotate_to_align();
 
-            if (base == BASE_LEFT) {
-                turn_right();
-                move_forward_by(40);
-                turn_right();
-            }
-            else {
-                turn_left();
-                move_forward_by(40);
-                turn_left();
-            }
+            // if (base == BASE_LEFT) {
+            //     turn_right();
+            //     move_forward_by(75);
+            //     turn_right();
+            // }
+            // else {
+            //     turn_left();
+            //     move_forward_by(75);
+            //     turn_left();
+            // }
 
-            reverse_to_align();
+            // reverse_to_align();
 
-            state = SEARCH_PUCK;
+            unwind_shortcut_back_to_base();
+            state = BASE_TO_PUCK_ZONE;
+            // state = SEARCH_PUCK;
         } END_STATE
 
         STATE(BASE_TO_PUCK_ZONE) {
@@ -306,7 +407,7 @@ int main(void)
                 move_forward_slow_nb();
                 while (us_get_front_dist() > DIST_TO_SIDE_WALL);
                 stop_nb();
-                rotate_to_align();
+                // rotate_to_align();
 
                 turn_right();
                 move_forward_by(50);
@@ -319,10 +420,10 @@ int main(void)
                 move_forward_slow_nb();
                 while (us_get_front_dist() > DIST_TO_SIDE_WALL);
                 stop_nb();
-                rotate_to_align();
+                // rotate_to_align();
 
                 turn_left();
-                move_forward_by(50);
+                move_forward_by(50);    // 50
                 turn_left();
             }
 
@@ -335,26 +436,44 @@ int main(void)
             bool wanted_puck_found = false;
             puck_row = 1;
 
+            track_linear_run = true;
+            linear_run = 0.0;
             while (!wanted_puck_found) {
                 // advance until puck found or end of the row is reached
-                ir_sensor_resume();
+                ir_b_resume();
                 move_forward_nb();
-                while (current_linear_movement != STOP) {
+                while (!puck_found) {
+                    // // obstacle avoidance
+                    // float front_dist = us_get_front_dist();
+                    // if (front_dist < OBSTACLE_DIST_THRESH) {
+                    //     stop_nb();
+                    //     uint8 num_wait = 0;
+                    //     while ((us_get_front_dist() < OBSTACLE_DIST_THRESH) && num_wait < 3) {
+                    //         num_wait++;
+                    //         bt_printf("obstacle %.2f ahead! (num_wait=%u)", front_dist, num_wait);
+                    //         CyDelay(5000);
+                    //     }
+                    //     move_forward_nb();
+                    // }
+
                     // if end of the row reached, switch to the next row
-                    if (fabsf(pos_x) >= ROW_LEN) {
+                    if (fabsf(linear_run) > 140) {
                         change_row = true;
                         stop_nb();
+                        bt_printf("changing rows: (linear_run=%.2f) > 140\n", linear_run);
                         break;
                     }
                 }
-                ir_sensor_pause();
+                ir_b_pause();
+                bt_printf("linear_run = %.2f\n", linear_run);
 
                 // sense color of detected puck
                 while (puck_found) {
                     move_forward_by(DETECTOR_TO_COLOR_SENSOR);
 
-                    ir_sensor_pause();
+                    ir_b_pause();
                     CyDelay(100);
+                    Color c = color_sense();
                     if (color_sense() == puck_color) {
                         puck_found = false;
                         wanted_puck_found = true;
@@ -362,11 +481,16 @@ int main(void)
                     }
 
                     // let the undesired puck pass first and check for the next puck
-                    move_forward_by(PUCK_DIAMETER / 2 + 1);
-                    ir_sensor_resume();
-                    CyDelay(100);
-                    puck_found = ir_is_detected();
+                    if (c != INVALID) {
+                        move_forward_by(PUCK_DIAMETER / 2 + 1);
+                        ir_b_resume();
+                        CyDelay(100);
+                        puck_found = ir_b_is_detected();
+                    }
+                    else
+                        puck_found = false;
                 }
+                ir_b_pause();
 
                 // change to next row of pucks if all pucks on the line has been detected
                 if (change_row) {
@@ -374,45 +498,63 @@ int main(void)
 
                     // alignment
                     move_forward_nb();
-                    while (us_get_front_dist() > 30);
+                    while (us_get_front_dist() > 20);
                     stop_nb();
                     rotate_to_align();
 
                     if ((base == BASE_LEFT && puck_row % 2 == 0) || (base == BASE_RIGHT && puck_row % 2 == 1)) {
                         turn_right();
-                        move_forward_by(ROW_GAP);
+                        move_forward_by(ROW_GAP * 0.6);
                         turn_right();
+                        reverse_to_align();
+                        bt_printf("pos_x: %.2f -> %.2f", pos_x, (base == BASE_LEFT) ? -MAX_X_2 : -MAX_X_1);
+                        pos_x = (base == BASE_LEFT) ? -MAX_X_2 : -MAX_X_1;
                     }
                     else {
                         turn_left();
-                        move_forward_by(ROW_GAP);
+                        move_forward_by(ROW_GAP * 0.6);
                         turn_left();
+                        reverse_to_align();
+                        bt_printf("pos_x: %.2f -> %.2f", pos_x, (base == BASE_LEFT) ? MAX_X_1 : MAX_X_2);
+                        pos_x = (base == BASE_LEFT) ? MAX_X_1 : MAX_X_2;
                     }
+
+                    // if we take the middle row first
+                    // if (base == BASE_LEFT) {
+                    //     turn_right();
+                    //     move_forward_by(ROW_GAP * 0.6);
+                    //     turn_right();
+                    //     reverse_to_align();
+                    // }
+                    // else {
+                    //     turn_left();
+                    //     move_forward_by(ROW_GAP * 0.6);
+                    //     turn_left();
+                    //     reverse_to_align();
+                    // }
+
                     puck_row++;
+                    linear_run = 0.0;
                 }
             }
+            track_linear_run = false;
 
             // clear nearby puck just in case
-            // move_backward_by(COLOR_SENSOR_TO_FLICKER + PUCK_DIAMETER - 0.5);
-            // move_backward_by(COLOR_SENSOR_TO_FLICKER + PUCK_DIAMETER + 1);
-            move_backward_by(8.5);
-            flicker_shoot();
+            // move_backward_by(COLOR_SENSOR_TO_FLICKER + PUCK_DIAMETER);
+            move_backward_by(10.5);
+            ir_f_resume();
+            CyDelay(200);
+            if (ir_f_is_detected())
+                flicker_shoot();
+            ir_f_pause();
 
             // take puck
             // move_backward_by(COLOR_SENSOR_TO_GRIPPER - (COLOR_SENSOR_TO_FLICKER + PUCK_DIAMETER));
             // move_backward_by(6.9);
-
-            // move_backward_by(8);
-            // gripper_open();
-            // lifter_down();
-            // gripper_hold_closed();
-            // CyDelay(800);
-            // lifter_up();
-            // gripper_unactuate();
             move_backward_by(10);
             gripper_open();
             lifter_down();
-            move_forward_by(4);
+            move_forward_by(5);
             gripper_hold_closed();
             CyDelay(800);
             lifter_up();
@@ -431,13 +573,35 @@ int main(void)
                     // end with robot back facing side wall
                     turn_right(); turn_right(); reverse_to_align();
                 }
+                bt_printf("pos_x: %.2f -> %.2f", pos_x, MAX_X_2);
+                pos_x = MAX_X_2;
             }
+            // if (base == BASE_LEFT) {
+            //     if (puck_row % 2  == 1) {
+            //         reverse_to_align();
+            //         move_forward_by(15);
+            //         turn_left();
+            //     }
+            // }
+            // else {
+            //     if (puck_row % 2 == 1)
+            //         reverse_to_align();
+            //     else {
+            //         move_forward_slow_nb();
+            //         while (us_get_front_dist() > 30);
+            //         stop_nb();
+            //         rotate_to_align();
+
+            //         // end with robot back facing side wall
+            //         turn_right(); turn_right(); reverse_to_align();
+            //     }
+            // }
 
             state = PUCK_ZONE_TO_PINDECK;
         } END_STATE
 
         STATE(PUCK_ZONE_TO_PINDECK) {
-            const float DIST_TO_BACK_WALL = 28;
+            const float DIST_TO_BACK_WALL = 25;
 
             if (base == BASE_LEFT) {
                 // const float DIST_TO_SIDE_WALL = 50;
@@ -450,7 +614,7 @@ int main(void)
             }
             else {
                 // turn to have the back facing the back wall
-                move_forward_by(15);
+                move_forward_by(12);
                 turn_right();
                 move_backward_by(40);
 
@@ -460,15 +624,16 @@ int main(void)
                 stop_nb();
                 turn_left();
                 reverse_to_align();
-
-                move_forward_by(19);
+                bt_printf("pos_x: %.2f -> %.2f\n", pos_x, MAX_X_2);
+                pos_x = MAX_X_2;
+                state = FIND_PIN;
             }
-
-            state = FIND_PIN;
         } END_STATE
 
         STATE(SHOOT_PUCK) {
             // place down puck
+            flicker_up();
+            flicker_up();
             move_backward_by(US_TO_GRIPPER);
             lifter_down();
             gripper_open();
@@ -476,8 +641,39 @@ int main(void)
             lifter_up();
             gripper_close();
 
-            // align puck with flicker and flick
-            move_forward_by(GRIPPER_TO_FLICKER + 3);
+
+            // if (base == BASE_RIGHT && zone_number == 1)
+            //     move_forward_by(GRIPPER_TO_FLICKER + 3 - 2);
+            // else
+            //     move_forward_by(GRIPPER_TO_FLICKER + 3);
+
+            // move s.t. puck is close to the ir sensor
+            // move_forward_by(7);
+            // CyDelay(1000);
+            // while (!puck_found) {
+            //     ir_f_resume();
+            //     CyDelay(200);
+            //     move_forward_nb(18);
+            //     while (!puck_found && current_linear_movement != STOP);
+            //     stop_nb();
+            //     ir_f_pause();
+
+            //     if (!puck_found)
+            //         move_backward_by(18);
+            // }
+            // puck_found = false;
+            ir_f_resume();
+            CyDelay(200);
+            bool puck_found_1 = false;
+            while (!puck_found_1) {
+                move_forward_by(3.0);
+                CyDelay(800);
+                puck_found_1 = ir_f_is_detected();
+            }
+
+            CyDelay(1500);
+            // flicker_shoot();
+            move_forward_by(2.5);
             flicker_shoot();
 
             state = RETURN_TO_BASE;
@@ -486,7 +682,6 @@ int main(void)
         STATE(RETURN_TO_BASE) {
             // unwind_navstack_till(1);
             unwind_shortcut_back_to_base();
-            panic(END_SUCCESS);
 
             if (current_lvl == 4)
                 panic(END_SUCCESS);

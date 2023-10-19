@@ -53,7 +53,7 @@
 //     panic(END_SUCCESS);
 //     ultrasonic_setup();
 //     ir_sensor_setup(&ir_handler);
-//     ir_sensor_pause();
+//     ir_b_pause();
 
 //     bt_setup();
 //     bt_print("Im ready!\n");
@@ -155,10 +155,10 @@
 
 //             // move forward until puck detected
 //             // TODO: handle case if puck not found by the time the robot reaches the wall
-//             ir_sensor_resume();
+//             ir_b_resume();
 //             move_forward();
 //             // while (current_linear_movement != STOP);
-//             ir_sensor_pause();
+//             ir_b_pause();
 
 //             // align color sensor with puck and detect color
 //             move_forward_by(DETECTOR_TO_COLOR_SENSOR);

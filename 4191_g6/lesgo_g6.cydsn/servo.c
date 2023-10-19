@@ -81,7 +81,7 @@ void servo_setup(void) {
 
 void gripper_hold_closed(void) {
     // const uint16 GRIPPER_CLOSE_CMP = 193;    // fully closed
-    const uint16 GRIPPER_CLOSE_CMP = 202;       // just nice, if too tight can try 203
+    const uint16 GRIPPER_CLOSE_CMP = 201;       // just nice, if too tight can try 203
     gripper_pwm_Start();
     gripper_pwm_WriteCompare(GRIPPER_CLOSE_CMP);
 }
@@ -108,34 +108,36 @@ void gripper_open(void) {
 }
 
 void lifter_up(void) {
-    const uint16 LIFTER_UP_CMP = 193;
-    const uint16 LIFTER_DOWN_CMP = 120;
+    // const uint16 LIFTER_UP_CMP = 193;
+    const uint16 LIFTER_UP_CMP = 210;
+    const uint16 LIFTER_DOWN_CMP = 110;
     // write_servo_shared(LIFTER_SELECT, LIFTER_UP_CMP);
     CyDelay(400);
     write_servo_smooth_shared(LIFTER_SELECT, LIFTER_DOWN_CMP, LIFTER_UP_CMP);
 }
 
 void lifter_down(void) {
-    const uint16 LIFTER_DOWN_CMP = 120;
+    const uint16 LIFTER_DOWN_CMP = 110;
     write_servo_shared(LIFTER_SELECT, LIFTER_DOWN_CMP);
 }
 
 void flicker_up(void) {
     const uint16 FLICKER_UP_CMP = 145;
-    const uint16 FLICKER_DOWN_CMP = 235;
+    const uint16 FLICKER_DOWN_CMP = 238;
+    CyDelay(500);
     write_servo_shared(FLICKER_SELECT, FLICKER_UP_CMP);
-    // CyDelay(400);
     // write_servo_smooth_shared(FLICKER_SELECT, FLICKER_DOWN_CMP, FLICKER_UP_CMP);
 }
 
 void flicker_down(void) {
-    const uint16 FLICKER_DOWN_CMP = 230;
+    const uint16 FLICKER_DOWN_CMP = 238;
     write_servo_shared(FLICKER_SELECT, FLICKER_DOWN_CMP);
 }
 
 void flicker_shoot(void) {
-    flicker_down();
+    flicker_up();
     CyDelay(500);
+    flicker_down();
     flicker_up();
 }
 

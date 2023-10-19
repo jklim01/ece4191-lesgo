@@ -44,11 +44,15 @@ typedef enum __attribute__ ((__packed__)) BasePos {
 #define ROW_GAP 12.0f
 #define ROW_LEN 70.0f
 #define PUCK_DIAMETER 4.0f
+#define OBSTACLE_DIST_THRESH 13.0f
 
-#define GRIPPER_TO_FLICKER 12.0f /* 18.0f */
-#define PIN_DIST_TOL 7.0f
+#define GRIPPER_TO_FLICKER 12.5f /* 18.0f */
+#define PIN_DIST_TOL 5.0f
 #define ROBOT_FRONT_TO_US_OFFSET 17.0f
-#define US_TO_GRIPPER 20.5f
+#define US_TO_GRIPPER 17.5f
+
+#define MAX_X_1 148
+#define MAX_X_2 80
 
 
 // globals

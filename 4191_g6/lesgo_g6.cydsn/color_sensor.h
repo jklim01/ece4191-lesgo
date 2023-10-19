@@ -20,12 +20,13 @@
 typedef enum __attribute__ ((__packed__)) Color {
     RED=0,
     GREEN=1,
-    BLUE=2
+    BLUE=2,
+    INVALID=3
 } Color;
 
 
 // globals
-extern const char* COLOR_NAMES[3];
+extern const char* COLOR_NAMES[4];
 
 
 // ISRs

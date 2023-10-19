@@ -20,7 +20,7 @@
 #include "bluetooth.h"
 #include "UART_1.h"
 #include "color_sensor.h"
-#include "isr_1.h"
+#include "uart_rx_isr.h"
 
 // #define MY_DEBUG
 
@@ -67,7 +67,7 @@ CY_ISR(uart_handler) {
 // API
 void bt_setup(void) {
     UART_1_Start();
-    isr_1_StartEx(uart_handler);
+    uart_rx_isr_StartEx(uart_handler);
 #ifdef MY_DEBUG
     bt_print("Bluetooth setup!\n");
 #endif

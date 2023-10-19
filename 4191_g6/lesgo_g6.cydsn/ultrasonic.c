@@ -33,6 +33,7 @@
 #include "utils.h"
 #include "ultrasonic.h"
 #include "CircularQ.h"
+#include "bluetooth.h"
 
 
 // static globals
@@ -107,11 +108,12 @@ void ultrasonic_setup(void) {
     us_b_isr_StartEx(us_b_isr);
 
     us_refresh_period = ROUNDING_DIV(CIRCULARQ_LEN * (us_trigger_pwm_ReadPeriod() + 1) * 1000, US_CLK_FREQ);
+    bt_printf("us_refresh_period = %u", us_refresh_period);
     CyDelay(us_refresh_period);
 }
 
 uint32 us_refresh(void) {
-    return us_refresh_period;
+    return  2 * us_refresh_period;
 }
 
 float us_l_get_dist(void) {
@@ -150,9 +152,9 @@ float us_get_front_dist(void) {
 
 float us_get_front_avg_dist(void) {
     float dist = 0;
-    CyDelay(us_refresh_period / 2);
+    CyDelay(us_refresh_period);
     for (uint8 i = 0;  i < 4; i++) {
-        CyDelay(us_refresh_period / 2);
+        CyDelay(us_refresh_period);
         dist += us_get_front_dist();
     }
     return dist / 4;
@@ -165,7 +167,7 @@ float us_l_get_avg_dist(void) {
     }
 
     float dist = 0;
-    CyDelay(us_refresh_period / 2);
+    CyDelay(us_refresh_period);
     for (uint8 i = 0;  i < 4; i++) {
         CyDelay(us_refresh_period / 2);
         dist += filter_buf(&us_lr_buf);
@@ -181,7 +183,7 @@ float us_r_get_avg_dist(void) {
     }
 
     float dist = 0;
-    CyDelay(us_refresh_period / 2);
+    CyDelay(us_refresh_period);
     for (uint8 i = 0;  i < 4; i++) {
         CyDelay(us_refresh_period / 2);
         dist += filter_buf(&us_lr_buf);
@@ -192,7 +194,7 @@ float us_r_get_avg_dist(void) {
 
 float us_fl_get_avg_dist(void) {
     float dist = 0;
-    CyDelay(us_refresh_period / 2);
+    CyDelay(us_refresh_period);
     for (uint8 i = 0;  i < 4; i++) {
         CyDelay(us_refresh_period / 2);
         dist += us_fl_get_dist();
@@ -203,7 +205,7 @@ float us_fl_get_avg_dist(void) {
 
 float us_fr_get_avg_dist(void) {
     float dist = 0;
-    CyDelay(us_refresh_period / 2);
+    CyDelay(us_refresh_period);
     for (uint8 i = 0;  i < 4; i++) {
         CyDelay(us_refresh_period / 2);
         dist += us_fr_get_dist();
@@ -214,7 +216,7 @@ float us_fr_get_avg_dist(void) {
 
 float us_b_get_avg_dist(void) {
     float dist = 0;
-    CyDelay(us_refresh_period / 2);
+    CyDelay(us_refresh_period);
     for (uint8 i = 0;  i < 4; i++) {
         CyDelay(us_refresh_period / 2);
         dist += us_b_get_dist();
