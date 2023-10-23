@@ -51,8 +51,8 @@ typedef enum __attribute__ ((__packed__)) BasePos {
 #define ROBOT_FRONT_TO_US_OFFSET 17.0f
 #define US_TO_GRIPPER 17.5f
 
-#define MAX_X_1 148
-#define MAX_X_2 80
+#define MAX_X_1 152
+#define MAX_X_2 83
 
 
 // globals

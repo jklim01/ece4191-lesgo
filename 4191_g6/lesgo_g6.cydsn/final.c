@@ -23,6 +23,7 @@
 #include "limit_sw.h"
 #include "bluetooth.h"
 #include "bt_debug.h"
+#include "NavStack.h"
 
 #define MY_DEBUG
 #ifndef MY_DEBUG
@@ -31,32 +32,34 @@
 #define bt_block_on (void)sizeof
 #endif
 
-// #define ALIGN_UPDATE_POS
-
-#define OBSTACLE_AVOIDANCE(meas, react, patience) obstacle_avoidance(meas, react, patience, #meas)
+#define ALIGN_UPDATE_POS
+#define OBSTACLE_AVOIDANCE(meas, react, recover, patience) obstacle_avoidance(meas, react, recover, patience, #meas)
+#define REFRESH_OBSTACLE_AVOIDANCE(meas, react, recover, patience) refresh_obstacle_avoidance(meas, react, recover, patience, #meas)
 #ifdef OBSTACLE_AVOIDANCE
-bool obstacle_avoidance(float (*measurer)(void), void (*reaction)(void), uint8 patience, const char* measurer_name) {
-    bool detected = false;
-
+bool obstacle_avoidance(float (*measurer)(void), void (*reaction)(void), void (*recovery)(void), uint8 patience, const char* measurer_name) {
     float dist = measurer();
     if (dist < OBSTACLE_DIST_THRESH) {
         reaction();
-        detected = true;
 
         uint8 num_wait = 0;
-        while (((dist = measurer()) < OBSTACLE_DIST_THRESH) && num_wait < patience) {
+        while ((dist = measurer()) < OBSTACLE_DIST_THRESH && num_wait < 3) {
             num_wait++;
             bt_printf("Obstacle! %s()=%.2f (num_wait=%u)\n", measurer_name, dist, num_wait);
-            CyDelay(5000);
+            CyDelay(4000);
         }
-    }
 
-    return detected;
+        if (num_wait == 3) return true;
+        recovery();
+    }
+    return false;
 }
-#define REFRESH_OBSTACLE_AVOIDANCE(meas, react, patience) CyDelay(us_refresh()); obstacle_avoidance(meas, react, patience, #meas)
+bool refresh_obstacle_avoidance(float (*measurer)(void), void (*reaction)(void), void (*recovery)(void), uint8 patience, const char* measurer_name) {
+    CyDelay(us_refresh());
+    return obstacle_avoidance(measurer, reaction, recovery, patience, measurer_name);
+}
 #else
 #define OBSTACLE_AVOIDANCE(...) false
-#define REFRESH_OBSTACLE_AVOIDANCE (void)sizeof
+#define REFRESH_OBSTACLE_AVOIDANCE(...) false
 #endif
 
 
@@ -79,7 +82,6 @@ typedef enum State {
     LIST_OF_STATES
 } State;
 #undef X
-
 
 static bool puck_found = false;
 static CY_ISR(ir_b_handler) {
@@ -143,14 +145,14 @@ int main(void)
     led_r_Write(0);
     led_g_Write(0);
     if (sw_sreg_Read() == 0) {
-        base = BASE_LEFT;
-        bt_print("Left Base\n");
-        led_r_Write(1);
-    }
-    else {
         base = BASE_RIGHT;
         bt_print("Right Base\n");
         led_g_Write(1);
+    }
+    else {
+        base = BASE_LEFT;
+        bt_print("Left Base\n");
+        led_r_Write(1);
     }
 
     // gripper_open();
@@ -171,7 +173,6 @@ int main(void)
     //     bt_printf("L: %8li\t R: %8li\n", motor_l_quaddec_GetCounter(), motor_r_quaddec_GetCounter());
     //     CyDelay(400);
     // }
-
 
     // receive info from bluetooth
     // BtResponse res;
@@ -364,12 +365,12 @@ int main(void)
                 if (front_dist < 23) {
                     zone_number = 1;
                     puck_color = RED;
-                    bt_printf("front_dist = %.2f < 20.9 => zone %u\n", front_dist, zone_number);
+                    bt_printf("front_dist = %.2f < 23.0 => zone %u\n", front_dist, zone_number);
                 }
                 else if (front_dist < 27) {
                     zone_number = 2;
                     puck_color = GREEN;
-                    bt_printf("front_dist = %.2f < 25.7 => zone %u\n", front_dist, zone_number);
+                    bt_printf("front_dist = %.2f < 27.0 => zone %u\n", front_dist, zone_number);
                 }
                 else if (front_dist < 31.5) {
                     zone_number = 3;
@@ -448,7 +449,7 @@ int main(void)
                 // rotate_to_align();
 
                 turn_right();
-                move_forward_by(50);
+                move_forward_by(58);
                 turn_right();
             }
             else {
@@ -461,7 +462,7 @@ int main(void)
                 // rotate_to_align();
 
                 turn_left();
-                move_forward_by(50);    // 50
+                move_forward_by(58);    // 50
                 turn_left();
             }
 
@@ -475,15 +476,15 @@ int main(void)
             puck_row = 1;
 
             track_linear_run = true;
-            linear_run = 0.0;
+            linear_run = 0;
+            bool is_persistent_obstacle = false;
             while (!wanted_puck_found) {
                 // advance until puck found or end of the row is reached
                 ir_b_resume();
                 move_forward_nb();
                 while (!puck_found) {
                     // obstacle avoidance
-                    if (OBSTACLE_AVOIDANCE(us_get_front_dist, stop_nb, 3))
-                        move_forward_nb();
+                    is_persistent_obstacle = OBSTACLE_AVOIDANCE(us_get_front_dist, stop_nb, move_forward_nb, 3);
                     // float front_dist = us_get_front_dist();
                     // if (front_dist < OBSTACLE_DIST_THRESH) {
                     //     stop_nb();
@@ -497,10 +498,10 @@ int main(void)
                     // }
 
                     // if end of the row reached, switch to the next row
-                    if (fabsf(linear_run) > 135) {
+                    if (linear_run > 125 || is_persistent_obstacle) {
                         change_row = true;
                         stop_nb();
-                        bt_printf("changing rows: (linear_run=%.2f) > 135\n", linear_run);
+                        bt_printf("changing rows: linear_run=%.2f, is_persistent_obstacle? %c\n", linear_run, is_persistent_obstacle ? 'Y' : 'N');
                         break;
                     }
                 }
@@ -540,42 +541,47 @@ int main(void)
                     change_row = false;
 
                     // alignment
-                    move_forward_nb();
-                    while (us_get_front_dist() > 25) {
-                        if (OBSTACLE_AVOIDANCE(us_get_front_dist, stop_nb, 2))
-                            move_forward_nb();
+                    if (is_persistent_obstacle) {
+                        move_backward_by(18);
                     }
-                    stop_nb();
-                    rotate_to_align();
+                    else {
+                        move_forward_nb();
+                        while (us_get_front_dist() > 25) {
+                            OBSTACLE_AVOIDANCE(us_get_front_dist, stop_nb, move_forward_nb, 2);
+                        }
+                        stop_nb();
+                        rotate_to_align();
+                    }
 
                     if ((base == BASE_LEFT && puck_row % 2 == 0) || (base == BASE_RIGHT && puck_row % 2 == 1)) {
-                        REFRESH_OBSTACLE_AVOIDANCE(us_r_get_dist, nop, 2);
+                        REFRESH_OBSTACLE_AVOIDANCE(us_r_get_dist, nop, nop, 2);
                         turn_right();
 
-                        REFRESH_OBSTACLE_AVOIDANCE(us_get_front_dist, nop, 2);
-                        move_forward_by(ROW_GAP * 0.6);
+                        REFRESH_OBSTACLE_AVOIDANCE(us_get_front_dist, nop, nop, 2);
+                        move_forward_by(ROW_GAP * 1.0);
 
-                        REFRESH_OBSTACLE_AVOIDANCE(us_r_get_dist, nop, 2);
+                        REFRESH_OBSTACLE_AVOIDANCE(us_r_get_dist, nop, nop, 2);
                         turn_right();
 
-                        REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, 2);
+                        REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, nop, 2);
                         reverse_to_align();
 #ifdef ALIGN_UPDATE_POS
                         bt_printf("pos_x: %.2f -> %.2f\n", pos_x, (base == BASE_LEFT) ? -MAX_X_2 : -MAX_X_1);
                         pos_x = (base == BASE_LEFT) ? -MAX_X_2 : -MAX_X_1;
+                        bt_printf("new (%.2f)\n", pos_x);
 #endif
                     }
                     else {
-                        REFRESH_OBSTACLE_AVOIDANCE(us_l_get_dist, nop, 2);
+                        REFRESH_OBSTACLE_AVOIDANCE(us_l_get_dist, nop, nop, 2);
                         turn_left();
 
-                        REFRESH_OBSTACLE_AVOIDANCE(us_get_front_dist, nop, 2);
-                        move_forward_by(ROW_GAP * 0.6);
+                        REFRESH_OBSTACLE_AVOIDANCE(us_get_front_dist, nop, nop, 2);
+                        move_forward_by(ROW_GAP * 1.0);
 
-                        REFRESH_OBSTACLE_AVOIDANCE(us_l_get_dist, nop, 2);
+                        REFRESH_OBSTACLE_AVOIDANCE(us_l_get_dist, nop, nop, 2);
                         turn_left();
 
-                        REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, 2);
+                        REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, nop, 2);
                         reverse_to_align();
 #ifdef ALIGN_UPDATE_POS
                         bt_printf("pos_x: %.2f -> %.2f\n", pos_x, (base == BASE_LEFT) ? MAX_X_1 : MAX_X_2);
@@ -598,32 +604,33 @@ int main(void)
                     // }
 
                     puck_row++;
-                    linear_run = 0.0;
+                    linear_run = 0;
                 }
             }
             track_linear_run = false;
 
             // clear nearby puck just in case
             // move_backward_by(COLOR_SENSOR_TO_FLICKER + PUCK_DIAMETER);
-            REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, 3);
+            REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, nop, 3);
             move_backward_by(10.5);
 
-            ir_f_resume();
-            CyDelay(200);
-            if (ir_f_is_detected() || true)
-                flicker_shoot();
-            ir_f_pause();
+            // flick away nearby puck
+            // ir_f_resume();
+            // CyDelay(200);
+            // if (ir_f_is_detected() || true)
+            //     flicker_shoot();
+            // ir_f_pause();
 
             // take puck
             // move_backward_by(COLOR_SENSOR_TO_GRIPPER - (COLOR_SENSOR_TO_FLICKER + PUCK_DIAMETER));
             // move_backward_by(6.9);
-            REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, 3);
+            REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, nop, 3);
             move_backward_by(10);
 
             gripper_open();
             lifter_down();
 
-            REFRESH_OBSTACLE_AVOIDANCE(us_get_front_dist, nop, 3);
+            REFRESH_OBSTACLE_AVOIDANCE(us_get_front_dist, nop, nop, 3);
             move_forward_by(5);
 
             gripper_hold_closed();
@@ -634,24 +641,23 @@ int main(void)
             // alignment with side wall (left base has shortcut path back so unneeded)
             if (base == BASE_RIGHT) {
                 if (puck_row % 2 == 1) {
-                    REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, 2);
+                    REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, nop, 2);
                     reverse_to_align();
                 }
                 else {
                     move_forward_slow_nb();
                     while (us_get_front_dist() > 30) {
-                        if (OBSTACLE_AVOIDANCE(us_get_front_dist, stop_nb, 3));
-                            move_forward_slow_nb();
+                        OBSTACLE_AVOIDANCE(us_get_front_dist, stop_nb, move_forward_slow_nb, 3);
                     }
                     stop_nb();
                     rotate_to_align();
 
                     // end with robot back facing side wall
-                    REFRESH_OBSTACLE_AVOIDANCE(us_r_get_dist, nop, 2);
+                    REFRESH_OBSTACLE_AVOIDANCE(us_r_get_dist, nop, nop, 2);
                     turn_right();
-                    REFRESH_OBSTACLE_AVOIDANCE(us_r_get_dist, nop, 2);
+                    REFRESH_OBSTACLE_AVOIDANCE(us_r_get_dist, nop, nop, 2);
                     turn_right();
-                    REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, 2);
+                    REFRESH_OBSTACLE_AVOIDANCE(us_b_get_dist, nop, nop, 2);
                     reverse_to_align();
                 }
 #ifdef ALIGN_UPDATE_POS
@@ -691,6 +697,10 @@ int main(void)
                 // const float err_tol = 3;
 
                 // go back to base first
+                if (puck_row % 2 == 1)
+                    REFRESH_OBSTACLE_AVOIDANCE(us_l_get_dist, nop, nop, 3);
+                else
+                    REFRESH_OBSTACLE_AVOIDANCE(us_r_get_dist, nop, nop, 3);
                 unwind_shortcut_back_to_base();
 
                 state = BASE_TO_PINDECK;
@@ -750,10 +760,17 @@ int main(void)
             ir_f_resume();
             CyDelay(200);
             bool puck_found_1 = false;
+            uint8 my_counts = 0;
             while (!puck_found_1) {
+                my_counts++;
                 move_forward_by(3.0);
                 CyDelay(800);
                 puck_found_1 = ir_f_is_detected();
+
+                if (my_counts == 5) {
+                    move_backward_by(13.5);
+                    my_counts = 0;
+                }
             }
 
             CyDelay(1500);
@@ -770,7 +787,20 @@ int main(void)
 
         STATE(RETURN_TO_BASE) {
             // unwind_navstack_till(1);
+            // print_navstack();
             unwind_shortcut_back_to_base();
+            // unwind_shortcut_navstack_till(2);/
+            // move_backward_nb();
+            // while (us_get_front_dist() < 60);
+            // stop_nb();
+            // if (base == BASE_LEFT)
+            //     turn_right();
+            // else
+            //     turn_left();
+            // reverse_to_align();
+            // clear_navstack();
+            pos_y = 0.0;
+            pos_x = 0.0;
 
             if (current_lvl == 4)
                 panic(END_SUCCESS);

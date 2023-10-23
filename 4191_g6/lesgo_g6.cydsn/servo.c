@@ -62,7 +62,8 @@ void write_servo_smooth_shared(uint8 demux_select, uint16 cmp_start, uint16 cmp_
     int16 inc = (cmp_end > cmp_start) ? 1 : -1;
     for (uint16 cmp = cmp_start; cmp != cmp_end; cmp += inc) {
         shared_pwm_WriteCompare(cmp);
-        CyDelayUs(12500);
+        // CyDelayUs(12500);
+        CyDelayUs(10000);
     }
     shared_pwm_WriteCompare(cmp_end);
 
@@ -124,7 +125,7 @@ void lifter_down(void) {
 void flicker_up(void) {
     const uint16 FLICKER_UP_CMP = 145;
     const uint16 FLICKER_DOWN_CMP = 238;
-    CyDelay(500);
+    CyDelay(300);
     write_servo_shared(FLICKER_SELECT, FLICKER_UP_CMP);
     // write_servo_smooth_shared(FLICKER_SELECT, FLICKER_DOWN_CMP, FLICKER_UP_CMP);
 }
@@ -136,7 +137,7 @@ void flicker_down(void) {
 
 void flicker_shoot(void) {
     flicker_up();
-    CyDelay(500);
+    CyDelay(300);
     flicker_down();
     flicker_up();
 }

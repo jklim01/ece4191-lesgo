@@ -43,7 +43,7 @@ volatile Heading heading = POS_Y;
 volatile float pos_x = 0.0;
 volatile float pos_y = 0.0;
 bool track_linear_run = false;
-volatile float linear_run = 0.0;
+volatile float linear_run = 0;
 
 
 // static globals
@@ -166,12 +166,22 @@ void stop(void) {
     target_val = 0;
     current_linear_movement = STOP;
 
+    int32 slave_val = labs(motor_l_quaddec_GetCounter());
+    int32 master_val = labs(motor_r_quaddec_GetCounter());
+    int32 slave_count = slave_val - prev_slave_val;
+    int32 master_count = master_val - prev_master_val;
+
     if (latest_movement.type == GO_FORWARD || latest_movement.type == GO_BACKWARD)
-        latest_movement.counts = (labs(motor_l_quaddec_GetCounter()) + labs(motor_r_quaddec_GetCounter())) / 2;
+        latest_movement.counts = (slave_val + master_val) / 2;
 
     update_pos_heading(latest_movement, &pos_x, &pos_y, &heading);
     if (push_movement_to_ns)
         navstack_push(latest_movement);
+
+    if (track_linear_run && current_linear_movement != STOP) {
+        int32 average_count = (slave_count + master_count) / 2;
+        linear_run += average_count / ((current_linear_movement == FORWARD) ? (float)COUNTS_PER_CM : -(float)COUNTS_PER_CM);
+    }
 
     latest_movement = (Movement){ .type=NO_MOVEMENT, .counts=0 };
 }
@@ -707,7 +717,7 @@ bool controller_update(void) {
 
     if (track_linear_run && current_linear_movement != STOP) {
         int32 average_count = (slave_count + master_count) / 2;
-        linear_run += (float)average_count / ((current_linear_movement == FORWARD) ? (float)(COUNTS_PER_CM) : -(float)(COUNTS_PER_CM));
+        linear_run += average_count / ((current_linear_movement == FORWARD) ? (float)COUNTS_PER_CM : -(float)COUNTS_PER_CM);
     }
 
     // stop if achieved target
